@@ -1,1 +1,1 @@
-# mindsparks
+# MindSparks
