@@ -11,6 +11,14 @@
 import { create } from "zustand";
 
 // --------------------------
+// Constants
+// --------------------------
+
+export const MIN_ZOOM = 0.25;
+export const MAX_ZOOM = 3;
+export const DEFAULT_ZOOM = 1;
+
+// --------------------------
 // Auxiliary types
 // --------------------------
 
@@ -53,12 +61,7 @@ interface UIStore {
     // --- Canvas state --
 
     // Current zoom level in the canvas. 1 = 100%, 0.5 = 50%, 2 = 200%
-    // Note: I think that, a reasonable range should be between 0.25 (25%) and 3 (300%).
-    //       But eh, maybe the me in the future decides it's too much or too little.
-    //       Constants are below this interface.      
-    //
-    //       BTW, if the me in the future made changes to the zoom values and this is still here,
-    //       it means either I forgot to delete this, or I chose to keep it this way.
+    // Constants are up
     zoom: number;
 
     selection: Selection;
@@ -94,13 +97,6 @@ interface UIStore {
     toggleZenMode: () => void;
 }
 
-// --------------------------
-// Constants
-// --------------------------
-
-const MIN_ZOOM = 0.25;
-const MAX_ZOOM = 3;
-const DEFAULT_ZOOM = 1;
 
 // --------------------------
 // Store

@@ -22,11 +22,11 @@ interface SparkStore {
     // Creates a new spark in a specific position in the canvas.
     // Receives text and position (x, y) where user double clicked.
     createSpark: (params: {
-        text: string;
-        position: Position;
-        spaceId: string;
-        categoryId?: string;
-        parentId?: string;
+        text:           string;
+        position:       Position;
+        spaceId:        string;
+        categoryId?:    string;
+        parentId?:      string;
     }) => Spark;
 
     updateSparkText: (id: string, text: string) => void;
@@ -51,6 +51,8 @@ interface SparkStore {
     // Get the child sparks from a specific flame or spark.
     // Used to show the lineage graph on hover.
     getChildSparks: (parentId: string) => Spark[];
+
+    getSparkById: (id: string) => Spark | undefined;
 }
 
 // --------------------------
@@ -138,6 +140,12 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
     getChildSparks: (parentId) => {
         return get().sparks.filter(
             (spark) => spark.parentId === parentId
+        );
+    },
+
+    getSparkById: (id) => {
+        return get().sparks.find(
+            (spark) => spark.id === id
         );
     },
 }));

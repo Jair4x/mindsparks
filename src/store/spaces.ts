@@ -7,8 +7,8 @@
 // uses to know which sparks to show.
 
 //
-// Note to future self: Change SpaceStore -> initializeDefaultSpace to work with SQLite to load them from the DB.
-//                      Right now, it creates the Spaces from scratch.
+// !Note to future self: Change SpaceStore -> initializeDefaultSpace to work with SQLite to load them from the DB.
+// !                     Right now, it creates the Spaces from scratch.
 //
 
 import { create } from "zustand";

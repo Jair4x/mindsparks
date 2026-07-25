@@ -80,9 +80,9 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         // Before deleting the category, we unlink all the sparks that had it assigned.
         // We access directly the sparks store to do this in a single operation.
         //
-        // Note to future self: This only works on memory. When you implement SQLite, this logic has to be
-        //                      managed on a database level with a foreign key set as ON DELETE SET NULL,
-        //                      to do exactly this but more efficiently and automatically.
+        // !Note to future self: This only works on memory. When you implement SQLite, this logic has to be
+        // !                     managed on a database level with a foreign key set as ON DELETE SET NULL,
+        // !                     to do exactly this but more efficiently and automatically.
         //
         const { sparks } = useSparkStore.getState();
         const affectedSparks = sparks.filter((spark) => spark.categoryId === id);
