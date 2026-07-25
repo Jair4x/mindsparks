@@ -5,7 +5,8 @@
 //  It's only use is to distribute the space on screen and react to the state of the UI (if side panel is collapsed or zen mode is active)
 //
 
-import { Layers, ChevronDown, Maximize2, Minus, Plus, Settings } from "lucide-react";
+import { Layers, ChevronDown, Maximize2, Minus, Plus } from "lucide-react";
+import { SidePanel } from "../panel/SidePanel";
 import { useUIStore } from "../../store/ui";
 import { useSpaceStore } from "../../store/spaces";
 
@@ -70,7 +71,7 @@ export function AppLayout() {
                 >
                     <Layers size={14} color="#7F52E9" />
                     {activeSpace?.name ?? "Personal"}
-                    <ChevronDown size={12} color="#6B6480" />
+                    <ChevronDown size={12} color="#BEB1E6" />
                 </button>
             </header>
 
@@ -80,7 +81,7 @@ export function AppLayout() {
             <main className="aboslute inset-0 pt-11">
                 {/* Placeholder for <Canvas /> */}
                 <div className="w-full h-full flex items-center justify-center py-3">
-                    <span style={{ color: "white", fontSize: 14 }}>
+                    <span style={{ color: "#BEB1E6", fontSize: 14 }}>
                         Canvas
                     </span>
                 </div>
@@ -89,23 +90,7 @@ export function AppLayout() {
             {/*
                 Side panel.
             */}
-            {showPanel && (
-                <aside
-                    className="absolute left-3 z-10 flex flex-col items-center"
-                    style={{
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        background: "#1A1625",
-                        border: "0.5px solid #7F52E9",
-                        borderRadius: 999,
-                        padding: "10px 0",
-                        width: 44,
-                    }}
-                >
-                    {/* Placeholder for <SidePanel /> */}
-                    <Settings size={16} color="white" />
-                </aside>
-            )}
+            {showPanel && ( <SidePanel /> ) }
 
             {/* 
                 Zoom controls.
@@ -121,7 +106,7 @@ export function AppLayout() {
                         height: 28,
                         minWidth: 44,
                         padding: "0 8px",
-                        color: "#6B6480",
+                        color: "#BEB1E6",
                     }}
                 >
                     100%
@@ -152,7 +137,7 @@ function ZoomButton({ icon, label }: { icon: React.ReactNode; label: string; }) 
                 borderRadius: 6,
                 border: "0.5px solid #2A2438",
                 background: "#1A1625",
-                color: "#6B6480",
+                color: "#BEB1E6",
             }}
         >
             {icon}
