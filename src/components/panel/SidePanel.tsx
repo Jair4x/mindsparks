@@ -2,8 +2,8 @@
 // The floating side panel in the canvas.
 //  This component is the main control panel to interact with the canvas besides being inside a spark or flame.
 //
-// Note: This doesn't have a working logic yet.
-//       Buttons just update the UI store or trigger actions that'll be implemented later.
+// !Note: This doesn't have a working logic yet.
+// !      Buttons just update the UI store or trigger actions that'll be implemented later.
 //
 
 import {
@@ -28,9 +28,9 @@ type GroupMode = "none" | "category" | "hierarchy";
 // --------------------------
 // Local state
 //
-// Note/To future me: The active group mode lives in this panel.
-//                    When you (me) need other components to read it (like from the canvas to know how to position the cards),
-//                    move onCreateSpark to UI Store.
+// !Note/To future me: The active group mode lives in this panel.
+// !                   When you (me) need other components to read it (like from the canvas to know how to position the cards),
+// !                   move onCreateSpark to UI Store.
 // --------------------------
 import { useState } from "react";
 
