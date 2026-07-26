@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* Color palettes */ 
+:root {
+  --color-bg: #100B1F;
+  --color-surface: #1a1625;
+  --color-surface-raised: #2a2438;
+  --color-border: #2e2a3d;
+  --color-border-subtle: #1e1830;
+  --color-border-accent: #3a3550;
+  --color-accent: #7F52E9;
+  --color-accent-light: #beb1e6;
+  --color-accent-muted: #7F52E940;
+  --color-text: #c9c4d8;
+  --color-text-muted: #6b6480;
+
+  --color-flame: #EF9F27;
+}

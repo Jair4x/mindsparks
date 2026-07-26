@@ -78,24 +78,24 @@ export function SparkInput({ position, onConfirm, onCancel }: SparkInputProps) {
                 placeholder="Nueva idea..."
                 rows={2}
                 style={{
-                    background: "#1A1625",
-                    border: "0.5px solid #7F52E9",
+                    background: "var(--color-surface)",
+                    border: "0.5px solid var(--color-accent)",
                     borderRadius: 12,
                     padding: "10px 14px",
                     fontSize: 13,
-                    color: "#C9C4D8",
+                    color: "var(--color-text)",
                     width: 200, //* Just to test, might change the value when the canvas is finished.
                     resize: "none",
                     outline: "none",
                     fontFamily: "inherit",
                     lineHeight: 1.45,
-                    boxShadow: "0 0 12px #7F52E922",
+                    boxShadow: "0 0 12px var(--color-accent)22",
                 }}
             />
             <div
                 style={{
                     fontSize: 11,
-                    color: "#6B6480",
+                    color: "var(--color-text)",
                     marginTop: 4,
                     paddingLeft: 2,
                 }}

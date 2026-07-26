@@ -91,7 +91,7 @@ export function connectionToEdge(connection: Connection): Edge {
         target: connection.targetId,
         type: "default",
         style: {
-            stroke: isLineage ? "#7F52E9" : "#3A3550",
+            stroke: isLineage ? "var(--color-accent)" : "var(--color-border-accent)",
             strokeWidth: 1,
             strokeDasharray: isLineage ? "12 6" : "4 3",
             opacity: isLineage ? 0.4 : 0.7,
