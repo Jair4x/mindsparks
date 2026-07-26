@@ -79,8 +79,11 @@ interface UIStore {
     isZenModeActive: boolean;
 
     // --- Spark input state ---
-    sparkInputPosition: Position | null;
-    openSparkInput: (position: Position) => void;
+    sparkInputPosition: { screen: Position; canvas: Position; } | null;
+    openSparkInput: (position: {
+        screen: Position;
+        canvas: Position;
+    }) => void;
     closeSparkInput: () => void;
 
     // --- Actions: modals ---

@@ -6,13 +6,15 @@
 //
 //
 
-import { use, useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useShallow } from "zustand/shallow";
 import {
     useReactFlow,
     ReactFlow,
     Background,
     BackgroundVariant,
+    applyNodeChanges,
+    type NodeChange,
     type NodeMouseHandler,
     type OnConnect,
 } from "@xyflow/react";
@@ -74,7 +76,17 @@ export function Canvas() {
 
     const nodes = sparksAndFlamesToNodes(sparks, flames);
     const edges = connectionsToEdges(connections);
+    
+    const [displayNodes, setDisplayNodes] = useState(nodes);
 
+    const onNodesChange = useCallback((changes: NodeChange[]) => {
+        setDisplayNodes((nds) => applyNodeChanges(changes, nds));
+    }, []);
+
+    useEffect(() => {
+        setDisplayNodes(nodes);
+    }, [sparks, flames]);
+    
     // --------------------------
     // onNodeDragStop
     //
@@ -135,23 +147,31 @@ export function Canvas() {
             if ((event.target as HTMLElement).classList.contains("react-flow__pane")) {
                 if (!isSafeZone(event.clientX, event.clientY)) return;
 
-                const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-                openSparkInput(position);
+                try {
+                    const screenPosition = { x: event.clientX, y: event.clientY };
+                    const canvasPosition = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+                    openSparkInput({ screen: screenPosition, canvas: canvasPosition });
+                } catch (e) {
+                    console.error("screenToFlowPosition failed:", e);
+                }
             }
         },
-        [screenToFlowPosition]
+        [screenToFlowPosition, openSparkInput]
     );
 
     return (
         <div className="w-full h-full" style={{ position: "relative"}}>
             <ReactFlow
-                nodes={nodes}
+                nodes={displayNodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
+                onNodesChange={onNodesChange}
                 onNodeDragStop={onNodeDragStop}
+                zoomOnDoubleClick={false}
                 onConnect={onConnect}
                 onDoubleClick={onDoubleClick}
                 proOptions={{ hideAttribution: true }}
+                nodeDragThreshold={1}
                 minZoom={MIN_ZOOM}
                 maxZoom={MAX_ZOOM}
                 defaultViewport={{ x: 0, y: 0, zoom: DEFAULT_ZOOM }}
@@ -167,17 +187,17 @@ export function Canvas() {
 
             {sparkInputPosition && (
                 <SparkInput
-                    position={sparkInputPosition}
+                    position={sparkInputPosition.screen}
                     onConfirm={(text) => {
                         useSparkStore.getState().createSpark({
                             text,
-                            position: sparkInputPosition,
+                            position: sparkInputPosition.canvas,
                             spaceId: activeSpaceId,
                         });
 
                         closeSparkInput();
                     }}
-                    onCancel={() => closeSparkInput()}
+                    onCancel={closeSparkInput}
                 />
             )}
         </div>
