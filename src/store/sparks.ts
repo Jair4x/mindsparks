@@ -71,8 +71,8 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
             categoryId,
             parentId,
             isArchived: false,
-            createAt: now(),
-            updateAt: now(),
+            createdAt: now(),
+            updatedAt: now(),
         };
 
         // add the newly created spark to the list

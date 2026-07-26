@@ -100,7 +100,7 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
         set((state) => ({
             connections: state.connections.filter((connection) => connection.id !== id),
         }));
-    }
+    },
 
     deleteConnectionsByNode: (nodeId) => {
         set((state) => ({
@@ -110,9 +110,9 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
     },
 
     getConnectionsBySpace: (spaceId) => {
-        set((state) => ({
-            connections: state.connections.filter((connection) => connection.spaceId !== spaceId),
-        }));
+        return get().connections.filter(
+            (connection) => connection.spaceId === spaceId
+        );
     },
 
     getConnectionsByNode: (nodeId) => {

@@ -43,8 +43,8 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
             style={{
                 top: "50%",
                 transform: "translateY(-50%)",
-                background: "#1A1625",
-                border: "0.5px solid #7F52E9",
+                background: "var(--color-surface)",
+                border: "0.5px solid var(--color-accent)",
                 borderRadius: 999,
                 padding: "10px 0",
                 width: 44,
@@ -114,15 +114,15 @@ function PanelCreateButton({ onClick }: { onClick: () => void }) {
     return (
         <button
             aria-label="Crear Spark"
-            onClick={onclick}
+            onClick={onClick}
             className="flex items-center justify-center cursor-pointer shrink-0"
             style={{
                 width: 28,
                 height: 28,
                 borderRadius: "50%",
                 border: "none",
-                background: "#2A2438",
-                color: "#7F52E9",
+                background: "var(--color-surface-raised)",
+                color: "var(--color-accent)",
                 marginBottom: 6,
                 marginTop: 4,
             }}
@@ -159,20 +159,20 @@ function PanelButton({
                 height: 28,
                 borderRadius: 6,
                 border: "none",
-                background: isActive ? "#2A2438" : "transparent",
-                color: isActive ? "#7F52E9" : "#BEB1E6",
+                background: isActive ? "var(--color-surface-raised)" : "transparent",
+                color: isActive ? "var(--color-accent)" : "var(--color-accent-light)",
                 margin: "2px 0",
             }}
             onMouseEnter={(e) => {
                 if (!isActive) {
-                    (e.currentTarget as HTMLButtonElement).style.background = "#2A2438";
-                    (e.currentTarget as HTMLButtonElement).style.color      = "#C9C4D8";
+                    (e.currentTarget as HTMLButtonElement).style.background = "var(--color-surface-raised)";
+                    (e.currentTarget as HTMLButtonElement).style.color      = "var(--color-text)";
                 }
             }}
             onMouseLeave={(e) => {
                 if (!isActive) {
                     (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                    (e.currentTarget as HTMLButtonElement).style.color      = "#BEB1E6";
+                    (e.currentTarget as HTMLButtonElement).style.color      = "var(--color-accent-light)";
                 }
             }}
         >
@@ -192,7 +192,7 @@ function PanelDivider() {
             style={{
                 width: 24,
                 height: "0.5px",
-                background: "#2A2438",
+                background: "var(--color-surface-raised)",
                 margin: "4px 0",
                 flexShrink: 0,
             }}

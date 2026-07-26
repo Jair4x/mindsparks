@@ -9,6 +9,7 @@
 //
 
 import { create } from "zustand";
+import type { Position } from "../types";
 
 // --------------------------
 // Constants
@@ -77,6 +78,11 @@ interface UIStore {
 
     isZenModeActive: boolean;
 
+    // --- Spark input state ---
+    sparkInputPosition: Position | null;
+    openSparkInput: (position: Position) => void;
+    closeSparkInput: () => void;
+
     // --- Actions: modals ---
 
     openModal: (modal: ModalType, nodeId?: string) => void;
@@ -105,6 +111,7 @@ interface UIStore {
 export const useUIStore = create<UIStore>((set, get) => ({
     activeModal: null,
     activeModalNodeId: null,
+    sparkInputPosition: null,
     zoom: DEFAULT_ZOOM,
     selection: { type: "none" },
     hoveredNodeId: null,
@@ -162,6 +169,16 @@ export const useUIStore = create<UIStore>((set, get) => ({
 
     setHoveredNode: (id) => {
         set({ hoveredNodeId: id });
+    },
+
+    // --- Spark creation ---
+
+    openSparkInput: (position) => {
+        set({ sparkInputPosition: position });
+    },
+
+    closeSparkInput: () => {
+        set({ sparkInputPosition: null });
     },
 
     // --- Side panel & Zen mode ---
