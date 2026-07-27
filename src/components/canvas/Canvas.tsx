@@ -148,7 +148,7 @@ export function Canvas() {
                 if (!isSafeZone(event.clientX, event.clientY)) return;
 
                 try {
-                    const screenPosition = { x: event.clientX, y: event.clientY };
+                    const screenPosition = { x: event.clientX, y: event.clientY - 44 }; // minus 44px because the canvas container div starts on pt-11 (44px from top)
                     const canvasPosition = screenToFlowPosition({ x: event.clientX, y: event.clientY });
                     openSparkInput({ screen: screenPosition, canvas: canvasPosition });
                 } catch (e) {
