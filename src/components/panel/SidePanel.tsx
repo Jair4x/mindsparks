@@ -47,7 +47,7 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
                 border: "0.5px solid var(--color-accent)",
                 borderRadius: 999,
                 padding: "10px 0",
-                width: 44,
+                width: 59,
             }}
         >
             {/*
@@ -62,7 +62,7 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
                 
                 No logic for now.
             */}
-            <PanelButton icon={<Search size={15} />} label="Buscar Spark" />
+            <PanelButton icon={<Search size={17} />} label="Buscar Spark" />
 
             {/*
                 Grouping buttons
@@ -71,19 +71,19 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
                 Active changes the current local groupMode.
             */}
             <PanelButton
-                icon={<LayoutGrid size={15} />}
+                icon={<LayoutGrid size={17} />}
                 label="Sin agrupar"
                 isActive={groupMode === "none"}
                 onClick={() => setGroupMode("none")}
             />
             <PanelButton
-                icon={<Tags size={15} />}
+                icon={<Tags size={17} />}
                 label="Agrupar por categoría"
                 isActive={groupMode === "category"}
                 onClick={() => setGroupMode("category")}
             />
             <PanelButton
-                icon={<Network size={15} />}
+                icon={<Network size={17} />}
                 label="Agrupar por jerarquía"
                 isActive={groupMode === "hierarchy"}
                 onClick={() => setGroupMode("hierarchy")}
@@ -96,9 +96,9 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 
                 No logic for now.
             */}
-            <PanelButton icon={<Filter size={15} />} label="Filtrar" />
-            <PanelButton icon={<List size={15} />} label="Vista de lista" />
-            <PanelButton icon={<Settings size={15} />} label="Configuración" />
+            <PanelButton icon={<Filter size={17} />} label="Filtrar" />
+            <PanelButton icon={<List size={17} />} label="Vista de lista" />
+            <PanelButton icon={<Settings size={17} />} label="Configuración" />
         </aside>
     );
 }
@@ -117,8 +117,8 @@ function PanelCreateButton({ onClick }: { onClick: () => void }) {
             onClick={onClick}
             className="flex items-center justify-center cursor-pointer shrink-0"
             style={{
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 borderRadius: "50%",
                 border: "none",
                 background: "var(--color-surface-raised)",
@@ -127,7 +127,7 @@ function PanelCreateButton({ onClick }: { onClick: () => void }) {
                 marginTop: 4,
             }}
         >
-            <Plus size={14} />
+            <Plus size={17} />
         </button>
     );
 }
@@ -155,8 +155,8 @@ function PanelButton({
             onClick={onClick}
             className="flex items-center justify-center cursor-pointer transition-colors shrink-0"
             style={{
-                width: 28,
-                height: 28,
+                width: 32,
+                height: 32,
                 borderRadius: 6,
                 border: "none",
                 background: isActive ? "var(--color-surface-raised)" : "transparent",
