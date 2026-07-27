@@ -36,7 +36,14 @@ export function formatRelativeDate(isoDate: string, now = Date.now()): string {
 // Safe zones
 // For double clicking, to prevent the user to open the input in a weird place.
 export function isSafeZone(x: number, y: number): boolean {
-    return x > 70 && y > 60 && !(x > window.innerWidth - 120 && y > window.innerHeight - 60);
+    const margin = 50;
+
+    return (
+        x > margin &&                       // Left
+        y > margin &&                       // Up
+        x < window.innerWidth - margin &&   // Right
+        y < window.innerHeight - margin     // Down
+    );
 }
 
 // Function to force re-render

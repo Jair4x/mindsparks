@@ -60,12 +60,15 @@ export function SparkInput({ position, onConfirm, onCancel }: SparkInputProps) {
         }, 100);
     }
 
+    const offsetX = position.x > window.innerWidth  / 2 ? -200 : 0;
+    const offsetY = position.y > window.innerHeight / 2 ? -100 : 0;
+
     return (
         <div
             style={{
                 position: "absolute",
-                left: position.x,
-                top: position.y,
+                left: position.x + offsetX,
+                top: position.y + offsetY,
                 zIndex: 50,
             }}
         >
