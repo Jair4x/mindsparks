@@ -19,6 +19,7 @@ import {
     type OnConnect,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { handleScroll, ZoomControls } from "./ZoomControls";
 
 
 import { useSparkStore, useFlameStore, useConnectionStore, useSpaceStore, useUIStore } from "../../store";
@@ -55,13 +56,15 @@ const nodeTypes = {
 
 export function Canvas() {
     const activeSpaceId = useSpaceStore((state) => state.activeSpaceId);
-    const { screenToFlowPosition } = useReactFlow();
+    const { screenToFlowPosition, zoomTo, getZoom } = useReactFlow();
     
     const sparkInputPosition    = useUIStore((state) => state.sparkInputPosition);
     const openSparkInput        = useUIStore((state) => state.openSparkInput);
-    const closeSparkInput       = useUIStore((state) => state.closeSparkInput);
+    const closeSparkInput = useUIStore((state) => state.closeSparkInput);
+    
+    const setZoom = useUIStore((state) => state.setZoom);
+    const zoom = useUIStore((state) => state.zoom);
 
-    // Haven't made flames store yet, so we won't work with that yet.
     const sparks = useSparkStore(
         useShallow((state) => state.getActiveSparksBySpace(activeSpaceId))
     );
@@ -160,7 +163,11 @@ export function Canvas() {
     );
 
     return (
-        <div className="w-full h-full" style={{ position: "relative"}}>
+        <div
+            className="w-full h-full"
+            style={{ position: "relative" }}
+            onWheel={(e) => handleScroll(e, zoom, zoomTo, setZoom)}
+        >
             <ReactFlow
                 nodes={displayNodes}
                 edges={edges}
@@ -175,6 +182,9 @@ export function Canvas() {
                 minZoom={MIN_ZOOM}
                 maxZoom={MAX_ZOOM}
                 defaultViewport={{ x: 0, y: 0, zoom: DEFAULT_ZOOM }}
+                zoomOnPinch={false}
+                zoomOnScroll={false}
+                onMoveEnd={(_, viewport) => setZoom(viewport.zoom)}
             >
                 <Background
                     variant={BackgroundVariant.Dots}
@@ -183,6 +193,8 @@ export function Canvas() {
                     color="var(--color-accent)"
                     style={{ opacity: 0.12 }}
                 />
+
+                <ZoomControls />
             </ReactFlow>
 
             {sparkInputPosition && (
