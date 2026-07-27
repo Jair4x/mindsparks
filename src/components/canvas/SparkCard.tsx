@@ -14,6 +14,7 @@ import { NodeProps } from "@xyflow/react";
 import { useUIStore, useCategoryStore } from "../../store";
 import type { SparkNode } from "../../lib/flowTransforms";
 import { formatRelativeDate } from "../../lib/utils";
+import { useNow } from "../../lib/utils";
 
 // --------------------------
 // Component
@@ -22,6 +23,8 @@ import { formatRelativeDate } from "../../lib/utils";
 export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
     const { spark } = data;
     const [isHovered, setIsHovered] = useState(false);
+
+    const now = useNow();
 
     const openModal = useUIStore((state) => state.openModal);
 
@@ -66,37 +69,39 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
             {/*
                 Metadata: category and date. Only visible on hover.
             */}
-            {isHovered && (
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        marginBottom: 5,
-                        fontSize: 11,
-                        color: "var(--color-text-muted)",
-                    }}
-                >
-                    {category ? (
-                        <>
-                            <span
-                                style={{
-                                    width: 8,
-                                    height: 8,
-                                    borderRadius: "50%",
-                                    background: category.color,
-                                    flexShrink: 0,
-                                }}
-                            />
-                            <span>{category.name}</span>
-                        </>
-                    ) : null}
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    marginBottom: isHovered ? 5 : 0,
+                    fontSize: 11,
+                    color: "var(--color-text-muted)",
+                    opacity: isHovered ? 1 : 0,
+                    maxHeight: isHovered ? 20 : 0,
+                    overflow: "hidden",
+                    transition: "opacity 0.15s ease, max-height 0.15s ease, margin-bottom 0.15s ease",
+                }}
+            >
+                {category ? (
+                    <>
+                        <span
+                            style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                background: category.color,
+                                flexShrink: 0,
+                            }}
+                        />
+                        <span>{category.name}</span>
+                    </>
+                ) : null}
 
-                    <span style={{ marginLeft: "auto" }}>
-                        {formatRelativeDate(spark.createdAt)}
-                    </span>
-                </div>
-            )}
+                <span style={{ marginLeft: "auto" }}>
+                    {formatRelativeDate(spark.createdAt, now)}
+                </span>
+            </div>
             <div
                 className="line-clamp-2"
                 style={{

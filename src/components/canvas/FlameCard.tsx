@@ -84,38 +84,39 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             {/*
                 Metadata: category and date. Only visible on hover.
             */}
-            {isHovered && (
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        marginBottom: 5,
-                        fontSize: 11,
-                        color: "var(--color-text-muted)",
-                        paddingRight: 16, // for the flame icon
-                    }}
-                >
-                    {category ? (
-                        <>
-                            <span
-                                style={{
-                                    width: 8,
-                                    height: 8,
-                                    borderRadius: "50%",
-                                    background: category.color,
-                                    flexShrink: 0,
-                                }}
-                            />
-                            <span>{category.name}</span>
-                        </>
-                    ) : null}
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    marginBottom: isHovered ? 5 : 0,
+                    fontSize: 11,
+                    color: "var(--color-text-muted)",
+                    opacity: isHovered ? 1 : 0,
+                    maxHeight: isHovered ? 20 : 0,
+                    overflow: "hidden",
+                    transition: "opacity 0.15s ease, max-height 0.15s ease, margin-bottom 0.15s ease",
+                }}
+            >
+                {category ? (
+                    <>
+                        <span
+                            style={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: "50%",
+                                background: category.color,
+                                flexShrink: 0,
+                            }}
+                        />
+                        <span>{category.name}</span>
+                    </>
+                ) : null}
 
-                    <span style={{ marginLeft: "auto" }}>
-                        {formatRelativeDate(flame.createdAt)}
-                    </span>
-                </div>
-            )}
+                <span style={{ marginLeft: "auto" }}>
+                    {formatRelativeDate(spark.createdAt)}
+                </span>
+            </div>
             <div
                 className="line-clamp-2"
                 style={{

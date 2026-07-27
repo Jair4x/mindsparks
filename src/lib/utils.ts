@@ -2,6 +2,7 @@
 // Auxiliary functions
 //  Set of helper functions to comply with "DRY" (Don't Repeat Yourself)
 // --------------------------
+import { useState, useEffect } from "react";
 
 // Generate a random ID
 export function generateId(): string {
@@ -16,8 +17,8 @@ export function now(): string {
 
 // Formats an ISO date into a legible format.
 // "2d ago", "3h ago", "1w ago", etc.
-export function formatRelativeDate(isoDate: string): string {
-    const diff = Date.now() - new Date(isoDate).getTime();
+export function formatRelativeDate(isoDate: string, now = Date.now()): string {
+    const diff = now - new Date(isoDate).getTime();
 
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(diff / 60000);
@@ -36,4 +37,16 @@ export function formatRelativeDate(isoDate: string): string {
 // For double clicking, to prevent the user to open the input in a weird place.
 export function isSafeZone(x: number, y: number): boolean {
     return x > 70 && y > 60 && !(x > window.innerWidth - 120 && y > window.innerHeight - 60);
+}
+
+// Function to force re-render
+export function useNow(intervalMs = 20000) {
+    const [now, setNow] = useState(() => Date.now());
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(Date.now()), intervalMs);
+        return () => clearInterval(interval);
+    }, [intervalMs]);
+
+    return now;
 }
