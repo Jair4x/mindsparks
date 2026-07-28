@@ -23,14 +23,12 @@ import { handleScroll, ZoomControls } from "./ZoomControls";
 
 
 import { useSparkStore, useFlameStore, useConnectionStore, useSpaceStore, useUIStore } from "../../store";
-import {
-    sparksAndFlamesToNodes,
-    connectionsToEdges,
-    type MindSparksNode,
-} from "../../lib/flowTransforms";
+import { sparksAndFlamesToNodes, connectionsToEdges, type MindSparksNode } from "../../lib/flowTransforms";
+import { isSafeZone } from "../../lib/utils";
+import { animateRepulsion, resolveAllCollisions } from "../../lib/repulsion";
+
 import { SparkCard } from "./SparkCard";
 import { FlameCard } from "./FlameCard";
-import { isSafeZone } from "../../lib/utils";
 import { SparkInput } from "./SparkInput";
 
 // --------------------------
@@ -60,7 +58,7 @@ export function Canvas() {
     const openSparkInput        = useUIStore((state) => state.openSparkInput);
     const closeSparkInput       = useUIStore((state) => state.closeSparkInput);
     
-    const setZoom   = useUIStore((state) => state.setZoom);
+    const setZoom = useUIStore((state) => state.setZoom);
 
     const sparks = useSparkStore(
         useShallow((state) => state.getActiveSparksBySpace(activeSpaceId))
@@ -110,7 +108,47 @@ export function Canvas() {
                 .moveFlameToPosition(typedNode.id, typedNode.position);
         }
 
-    }, []);
+        // Which nodes need repulsion.
+        const allNodePositions = displayNodes.map((n) => ({
+            id:         n.id,
+            position:   n.position,
+        }));
+
+        const affected = resolveAllCollisions(typedNode.id, typedNode.position, allNodePositions);
+
+        if (affected.length === 0) return;
+
+        const startPositions = affected.map((a) => ({
+            id:         a.id,
+            position:   displayNodes.find((n) => n.id === a.id)!.position,
+        }));
+
+        animateRepulsion(
+            startPositions,
+            affected,
+            // onUpdate updates displayNodes in each frame to animate them
+            (current) => {
+                setDisplayNodes((prev) =>
+                    prev.map((n) => {
+                        const updated = current.find((c) => c.id === n.id);
+                        return updated ? { ...n, position: updated.position } : n;
+                    })
+                );
+            },
+            // onComplete persists the final positions on Zustand
+            (final) => {
+                for (const node of final) {
+                    const spark = useSparkStore.getState().sparks.find((s) => s.id === node.id);
+                    if (spark) {
+                        useSparkStore.getState().moveSparkToPosition(node.id, node.position);
+                        continue;
+                    }
+
+                    useFlameStore.getState().moveFlameToPosition(node.id, node.position);
+                }
+            }
+        );
+    }, [displayNodes]);
 
     // --------------------------
     // onConnect
@@ -198,11 +236,47 @@ export function Canvas() {
                 <SparkInput
                     position={sparkInputPosition.screen}
                     onConfirm={(text) => {
-                        useSparkStore.getState().createSpark({
+                        const newSpark = useSparkStore.getState().createSpark({
                             text,
                             position: sparkInputPosition.canvas,
                             spaceId: activeSpaceId,
                         });
+
+                        // Resolve collisions
+                        const allNodePositions = displayNodes.map((n) => ({
+                            id: n.id,
+                            position: n.position,
+                        }));
+
+                        // Add the newly created spark to the list so it becomes a source of repulsion
+                        allNodePositions.push({ id: newSpark.id, position: sparkInputPosition.canvas });
+
+                        const resolved = resolveAllCollisions(newSpark.id, sparkInputPosition.canvas, allNodePositions);
+
+                        const affected = resolved.filter((n) => n.id !== newSpark.id);
+
+                        if (affected.length > 0) {
+                            const startPositions = affected.map((a) => ({
+                            id: a.id,
+                            position: displayNodes.find((n) => n.id === a.id)?.position ?? a.position,
+                            }));
+
+                            animateRepulsion(startPositions, affected, 
+                            (current) => {
+                                setDisplayNodes((prev) =>
+                                prev.map((n) => {
+                                    const updated = current.find((c) => c.id === n.id);
+                                    return updated ? { ...n, position: updated.position } : n;
+                                })
+                                );
+                            },
+                            (final) => {
+                                for (const node of final) {
+                                useSparkStore.getState().moveSparkToPosition(node.id, node.position);
+                                }
+                            }
+                            );
+                        }
 
                         closeSparkInput();
                     }}
