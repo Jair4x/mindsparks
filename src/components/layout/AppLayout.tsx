@@ -76,7 +76,7 @@ export function AppLayout() {
             {showPanel && ( <SidePanel onCreateSpark={() => {
                 openSparkInput({
                     screen: { x: window.innerWidth / 2, y: window.innerHeight / 2 - 44 },
-                    canvas: { x: window.innerWidth / 2, y: window.innerHeight / 2 - 44 }
+                    canvas: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
                 });
             }}/> ) }
         </div>
