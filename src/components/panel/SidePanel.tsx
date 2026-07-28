@@ -2,10 +2,10 @@
 // The floating side panel in the canvas.
 //  This component is the main control panel to interact with the canvas besides being inside a spark or flame.
 //
-// !Note: This doesn't have a working logic yet.
-// !      Buttons just update the UI store or trigger actions that'll be implemented later.
+// * Note: Search, filters, list view and settings DON'T have logic yet.
 //
 
+import { Background } from "@xyflow/react";
 import {
     Plus,
     Search,
@@ -27,10 +27,6 @@ type GroupMode = "none" | "category" | "hierarchy";
 
 // --------------------------
 // Local state
-//
-// !Note/To future me: The active group mode lives in this panel.
-// !                   When you (me) need other components to read it (like from the canvas to know how to position the cards),
-// !                   move onCreateSpark to UI Store.
 // --------------------------
 import { useState } from "react";
 
@@ -125,6 +121,14 @@ function PanelCreateButton({ onClick }: { onClick: () => void }) {
                 color: "var(--color-accent)",
                 marginBottom: 6,
                 marginTop: 4,
+            }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--color-accent)";
+                e.currentTarget.style.color = "var(--color-surface)";
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.background = "var(--color-surface-raised)";
+                e.currentTarget.style.color = "var(--color-accent)";
             }}
         >
             <Plus size={17} />
