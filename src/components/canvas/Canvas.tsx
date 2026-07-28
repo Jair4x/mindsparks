@@ -60,10 +60,9 @@ export function Canvas() {
     
     const sparkInputPosition    = useUIStore((state) => state.sparkInputPosition);
     const openSparkInput        = useUIStore((state) => state.openSparkInput);
-    const closeSparkInput = useUIStore((state) => state.closeSparkInput);
+    const closeSparkInput       = useUIStore((state) => state.closeSparkInput);
     
-    const setZoom = useUIStore((state) => state.setZoom);
-    const zoom = useUIStore((state) => state.zoom);
+    const setZoom   = useUIStore((state) => state.setZoom);
 
     const sparks = useSparkStore(
         useShallow((state) => state.getActiveSparksBySpace(activeSpaceId))
@@ -166,7 +165,7 @@ export function Canvas() {
         <div
             className="w-full h-full"
             style={{ position: "relative" }}
-            onWheel={(e) => handleScroll(e, zoom, zoomTo, setZoom)}
+            onWheel={(e) => handleScroll(e, getZoom, zoomTo, setZoom)}
         >
             <ReactFlow
                 nodes={displayNodes}

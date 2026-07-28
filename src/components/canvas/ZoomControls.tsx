@@ -10,19 +10,18 @@ import { useUIStore, MIN_ZOOM, MAX_ZOOM } from "../../store";
 
 const ZOOM_STEP = 0.1; // 10%
 
-// TODO: Fix whatever makes the scroll work weird.
-
 // Handling scroll zoom on canvas instead of React Flow
 export function handleScroll(
     e: React.WheelEvent<HTMLDivElement>,
-    zoom: number,
+    getZoom: () => number,
     zoomTo: (zoom: number, options?: { duration?: number }) => void,
     setZoom: (zoom: number) => void,
 ) {
     e.preventDefault();
+    const currentZoom = getZoom();
     const delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
-    const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((zoom + delta) * 10) / 10));
-    zoomTo(newZoom, { duration: 150 });
+    const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((currentZoom + delta) * 10) / 10));
+    zoomTo(newZoom);
     setZoom(newZoom);
 }
 
