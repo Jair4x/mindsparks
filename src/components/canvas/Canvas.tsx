@@ -42,8 +42,6 @@ import { MIN_ZOOM, MAX_ZOOM, DEFAULT_ZOOM } from "../../store/ui";
 // Custom node Types
 //
 // We tell React Flow what component to render for each type of node.
-//
-// Note: These are Placeholders now btw, when SparkCard and FlameCard are done this'll change.
 // --------------------------
 const nodeTypes = {
     spark: SparkCard,
