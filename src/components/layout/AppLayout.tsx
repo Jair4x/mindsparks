@@ -13,6 +13,8 @@ import { useUIStore, useSpaceStore } from "../../store";
 import { SidePanel } from "../panel/SidePanel";
 import { Canvas } from "../canvas/Canvas";
 
+import { SparkModal } from "../ui/SparkModal";
+
 // --------------------------
 // Components
 // --------------------------
@@ -79,6 +81,8 @@ export function AppLayout() {
                     canvas: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
                 });
             }}/> ) }
+            
+            <SparkModal />
         </div>
     );
 }

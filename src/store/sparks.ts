@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { Spark, Position } from "../types";
 import { generateId, now } from "../lib/utils";
+import {
+    SPARK_DESC_MAX_LENGTH as DESC_MAX_LENGTH
+} from "../../lib/constants";
 
 // --------------------------
 // Store types
@@ -30,6 +33,8 @@ interface SparkStore {
     }) => Spark;
 
     updateSparkText: (id: string, text: string) => void;
+
+    updateSparkDescription: (id: string, description: string) => void;
 
     // Called each time the user stops dragging a card.
     moveSparkToPosition: (id: string, position: Position) => void;
@@ -86,6 +91,16 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
             sparks: state.sparks.map((spark) =>
                 spark.id === id
                     ? { ...spark, text, updatedAt: now() }
+                    : spark
+            ),
+        }));
+    },
+
+    updateSparkDescription: (id, description) => {
+        set((state) => ({
+            sparks: state.sparks.map((spark) =>
+                spark.id === id
+                    ? { ...spark, description: description, updatedAt: now() }
                     : spark
             ),
         }));

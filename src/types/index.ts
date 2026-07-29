@@ -35,7 +35,8 @@ export interface Category {
 // --------------------------
 export interface Spark {
     id:             string;
-    text:           string;
+    text:           string;     // Title of the idea
+    description?:   string;     // Short description of the idea (150 chars max, optional)
     position:       Position;   // where is it in the canvas
     spaceId:        string;     // to which Space it belongs
     categoryId?:    string;     // optional: it might not have a category
