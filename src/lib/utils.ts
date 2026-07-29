@@ -3,6 +3,7 @@
 //  Set of helper functions to comply with "DRY" (Don't Repeat Yourself)
 // --------------------------
 import { useState, useEffect } from "react";
+import { SAFE_ZONE_MARGIN } from "./constants";
 
 // Generate a random ID
 export function generateId(): string {
@@ -36,7 +37,7 @@ export function formatRelativeDate(isoDate: string, now = Date.now()): string {
 // Safe zones
 // For double clicking, to prevent the user to open the input in a weird place.
 export function isSafeZone(x: number, y: number): boolean {
-    const margin = 50;
+    const margin = SAFE_ZONE_MARGIN;
 
     return (
         x > margin &&                       // Left

@@ -31,10 +31,11 @@ import { SparkCard } from "./SparkCard";
 import { FlameCard } from "./FlameCard";
 import { SparkInput } from "./SparkInput";
 
-// --------------------------
-// Constants
-// --------------------------
-import { MIN_ZOOM, MAX_ZOOM, DEFAULT_ZOOM } from "../../store/ui";
+import {
+    CANVAS_MIN_ZOOM     as MIN_ZOOM,
+    CANVAS_MAX_ZOOM     as MAX_ZOOM,
+    CANVAS_DEFAULT_ZOOM as DEFAULT_ZOOM
+} from "../../lib/constants";
 
 // --------------------------
 // Custom node Types

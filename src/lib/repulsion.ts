@@ -11,18 +11,11 @@
 //
 
 import type { Position } from "../types";
-
-// --------------------------
-// Constants
-// --------------------------
-
-// Radius inside which a node is affected by the repulsion (in canvas pixels).
-export const REPULSION_RADIUS = 200;
-
-// Max repulsion force applied to a node just over the dropped node.
-const MAX_FORCE = 100;
-
-const ANIMATION_DURATION = 400;
+import {
+    REPULSION_RADIUS,
+    REPULSION_MAX_FORCE as MAX_FORCE,
+    REPULSION_DURATION  as ANIMATION_DURATION,
+} from "./constants";
 
 // --------------------------
 // Types

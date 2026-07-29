@@ -10,14 +10,11 @@
 
 import { create } from "zustand";
 import type { Position } from "../types";
-
-// --------------------------
-// Constants
-// --------------------------
-
-export const MIN_ZOOM = 0.2;
-export const MAX_ZOOM = 3;
-export const DEFAULT_ZOOM = 1;
+import {
+    CANVAS_MIN_ZOOM     as MIN_ZOOM,
+    CANVAS_MAX_ZOOM     as MAX_ZOOM,
+    CANVAS_DEFAULT_ZOOM as DEFAULT_ZOOM
+} from "../lib/constants";
 
 // --------------------------
 // Auxiliary types

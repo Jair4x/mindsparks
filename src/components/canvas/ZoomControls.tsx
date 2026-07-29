@@ -6,9 +6,12 @@
 import { useCallback } from "react";
 import { useReactFlow } from "@xyflow/react";
 import { Maximize2, Minus, Plus } from "lucide-react";
-import { useUIStore, MIN_ZOOM, MAX_ZOOM } from "../../store";
-
-const ZOOM_STEP = 0.1; // 10%
+import { useUIStore } from "../../store";
+import {
+    CANVAS_MIN_ZOOM     as MIN_ZOOM,
+    CANVAS_MAX_ZOOM     as MAX_ZOOM,
+    CANVAS_ZOOM_STEP    as ZOOM_STEP
+} from "../../lib/constants";
 
 // Handling scroll zoom on canvas instead of React Flow
 export function handleScroll(
@@ -17,7 +20,6 @@ export function handleScroll(
     zoomTo: (zoom: number, options?: { duration?: number }) => void,
     setZoom: (zoom: number) => void,
 ) {
-    e.preventDefault();
     const currentZoom = getZoom();
     const delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
     const newZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.round((currentZoom + delta) * 10) / 10));
