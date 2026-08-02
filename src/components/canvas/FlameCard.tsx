@@ -70,11 +70,19 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             <div
                 style={{
                     position: "absolute",
-                    top: 8,
+                    top: "25%",
                     right: 10,
-                    color: "var(--color-flame)", // Orange
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: "var(--color-surface-raised)",
+                    color: "var(--color-flame)",
+                    opacity: isHovered ? 0 : 1,
+                    transform: isHovered ? "scale(0.5)" : "scale(1)",
+                    transition: "opacity 0.15s, transform 0.15s",
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "center",
                 }}
             >
                 <Flame size={12} />
