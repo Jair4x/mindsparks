@@ -48,7 +48,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
 
     return (
         <div
-            onClick={handleClick}
+            onDoubleClick={handleClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={{

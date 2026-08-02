@@ -52,7 +52,7 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
 
     return (
         <div
-            onClick={handleClick}
+            onDoubleClick={handleClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={{
