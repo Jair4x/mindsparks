@@ -18,12 +18,12 @@ import {
 // --------------------------
 
 export function SparkModal() {
-    const activeModal       = useUIStore((state) => state.activeModal);
-    const activeModalNodeId = useUIStore((state) => state.activeModalNodeId);
-    const closeModal        = useUIStore((state) => state.closeModal);
+    const activeModal       = useUIStore((s) => s.activeModal);
+    const activeModalNodeId = useUIStore((s) => s.activeModalNodeId);
+    const closeModal        = useUIStore((s) => s.closeModal);
     
-    const spark = useSparkStore((state) =>
-        state.sparks.find((s) => s.id === activeModalNodeId)
+    const spark = useSparkStore((s) =>
+        s.sparks.find((s) => s.id === activeModalNodeId)
     );
 
     if (activeModal !== "spark-detail" || !spark) return null;
@@ -42,13 +42,13 @@ export function SparkModal() {
 // Separated from SparkModal to be able to use hooks with the already validated spark.
 // --------------------------
 function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () => void }) {
-    const spark             = useSparkStore((state) => state.sparks.find((s) => s.id === sparkId))!;
-    const updateText        = useSparkStore((state) => state.updateSparkText);
-    const updateDescription = useSparkStore((state) => state.updateSparkDescription);
-    const openModal         = useUIStore((state) => state.openModal);
+    const spark             = useSparkStore((s) => s.sparks.find((s) => s.id === sparkId))!;
+    const updateText        = useSparkStore((s) => s.updateSparkText);
+    const updateDescription = useSparkStore((s) => s.updateSparkDescription);
+    const openModal         = useUIStore((s) => s.openModal);
 
-    const category = useCategoryStore((state) =>
-        spark.categoryId ? state.categories.find((c) => c.id === spark.categoryId) : undefined
+    const category = useCategoryStore((s) =>
+        spark.categoryId ? s.categories.find((c) => c.id === spark.categoryId) : undefined
     );
 
     const children      = useChildren(sparkId);

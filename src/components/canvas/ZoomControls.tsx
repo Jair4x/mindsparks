@@ -29,8 +29,8 @@ export function handleScroll(
 
 export function ZoomControls() {
     const { zoomIn, zoomOut, zoomTo, getZoom } = useReactFlow();
-    const zoom = useUIStore((state) => state.zoom);
-    const setZoom = useUIStore((state) => state.setZoom);
+    const zoom = useUIStore((s) => s.zoom);
+    const setZoom = useUIStore((s) => s.setZoom);
 
     // Sync React Flow's zoom with UI Store
     const handleZoomIn = useCallback(() => {

@@ -26,13 +26,13 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
 
     const now = useNow();
 
-    const openModal = useUIStore((state) => state.openModal);
+    const openModal = useUIStore((s) => s.openModal);
 
     // Read the spark category from the category store.
     // no category = undefined
-    const category = useCategoryStore((state) =>
+    const category = useCategoryStore((s) =>
         spark.categoryId
-            ? state.categories.find((c) => c.id === spark.categoryId)
+            ? s.categories.find((c) => c.id === spark.categoryId)
             : undefined
     );
 

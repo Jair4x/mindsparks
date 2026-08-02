@@ -19,22 +19,22 @@ import type { Schema, Tool, Position } from "../../types";
 // --------------------------
 
 export function SparkToFlameModal() {
-    const activeModal           = useUIStore((state) => state.activeModal);
-    const activeModalNodeId     = useUIStore((state) => state.activeModalNodeId);
-    const closeModal            = useUIStore((state) => state.closeModal);
-    const openFlame             = useUIStore((state) => state.openFlame);
-    const activeFlameId         = useUIStore((state) => state.activeFlameId);
+    const activeModal           = useUIStore((s) => s.activeModal);
+    const activeModalNodeId     = useUIStore((s) => s.activeModalNodeId);
+    const closeModal            = useUIStore((s) => s.closeModal);
+    const openFlame             = useUIStore((s) => s.openFlame);
+    const activeFlameId         = useUIStore((s) => s.activeFlameId);
     
-    const spark = useSparkStore((state) =>
-        state.sparks.find((s) => s.id === activeModalNodeId)
+    const spark = useSparkStore((s) =>
+        s.sparks.find((s) => s.id === activeModalNodeId)
     );
-    const archiveSpark          = useSparkStore((state) => state.archiveSpark);
-    const convertSparkToFlame   = useFlameStore((state) => state.convertSparkToFlame);
+    const archiveSpark          = useSparkStore((s) => s.archiveSpark);
+    const convertSparkToFlame   = useFlameStore((s) => s.convertSparkToFlame);
     
-    const flame = useFlameStore((state) =>
-        state.flames.find((f) => f.id === activeFlameId)
+    const flame = useFlameStore((s) =>
+        s.flames.find((f) => f.id === activeFlameId)
     );
-    const updateFlameTools = useFlameStore((state) => state.updateFlameTools);
+    const updateFlameTools = useFlameStore((s) => s.updateFlameTools);
     
     if (activeModal === "spark-to-flame" && spark) {
         return (

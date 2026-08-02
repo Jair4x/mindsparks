@@ -18,11 +18,11 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     const { flame } = data;
     const [isHovered, setIsHovered] = useState(false);
 
-    const openFlame = useUIStore((state) => state.openFlame);
+    const openFlame = useUIStore((s) => s.openFlame);
 
-    const category = useCategoryStore((state) =>
+    const category = useCategoryStore((s) =>
         flame.categoryId
-            ? state.categories.find((f) => f.id === flame.categoryId)
+            ? s.categories.find((f) => f.id === flame.categoryId)
             : undefined
     );
 

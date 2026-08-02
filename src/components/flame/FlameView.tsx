@@ -22,23 +22,23 @@ import { FlameWorkspace } from "./FlameWorkspace";
 // --------------------------
 
 export function FlameView() {
-    const activeFlameId         = useUIStore((state) => state.activeFlameId);
-    const navigationStack       = useUIStore((state) => state.navigationStack);
-    const goBack                = useUIStore((state) => state.goBack);
-    const openModal             = useUIStore((state) => state.openModal);
+    const activeFlameId         = useUIStore((s) => s.activeFlameId);
+    const navigationStack       = useUIStore((s) => s.navigationStack);
+    const goBack                = useUIStore((s) => s.goBack);
+    const openModal             = useUIStore((s) => s.openModal);
     
-    const flame = useFlameStore((state) =>
-        state.flames.find((f) => f.id === activeFlameId)
+    const flame = useFlameStore((s) =>
+        s.flames.find((f) => f.id === activeFlameId)
     );
     
     if (!flame) return null;
 
-    const spark = useSparkStore((state) =>
-        state.sparks.find((s) => s.id === flame.sparkId)
+    const spark = useSparkStore((s) =>
+        s.sparks.find((s) => s.id === flame.sparkId)
     );
 
-    const updateFlameName = useFlameStore((state) => state.updateFlameName);
-    const updateSparkName = useSparkStore((state) => state.updateSparkText);
+    const updateFlameName = useFlameStore((s) => s.updateFlameName);
+    const updateSparkName = useSparkStore((s) => s.updateSparkText);
 
     const [isEditing, setIsEditing]     = useState(false);
     const [editName, setEditName]       = useState("");

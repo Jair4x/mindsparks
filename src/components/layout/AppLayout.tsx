@@ -22,13 +22,13 @@ import { SparkToFlameModal } from "../ui/SparkToFlameModal";
 // --------------------------
 
 export function AppLayout() {
-    const isPanelCollapsed  = useUIStore((state) => state.isPanelCollapsed);
-    const isZenModeActive   = useUIStore((state) => state.isZenModeActive);
+    const isPanelCollapsed  = useUIStore((s) => s.isPanelCollapsed);
+    const isZenModeActive   = useUIStore((s) => s.isZenModeActive);
     
-    const openSparkInput    = useUIStore((state) => state.openSparkInput);
+    const openSparkInput    = useUIStore((s) => s.openSparkInput);
 
-    const activeSpace       = useSpaceStore((state) => state.getActiveSpace());
-    const activeView        = useUIStore((state) => state.activeView);
+    const activeSpace       = useSpaceStore((s) => s.getActiveSpace());
+    const activeView        = useUIStore((s) => s.activeView);
     
     const showPanel         = !isPanelCollapsed && !isZenModeActive;
 

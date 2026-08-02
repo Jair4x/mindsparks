@@ -52,25 +52,25 @@ const nodeTypes = {
 // --------------------------
 
 export function Canvas() {
-    const activeSpaceId = useSpaceStore((state) => state.activeSpaceId);
+    const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
     const { screenToFlowPosition, zoomTo, getZoom } = useReactFlow();
     
-    const sparkInputPosition    = useUIStore((state) => state.sparkInputPosition);
-    const openSparkInput        = useUIStore((state) => state.openSparkInput);
-    const closeSparkInput       = useUIStore((state) => state.closeSparkInput);
+    const sparkInputPosition    = useUIStore((s) => s.sparkInputPosition);
+    const openSparkInput        = useUIStore((s) => s.openSparkInput);
+    const closeSparkInput       = useUIStore((s) => s.closeSparkInput);
     
-    const setZoom = useUIStore((state) => state.setZoom);
+    const setZoom = useUIStore((s) => s.setZoom);
 
     const sparks = useSparkStore(
-        useShallow((state) => state.getActiveSparksBySpace(activeSpaceId))
+        useShallow((s) => s.getActiveSparksBySpace(activeSpaceId))
     );
 
     const flames = useFlameStore(
-        useShallow((state) => state.getActiveFlamesBySpace(activeSpaceId))
+        useShallow((s) => s.getActiveFlamesBySpace(activeSpaceId))
     );
 
     const connections = useConnectionStore(
-        useShallow((state) => state.getConnectionsBySpace(activeSpaceId))
+        useShallow((s) => s.getConnectionsBySpace(activeSpaceId))
     );
 
     const nodes = sparksAndFlamesToNodes(sparks, flames);
