@@ -29,14 +29,39 @@ export interface Category {
 }
 
 // --------------------------
+// Tool 
+//  The powers available to use in Flames to work on projects.
+// --------------------------
+export interface Tool {
+    name:           string;
+    label:          string;
+    description:    string;
+    icon:           string;     // Lucide icon name
+    enabled:        boolean;    // if it's implemented in the current version
+}
+
+// --------------------------
+// Schema
+//  Predefined set of Tools to make things faster
+//
+// Phase 2 will introduce user-made Schemas.
+// --------------------------
+export interface Schema {
+    name:           string;
+    label:          string;
+    description:    string;
+    tools:          string[];   // tool names, referencing tools[]
+}
+
+// --------------------------
 // Spark
 //  The basic unit of this project. An idea in its raw state.
 //  No tools, no structure, it only exists.
 // --------------------------
 export interface Spark {
     id:             string;
-    text:           string;     // Title of the idea
-    description?:   string;     // Short description of the idea (150 chars max, optional)
+    text:           string;     // title of the idea
+    description?:   string;     // short description of the idea (150 chars max, optional)
     position:       Position;   // where is it in the canvas
     spaceId:        string;     // to which Space it belongs
     categoryId?:    string;     // optional: it might not have a category
@@ -45,21 +70,6 @@ export interface Spark {
     createdAt:      string;
     updatedAt:      string;
 }
-
-// --------------------------
-// FlameSchema
-//  The tools preset that the user chooses when choosing to convert a spark into a flame.
-//      "development" and "research" are the two predefined schemas.
-//      "custom" is set when the user defines the tools manually (default value).
-// --------------------------
-export type FlameSchema = "development" | "research" | "custom";
-
-// --------------------------
-// FlameTool
-//  The tools available in this MVP.
-//      Later phases will add more options to this type.
-// --------------------------
-export type FlameTool = "markdown" | "kanban" | "checklist";
 
 // --------------------------
 // Flame
@@ -75,8 +85,8 @@ export interface Flame {
     spaceId:        string;
     categoryId?:    string;
     parentId?:      string;
-    schema:         FlameSchema;
-    tools:          FlameTool[];    // active tools in this flame
+    schema:         string;         // name of the selected schema (predefined or custom), referencing Schema
+    tools:          string[];       // name of the active tools in this flame, referencing tools[]
     isArchived:     boolean;
     isCompleted:    boolean;        // if the user marked it as finished
     createdAt:      string;

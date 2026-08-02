@@ -11,9 +11,9 @@
 import { create } from "zustand";
 import type { Position } from "../types";
 import {
-    CANVAS_MIN_ZOOM     as MIN_ZOOM,
-    CANVAS_MAX_ZOOM     as MAX_ZOOM,
-    CANVAS_DEFAULT_ZOOM as DEFAULT_ZOOM
+    MIN_ZOOM as MIN_ZOOM,
+    MAX_ZOOM as MAX_ZOOM,
+    DEFAULT_ZOOM as DEFAULT_ZOOM
 } from "../lib/constants";
 
 // --------------------------
@@ -25,6 +25,7 @@ import {
 export type ModalType =
     | "spark-detail"        // Modal for the details of a spark
     | "spark-to-flame"      // Spark to flame conversion modal
+    | "manage-tools"        // spark-to-flame, but inside a flame to manage tools
     | "category-form"       // Modal to create or edit a category
     | null;                 // No modal open
 
@@ -33,8 +34,8 @@ export type SelectedNodeType = "spark" | "flame";
 
 // For multiple selection
 export type SelectedNode = {
-    id:     string;
-    type:   SelectedNodeType;
+    id: string;
+    type: SelectedNodeType;
 };
 
 // Type of selections the user can do to nodes
@@ -67,6 +68,12 @@ interface UIStore {
     // Used to show the edges of the lineage graph.
     hoveredNodeId: string | null;
 
+    activeView: "canvas" | "flame";
+
+    activeFlameId: string | null;
+
+    navigationStack: string[];  // IDs of flames in the navigation stack
+
     // --- Side panel state ---
 
     isPanelCollapsed: boolean;
@@ -97,6 +104,9 @@ interface UIStore {
     clearSelection: () => void;
     setHoveredNode: (id: string | null) => void;
 
+    openFlame: (flameId: string) => void;
+    goBack: () => void;
+
     // --- Actions: side panel & zen mode
 
     togglePanel: () => void;
@@ -115,6 +125,9 @@ export const useUIStore = create<UIStore>((set, get) => ({
     zoom: DEFAULT_ZOOM,
     selection: { type: "none" },
     hoveredNodeId: null,
+    activeView: "canvas",
+    activeFlameId: null,
+    navigationStack: [],
     isPanelCollapsed: false,
     isZenModeActive: false,
 
@@ -136,7 +149,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
         set({ zoom: clampedZoom });
     },
 
-    resetZoom:() => {
+    resetZoom: () => {
         set({ zoom: DEFAULT_ZOOM });
     },
 
@@ -169,6 +182,29 @@ export const useUIStore = create<UIStore>((set, get) => ({
 
     setHoveredNode: (id) => {
         set({ hoveredNodeId: id });
+    },
+
+    openFlame: (flameId) => {
+        set((state) => ({
+            activeView: "flame",
+            activeFlameId: flameId,
+            navigationStack: state.activeFlameId
+                ? [...state.navigationStack, state.activeFlameId]
+                : state.navigationStack,
+        }));
+    },
+
+    goBack: () => {
+        set((state) => {
+            const stack = [...state.navigationStack];
+            const previousFlameId = stack.pop();
+
+            return {
+                activeView: previousFlameId ? "flame" : "canvas",
+                activeFlameId: previousFlameId ?? null,
+                navigationStack: stack,
+            };
+        });
     },
 
     // --- Spark creation ---

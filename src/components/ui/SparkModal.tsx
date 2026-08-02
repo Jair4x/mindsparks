@@ -24,16 +24,16 @@ export function SparkModal() {
     
     const spark = useSparkStore((state) =>
         state.sparks.find((s) => s.id === activeModalNodeId)
-);
+    );
 
-if (activeModal !== "spark-detail" || !spark) return null;
+    if (activeModal !== "spark-detail" || !spark) return null;
 
-return (
-    <SparkModalContent
-    sparkId={spark.id}
-    onClose={closeModal}
-    />
-)
+    return (
+        <SparkModalContent
+        sparkId={spark.id}
+        onClose={closeModal}
+        />
+    )
 }
 
 // --------------------------
@@ -45,6 +45,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
     const spark             = useSparkStore((state) => state.sparks.find((s) => s.id === sparkId))!;
     const updateText        = useSparkStore((state) => state.updateSparkText);
     const updateDescription = useSparkStore((state) => state.updateSparkDescription);
+    const openModal         = useUIStore((state) => state.openModal);
 
     const category = useCategoryStore((state) =>
         spark.categoryId ? state.categories.find((c) => c.id === spark.categoryId) : undefined
@@ -292,7 +293,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                         <ActionButton
                             icon={<Flame size={13} />}
                             label="Convert into flame"
-                            onClick={() => { }} // TODO: Change this when finishing on Flame
+                            onClick={() => openModal("spark-to-flame", spark.id)}
                             accent
                         />
 

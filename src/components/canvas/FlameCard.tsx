@@ -18,7 +18,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     const { flame } = data;
     const [isHovered, setIsHovered] = useState(false);
 
-    const openModal = useUIStore((state) => state.openModal);
+    const openFlame = useUIStore((state) => state.openFlame);
 
     const category = useCategoryStore((state) =>
         flame.categoryId
@@ -40,8 +40,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     const opacity = flame.isCompleted ? 0.5 : 1;
 
     const handleClick = () => {
-        // TODO: Open the full flame view, not the detail modal.
-        openModal("spark-detail", flame.id);
+        openFlame(flame.id)
     };
 
     const hasTracker = flame.tools.includes("checklist");
@@ -114,7 +113,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
                 ) : null}
 
                 <span style={{ marginLeft: "auto" }}>
-                    {formatRelativeDate(spark.createdAt)}
+                    {formatRelativeDate(flame.createdAt)}
                 </span>
             </div>
             <div

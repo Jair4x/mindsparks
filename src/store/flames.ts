@@ -7,22 +7,9 @@
 
 
 import { create } from "zustand";
-import { Flame, FlameSchema, FlameTool, Position } from "../types";
+import { Flame, FlameSchema, string, Position } from "../types";
 import { generateId, now } from "../lib/utils";
 import { useConnectionStore } from "./connections";
-
-// --------------------------
-// Tools by schema
-//
-// When the user chooses to convert a spark into a flame and chooses a schema in the modal,
-// these are the tools that are automatically pre-selected.
-// The user can modify them before confirming.
-// --------------------------
-export const SCHEMA_DEFAULT_TOOLS: Record<FlameSchema, FlameTool[]> = {
-    development: ["markdown", "kanban", "checklist"],
-    research: ["markdown", "checklist"],
-    custom: [],
-};
 
 // --------------------------
 // Store types
@@ -43,8 +30,8 @@ interface FlameStore {
         name:           string;
         position:       Position;
         spaceId:        string;
-        schema:         FlameSchema;
-        tools:          FlameTool[];
+        schema:         string;
+        tools:          string[];
         categoryId?:    string;
         parentId?:      string;
     }) => Flame;
@@ -54,9 +41,7 @@ interface FlameStore {
     moveFlameToPosition: (id: string, position: Position) => void;
 
     // Add a tool into the flame
-    addTool: (id: string, tool: FlameTool) => void;
-
-    removeTool: (id: string, tool: FlameTool) => void;
+    updateFlameTools: (id: string, tools: string[]) => void;
 
     assignCategory: (id: string, categoryId: string | undefined) => void;
 
@@ -139,24 +124,13 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         }));
     },
 
-    addTool: (id, tool) => {
+    updateFlameTools: (id, tools) => {
         set((state) => ({
             flames: state.flames.map((flame) => {
                 if (flame.id !== id) return flame;
-                if (flame.tools.includes(tool)) return flame; // TODO: Change this when the possibility to add more instances of the same tool gets made.
                 
-                return { ...flame, tools: [...flame.tools, tool], updatedAt: now() };
+                return { ...flame, tools, updatedAt: now() };
             }),
-        }));
-    },
-
-    removeTool: (id, tool) => {
-        set((state) => ({
-            flames: state.flames.map((flame) => 
-                flame.id === id
-                    ? { ...flame, tools: flame.tools.filter((t) => t !== tool), updatedAt: now() }
-                    : flame
-            ),
         }));
     },
 
