@@ -6,7 +6,7 @@
 //
 //
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ArrowLeft, Info, Settings, MoreHorizontal, LayoutGrid } from "lucide-react";
 import { useUIStore, useFlameStore, useSparkStore } from "../../store";
 import type { string } from "../../types";
@@ -42,14 +42,32 @@ export function FlameView() {
 
     const [isEditing, setIsEditing]     = useState(false);
     const [editName, setEditName]       = useState("");
+    
     const [activeTool, setActiveTool]   = useState<string | null>(
         flame?.tools[0] ?? null
     );
+    const [splitTool, setSplitTool]     = useState<string | null>(null); // For split view
 
-    const displayName = isEditing ? editName : (flame?.name ?? "");
+    const displayName                   = isEditing ? editName : (flame?.name ?? "");
 
-    const [splitTool, setSplitTool] = useState<string | null>(null); // For split view
-
+    // When updating the tools with the modal inside the flame, close the view
+    // * Note: The logic for all this split view doesn't really click with me, but it's the current solution I could come up with
+    // *       I'll probably change it when I get a proper 3 or so windows split view so deletion works dinamically
+    useEffect(() => {
+        const leftNotThere = activeTool && !flame?.tools.includes(activeTool);
+        const rightNotThere = splitTool && !flame?.tools.includes(splitTool);
+        
+        if (leftNotThere && rightNotThere) {
+            setActiveTool(null);
+            setSplitTool(null);
+            return;
+        } else if (leftNotThere) {
+            setActiveTool(splitTool);
+            setSplitTool(null);
+        } else if (rightNotThere) {
+            setSplitTool(null);
+        }
+    }, [flame?.tools]);
 
     const handleNameFocus = () => {
         setEditName(flame?.name ?? "");
@@ -173,7 +191,7 @@ export function FlameView() {
                     <HeaderButton
                         icon={<LayoutGrid size={14} />}
                         label="Manage Tools"
-                        onClick={() => openModal("manage-tools", flame.id)} // TODO: Open the tools modal when made.
+                        onClick={() => openModal("manage-tools", flame.id)}
                     />
                 </div>
 
