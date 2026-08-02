@@ -8,9 +8,9 @@ import { useReactFlow } from "@xyflow/react";
 import { Maximize2, Minus, Plus } from "lucide-react";
 import { useUIStore } from "../../store";
 import {
-    CANVAS_MIN_ZOOM     as MIN_ZOOM,
-    CANVAS_MAX_ZOOM     as MAX_ZOOM,
-    CANVAS_ZOOM_STEP    as ZOOM_STEP
+    MIN_ZOOM     as MIN_ZOOM,
+    MAX_ZOOM     as MAX_ZOOM,
+    ZOOM_STEP    as ZOOM_STEP
 } from "../../lib/constants";
 
 // Handling scroll zoom on canvas instead of React Flow

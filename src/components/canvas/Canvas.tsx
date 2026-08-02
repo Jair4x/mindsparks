@@ -32,9 +32,9 @@ import { FlameCard } from "./FlameCard";
 import { SparkInput } from "./SparkInput";
 
 import {
-    CANVAS_MIN_ZOOM     as MIN_ZOOM,
-    CANVAS_MAX_ZOOM     as MAX_ZOOM,
-    CANVAS_DEFAULT_ZOOM as DEFAULT_ZOOM
+    MIN_ZOOM     as MIN_ZOOM,
+    MAX_ZOOM     as MAX_ZOOM,
+    DEFAULT_ZOOM as DEFAULT_ZOOM
 } from "../../lib/constants";
 
 // --------------------------
