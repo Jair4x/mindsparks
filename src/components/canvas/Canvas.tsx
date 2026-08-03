@@ -59,7 +59,17 @@ export function Canvas() {
     const openSparkInput        = useUIStore((s) => s.openSparkInput);
     const closeSparkInput       = useUIStore((s) => s.closeSparkInput);
     
-    const setZoom = useUIStore((s) => s.setZoom);
+    const setZoom               = useUIStore((s) => s.setZoom);
+    
+    const selectNode            = useUIStore((s) => s.selectNode);
+    const toggleNodeSelection   = useUIStore((s) => s.toggleNodeSelection);
+    const clearSelection        = useUIStore((s) => s.clearSelection);
+    const selection             = useUIStore((s) => s.selection);
+    
+    const selectionBox          = useUIStore((s) => s.selectionBox);
+    const startSelectionBox     = useUIStore((s) => s.startSelectionBox);
+    const updateSelectionBox    = useUIStore((s) => s.updateSelectionBox);
+    const endSelectionBox       = useUIStore((s) => s.endSelectionBox);
 
     const sparks = useSparkStore(
         useShallow((s) => s.getActiveSparksBySpace(activeSpaceId))
@@ -198,6 +208,26 @@ export function Canvas() {
         [screenToFlowPosition, openSparkInput]
     );
 
+    // --------------------------
+    // handleNodeClick
+    //
+    // When the user clicks on a node,
+    // React Flow normally manages the selection.
+    // Since I don't like it, I'm gonna do mine.
+    // --------------------------
+    const handleNodeClick: NodeMouseHandler = (event, node) => {
+        const nodeType = node.type === "spark" ? "spark" : "flame";
+
+        if (event.ctrlKey) {
+            toggleNodeSelection({
+                id: node.id,
+                type: nodeType,
+            });
+        } else {
+            selectNode(node.id, nodeType);
+        }
+    };
+
     return (
         <div
             className="w-full h-full"
@@ -208,6 +238,11 @@ export function Canvas() {
                 nodes={displayNodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
+                selectionOnDrag={false}
+                selectNodesOnDrag={false}
+                nodesConnectable={false}
+                onNodeClick={handleNodeClick}
+                onPaneClick={clearSelection}
                 onNodesChange={onNodesChange}
                 onNodeDragStop={onNodeDragStop}
                 zoomOnDoubleClick={false}
@@ -232,6 +267,10 @@ export function Canvas() {
 
                 <ZoomControls />
             </ReactFlow>
+
+            {selectionBox && (
+                {/* Box selection goes here */}
+            )}
 
             {sparkInputPosition && (
                 <SparkInput

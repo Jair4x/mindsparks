@@ -44,6 +44,12 @@ export type Selection =
     | { type: "multi"; nodes: SelectedNode[] }
     | { type: "none" };
 
+// For drag selection
+export type SelectionBox = {
+    start: Position;
+    current: Position;
+};
+
 // --------------------------
 // Store Types
 // --------------------------
@@ -64,6 +70,10 @@ interface UIStore {
     zoom: number;
 
     selection: Selection;
+
+    selectionBox: SelectionBox | null;
+
+    isSelecting: boolean;
 
     // Used to show the edges of the lineage graph.
     hoveredNodeId: string | null;
@@ -100,7 +110,11 @@ interface UIStore {
     setZoom: (zoom: number) => void;
     resetZoom: () => void;
     selectNode: (id: string, nodeType: SelectedNodeType) => void;
-    toggleMultiSelectNode: (node: SelectedNode) => void;
+    toggleNodeSelection: (node: SelectedNode) => void;
+    replaceSelection: (selection: Selection) => void;
+    startSelectionBox: (start: Position) => void;
+    updateSelectionBox: (current: Position) => void;
+    endSelectionBox: () => void;
     clearSelection: () => void;
     setHoveredNode: (id: string | null) => void;
 
@@ -124,6 +138,8 @@ export const useUIStore = create<UIStore>((set, get) => ({
     sparkInputPosition: null,
     zoom: DEFAULT_ZOOM,
     selection: { type: "none" },
+    selectionBox: null,
+    isSelecting: false,
     hoveredNodeId: null,
     activeView: "canvas",
     activeFlameId: null,
@@ -157,22 +173,78 @@ export const useUIStore = create<UIStore>((set, get) => ({
         set({ selection: { type: "single", id, nodeType } });
     },
 
-    toggleMultiSelectNode: (node) => {
+    replaceSelection: (selection) => {
+        set({ selection });
+    },
+
+    toggleNodeSelection: (node) => {
         const { selection } = get();
 
-        const currentNodes =
-            selection.type === "multi" ? selection.nodes : [];
+        let currentNodes: SelectedNode[] = [];
+
+        if (selection.type === "single") {
+            currentNodes = [{
+                id: selection.id,
+                type: selection.nodeType,
+            }];
+        }
+
+        if (selection.type === "multi") {
+            currentNodes = selection.nodes;
+        }
 
         const alreadySelected = currentNodes.some((n) => n.id === node.id);
 
-        // Get rid or add node
+        const nextNodes = alreadySelected
+            ? currentNodes.filter((n) => n.id !== node.id)
+            : [...currentNodes, node];
+
+        if (nextNodes.length === 0) {
+            set({ selection: { type: "none" } });
+            return;
+        }
+
+        if (nextNodes.length === 1) {
+            set({
+                selection: {
+                    type: "single",
+                    id: nextNodes[0].id,
+                    nodeType: nextNodes[0].type,
+                }
+            });
+            return;
+        }
+
         set({
             selection: {
                 type: "multi",
-                nodes: alreadySelected
-                    ? currentNodes.filter((n) => n.id !== node.id)
-                    : [...currentNodes, node],
+                nodes: nextNodes,
             },
+        });
+    },
+
+    startSelectionBox: (start) => {
+        set({
+            isSelecting: true,
+            selectionBox: {
+                start,
+                current: start,
+            }
+        });
+    },
+
+    updateSelectionBox: (current) => {
+        set((state) => ({
+            selectionBox: state.selectionBox
+                ? { ...state.selectionBox, current }
+                : null
+        }));
+    },
+
+    endSelectionBox: () => {
+        set({
+            isSelecting: false,
+            selectionBox: null,
         });
     },
 

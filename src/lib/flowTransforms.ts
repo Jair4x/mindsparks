@@ -55,6 +55,7 @@ export function sparkToNode(spark: Spark): SparkNode {
         position: spark.position,
         data: { spark },
         draggable: true,
+        selectable: false,
     };
 }
 
@@ -71,6 +72,7 @@ export function flameToNode(flame: Flame): FlameNode {
         position: flame.position,
         data: { flame },
         draggable: true,
+        selectable: false,
     };
 }
 
