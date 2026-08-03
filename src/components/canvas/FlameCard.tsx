@@ -7,8 +7,10 @@ import { useState } from "react";
 import { NodeProps } from "@xyflow/react";
 import { Flame } from "lucide-react";
 import { useUIStore, useCategoryStore } from "../../store";
-import { formatRelativeDate } from "../../lib/utils";
+import { formatRelativeDate, useNow } from "../../lib/utils";
+import { getToolIcon } from "../../lib/toolConfig";
 import { FlameNode } from "../../lib/flowTransforms";
+import { tools } from "../../lib/constants";
 
 // --------------------------
 // Component
@@ -17,6 +19,7 @@ import { FlameNode } from "../../lib/flowTransforms";
 export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     const { flame } = data;
     const [isHovered, setIsHovered] = useState(false);
+    const now = useNow();
 
     const openFlame = useUIStore((s) => s.openFlame);
 
@@ -39,12 +42,14 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     
     const opacity = flame.isCompleted ? 0.5 : 1;
 
+    // Get the Tool objects for the active tools in this flame
+    const activeTools = flame.tools
+        .map((toolName) => tools.find((t) => t.name === toolName))
+        .filter(Boolean);
+
     const handleClick = () => {
         openFlame(flame.id)
     };
-
-    const hasTracker = flame.tools.includes("checklist");
-    const progress = 0; // TODO: Calculate from the tracker's tasks.
 
     return (
         <div
@@ -65,7 +70,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             }}
         >
             {/*
-                Flame icon 
+                Flame icon (fades out on hover to show metadata)
             */}
             <div
                 style={{
@@ -121,7 +126,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
                 ) : null}
 
                 <span style={{ marginLeft: "auto" }}>
-                    {formatRelativeDate(flame.createdAt)}
+                    {formatRelativeDate(flame.createdAt, now)}
                 </span>
             </div>
             <div
@@ -137,49 +142,28 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             </div>
 
             {/*
-                Progress bar (visible if the flame has an active tracker)
-                
-                This is a div, inside a div, inside a div. Yeah.
+                Active tools icons, shown below the name.
             */}
-            {hasTracker && (
+            {activeTools.length > 0 && (
                 <div
-                    style={{
-                        marginTop: 8,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                    }}
+                    className="flex items-center gap-1 mt-2"
                 >
-                    <div
-                        style={{
-                            flex: 1,
-                            height: 3,
-                            background: "var(--color-surface-raised)",
-                            borderRadius: 2,
-                            overflow: "hidden",
-                        }}
-                    >
+                    {activeTools.map((tool) => tool && (
                         <div
+                            key={tool.name}
+                            title={tool.label}
+                            className="flex items-center justify-center"
                             style={{
-                                width: `${progress}%`,
-                                height: "100%",
-                                background: "var(--color-flame)",
-                                borderRadius: 2,
-                                transition: "width 0.3s ease",
+                                width: 20,
+                                height: 20,
+                                borderRadius: 4,
+                                background: "var(--color-surface-raised)",
+                                color: "var(--color-accent)",
                             }}
-                        />
-                    </div>
-
-                    <span
-                        style={{
-                            fontSize: 10,
-                            color: "var(--color-text-muted)",
-                            minWidth: 24,
-                            textAlign: "right",
-                        }}
-                    >
-                        {progress}%
-                    </span>
+                        >
+                            {getToolIcon(tool.icon)}
+                        </div>
+                    ))}
                 </div>
             )}
         </div>
