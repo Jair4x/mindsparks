@@ -5,12 +5,13 @@
 
 import { useCallback } from "react";
 import { useReactFlow } from "@xyflow/react";
-import { Maximize2, Minus, Plus } from "lucide-react";
+import { Home, Maximize2, Minus, Plus } from "lucide-react";
 import { useUIStore } from "../../store";
 import {
     MIN_ZOOM     as MIN_ZOOM,
     MAX_ZOOM     as MAX_ZOOM,
-    ZOOM_STEP    as ZOOM_STEP
+    ZOOM_STEP    as ZOOM_STEP,
+    DEFAULT_ZOOM
 } from "../../lib/constants";
 
 // Handling scroll zoom on canvas instead of React Flow
@@ -28,7 +29,7 @@ export function handleScroll(
 }
 
 export function ZoomControls() {
-    const { zoomIn, zoomOut, zoomTo, getZoom } = useReactFlow();
+    const { zoomIn, zoomOut, zoomTo, getZoom, setViewport } = useReactFlow();
     const zoom = useUIStore((s) => s.zoom);
     const setZoom = useUIStore((s) => s.setZoom);
 
@@ -57,6 +58,16 @@ export function ZoomControls() {
         <div
             className="absolute bottom-3.5 right-3.5 z-20 flex items-center gap-1"
         >
+            {/* Reset button */}
+            <ZoomButton
+                icon={<Home size={13} />}
+                label="Reset view"
+                onClick={() => {
+                    setViewport({ x: 0, y: 0, zoom: DEFAULT_ZOOM }, { duration: 200 });
+                    setZoom(DEFAULT_ZOOM);
+                }}
+            />
+
             {/* Full screen */}
             <ZoomButton
                 icon={<Maximize2 size={13} />}
