@@ -17,6 +17,8 @@ import { FlameView } from "../flame/FlameView";
 import { SparkModal } from "../ui/SparkModal";
 import { SparkToFlameModal } from "../ui/SparkToFlameModal";
 
+import { HEADER_HEIGHT } from "../../lib/constants";
+
 // --------------------------
 // Components
 // --------------------------
@@ -48,7 +50,7 @@ export function AppLayout() {
                         <header
                             className="absolute top-0 left-0 right-0 flex items-center px-3 z-20"
                             style={{
-                                height: 44,
+                                height: HEADER_HEIGHT,
                                 borderBottom: "0.5px solid var(--color-border-subtle)",
                             }}
                         >

@@ -35,6 +35,7 @@ export const SPARK_DESC_MAX_LINES   = 2;
 // --------------------------
 
 export const SAFE_ZONE_MARGIN       = 20;       // px (margin for canvas safe zones)
+export const HEADER_HEIGHT          = 44;       // px
 
 // --------------------------
 //           Flames

@@ -6,7 +6,7 @@
 //
 //
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useShallow } from "zustand/shallow";
 import {
     useReactFlow,
@@ -30,6 +30,7 @@ import { animateRepulsion, resolveAllCollisions } from "../../lib/repulsion";
 import { SparkCard } from "./SparkCard";
 import { FlameCard } from "./FlameCard";
 import { SparkInput } from "./SparkInput";
+import { SelectionBox } from "./SelectionBox";
 
 import {
     MIN_ZOOM     as MIN_ZOOM,
@@ -53,7 +54,7 @@ const nodeTypes = {
 
 export function Canvas() {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
-    const { screenToFlowPosition, zoomTo, getZoom } = useReactFlow();
+    const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom } = useReactFlow();
     
     const sparkInputPosition    = useUIStore((s) => s.sparkInputPosition);
     const openSparkInput        = useUIStore((s) => s.openSparkInput);
@@ -64,8 +65,10 @@ export function Canvas() {
     const selectNode            = useUIStore((s) => s.selectNode);
     const toggleNodeSelection   = useUIStore((s) => s.toggleNodeSelection);
     const clearSelection        = useUIStore((s) => s.clearSelection);
+    const replaceSelection      = useUIStore((s) => s.replaceSelection);
     const selection             = useUIStore((s) => s.selection);
     
+    const isSelecting           = useUIStore((s) => s.isSelecting);
     const selectionBox          = useUIStore((s) => s.selectionBox);
     const startSelectionBox     = useUIStore((s) => s.startSelectionBox);
     const updateSelectionBox    = useUIStore((s) => s.updateSelectionBox);
@@ -89,12 +92,113 @@ export function Canvas() {
     const [displayNodes, setDisplayNodes] = useState(nodes);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
-        setDisplayNodes((nds) => applyNodeChanges(changes, nds));
+        setDisplayNodes((nds) =>
+            applyNodeChanges(
+                changes.filter((c) => c.type !== "select"),
+                nds
+            )
+        );
     }, []);
 
+    const handlePaneClick = (e: React.MouseEvent) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.shiftKey) return; // Drag box selection
+
+        clearSelection();
+    };
+
     useEffect(() => {
-        setDisplayNodes(nodes);
-    }, [sparks, flames]);
+        setDisplayNodes(
+            nodes.map((node) => ({
+                ...node,
+                selected:
+                    selection.type === "single"
+                        ? selection.id === node.id
+                        : selection.type === "multi"
+                            ? selection.nodes.some((n) => n.id === node.id)
+                            : false,
+            }))
+        );
+    }, [sparks, flames, selection]);
+
+    // For group selecting
+    const getNodesInBox = useCallback((start: Position, current: Position) => {
+        const left      = Math.min(start.x, current.x);
+        const top       = Math.min(start.y, current.y); 
+        const right     = Math.max(start.x, current.x);
+        const bottom    = Math.max(start.y, current.y);
+        
+        return displayNodes.filter((node) => {
+            const screenPos     = flowToScreenPosition(node.position);
+            const el            = document.querySelector(`[data-id="${node.id}"]`);
+            const rect          = el?.getBoundingClientRect();
+            const nodeWidth     = rect?.width ?? node.width ?? 180;
+            const nodeHeight    = rect?.height ?? node.height ?? 40;
+
+            return (
+                screenPos.x < right &&
+                screenPos.x + nodeWidth > left &&
+                screenPos.y < bottom &&
+                screenPos.y + nodeHeight > top
+            );
+        })
+    }, [displayNodes, flowToScreenPosition]);
+
+    const nodesInBox = useMemo(() => {
+        if (!selectionBox) return [];
+        return getNodesInBox(selectionBox.start, selectionBox.current);
+    }, [selectionBox, getNodesInBox]);
+
+    const handlePaneMouseMove = useCallback((e: React.MouseEvent) => {
+        if (!isSelecting) return;
+        updateSelectionBox({ x: e.clientX, y: e.clientY });
+    }, [isSelecting, updateSelectionBox]);
+    
+    useEffect(() => {
+        const handleMouseDown = (e: React.MouseEvent) => {
+            if (e.button !== 0 || !e.shiftKey) return; // Shift + left click only
+
+            const target = e.target as HTMLElement;
+            if (!target.classList.contains("react-flow__pane")) return;
+
+            startSelectionBox({ x: e.clientX, y: e.clientY });
+        }
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+        return () => document.removeEventListener("mousedown", handleMouseDown, true);
+    }, [startSelectionBox]);
+
+    useEffect(() => {
+        const handleMouseUp = () => {
+            if (!isSelecting || !selectionBox) return;
+            
+            const selected = getNodesInBox(selectionBox.start, selectionBox.current)
+                .map((node) => ({
+                    id:         node.id,
+                    type:       node.type as "spark" | "flame",
+                }));
+            
+            if (selected.length === 0) {
+                replaceSelection({ type: "none" });
+            } else if (selected.length === 1) {
+                replaceSelection({
+                    type: "single",
+                    id: selected[0].id,
+                    nodeType: selected[0].type,
+                });
+            } else {
+                replaceSelection({
+                    type: "multi",
+                    nodes: selected,
+                });
+            }
+
+            endSelectionBox();
+        };
+
+        document.addEventListener("mouseup", handleMouseUp);
+        return () => document.removeEventListener("mouseup", handleMouseUp);
+    }, [isSelecting, selectionBox, getNodesInBox, replaceSelection, endSelectionBox]);
     
     // --------------------------
     // onNodeDragStop
@@ -242,9 +346,13 @@ export function Canvas() {
                 selectNodesOnDrag={false}
                 nodesConnectable={false}
                 onNodeClick={handleNodeClick}
-                onPaneClick={clearSelection}
+                onPaneClick={handlePaneClick}
                 onNodesChange={onNodesChange}
                 onNodeDragStop={onNodeDragStop}
+                onPaneMouseMove={handlePaneMouseMove}
+                selectionKeyCode={null}
+                multiSelectionKeyCode={null}
+                panOnDrag={!isSelecting}
                 zoomOnDoubleClick={false}
                 onConnect={onConnect}
                 onDoubleClick={onDoubleClick}
@@ -269,7 +377,9 @@ export function Canvas() {
             </ReactFlow>
 
             {selectionBox && (
-                {/* Box selection goes here */}
+                <SelectionBox
+                    nodeCount={nodesInBox.length}
+                />
             )}
 
             {sparkInputPosition && (
