@@ -69,6 +69,8 @@ interface UIStore {
     // Constants are up
     zoom: number;
 
+    canvasViewport: { x: number; y: number; zoom: number };
+
     selection: Selection;
 
     selectionBox: SelectionBox | null;
@@ -107,8 +109,8 @@ interface UIStore {
 
     // --- Actions: canvas ---
 
+    setCanvasViewport: (viewport: { x: number; y: number; zoom: number }) => void;
     setZoom: (zoom: number) => void;
-    resetZoom: () => void;
     selectNode: (id: string, nodeType: SelectedNodeType) => void;
     toggleNodeSelection: (node: SelectedNode) => void;
     replaceSelection: (selection: Selection) => void;
@@ -137,6 +139,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
     activeModalNodeId: null,
     sparkInputPosition: null,
     zoom: DEFAULT_ZOOM,
+    canvasViewport: { x: 0, y: 0, zoom: 1 },
     selection: { type: "none" },
     selectionBox: null,
     isSelecting: false,
@@ -159,14 +162,14 @@ export const useUIStore = create<UIStore>((set, get) => ({
 
     // --- Canvas ---
 
+    setCanvasViewport: (viewport) => {
+        set({ canvasViewport: viewport });
+    },
+
     setZoom: (zoom) => {
         // Apply the limits so the zoom doesn't get out the allowed range.
         const clampedZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));
         set({ zoom: clampedZoom });
-    },
-
-    resetZoom: () => {
-        set({ zoom: DEFAULT_ZOOM });
     },
 
     selectNode: (id, nodeType) => {

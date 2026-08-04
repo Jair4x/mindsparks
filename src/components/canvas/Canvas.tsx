@@ -55,13 +55,15 @@ const nodeTypes = {
 export function Canvas() {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
     const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom } = useReactFlow();
-    
+
     const sparkInputPosition    = useUIStore((s) => s.sparkInputPosition);
     const openSparkInput        = useUIStore((s) => s.openSparkInput);
     const closeSparkInput       = useUIStore((s) => s.closeSparkInput);
-    
+
     const setZoom               = useUIStore((s) => s.setZoom);
-    
+    const setCanvasViewport     = useUIStore((s) => s.setCanvasViewport);
+    const canvasViewport        = useUIStore((s) => s.canvasViewport);
+
     const selectNode            = useUIStore((s) => s.selectNode);
     const toggleNodeSelection   = useUIStore((s) => s.toggleNodeSelection);
     const clearSelection        = useUIStore((s) => s.clearSelection);
@@ -88,7 +90,7 @@ export function Canvas() {
 
     const nodes = sparksAndFlamesToNodes(sparks, flames);
     const edges = connectionsToEdges(connections);
-    
+
     const [displayNodes, setDisplayNodes] = useState(nodes);
 
     const onNodesChange = useCallback((changes: NodeChange[]) => {
@@ -127,7 +129,7 @@ export function Canvas() {
         const top       = Math.min(start.y, current.y); 
         const right     = Math.max(start.x, current.x);
         const bottom    = Math.max(start.y, current.y);
-        
+
         return displayNodes.filter((node) => {
             const screenPos     = flowToScreenPosition(node.position);
             const el            = document.querySelector(`[data-id="${node.id}"]`);
@@ -153,7 +155,7 @@ export function Canvas() {
         if (!isSelecting) return;
         updateSelectionBox({ x: e.clientX, y: e.clientY });
     }, [isSelecting, updateSelectionBox]);
-    
+
     useEffect(() => {
         const handleMouseDown = (e: React.MouseEvent) => {
             if (e.button !== 0 || !e.shiftKey) return; // Shift + left click only
@@ -171,13 +173,13 @@ export function Canvas() {
     useEffect(() => {
         const handleMouseUp = () => {
             if (!isSelecting || !selectionBox) return;
-            
+
             const selected = getNodesInBox(selectionBox.start, selectionBox.current)
                 .map((node) => ({
                     id:         node.id,
                     type:       node.type as "spark" | "flame",
                 }));
-            
+
             if (selected.length === 0) {
                 replaceSelection({ type: "none" });
             } else if (selected.length === 1) {
@@ -199,7 +201,7 @@ export function Canvas() {
         document.addEventListener("mouseup", handleMouseUp);
         return () => document.removeEventListener("mouseup", handleMouseUp);
     }, [isSelecting, selectionBox, getNodesInBox, replaceSelection, endSelectionBox]);
-    
+
     // --------------------------
     // onNodeDragStop
     //
@@ -360,10 +362,13 @@ export function Canvas() {
                 nodeDragThreshold={1}
                 minZoom={MIN_ZOOM}
                 maxZoom={MAX_ZOOM}
-                defaultViewport={{ x: 0, y: 0, zoom: DEFAULT_ZOOM }}
+                defaultViewport={canvasViewport}
                 zoomOnPinch={false}
                 zoomOnScroll={false}
-                onMoveEnd={(_, viewport) => setZoom(viewport.zoom)}
+                onMoveEnd={(_, viewport) => {
+                    setZoom(viewport.zoom);
+                    setCanvasViewport(viewport);
+                }}
             >
                 <Background
                     variant={BackgroundVariant.Dots}
