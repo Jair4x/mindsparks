@@ -18,8 +18,8 @@ export function now(): string {
 
 // Formats an ISO date into a legible format.
 // "2d ago", "3h ago", "1w ago", etc.
-export function formatRelativeDate(isoDate: string, now = Date.now()): string {
-    const diff = now - new Date(isoDate).getTime();
+export function formatRelativeDate(isoDate: string, nowMs = Date.now()): string {
+    const diff = nowMs - new Date(isoDate).getTime();
 
     const seconds = Math.floor(diff / 1000);
     const minutes = Math.floor(diff / 60000);
@@ -49,12 +49,12 @@ export function isSafeZone(x: number, y: number): boolean {
 
 // Function to force re-render
 export function useNow(intervalMs = 20000) {
-    const [now, setNow] = useState(() => Date.now());
+    const [nowMs, setNowMs] = useState(() => Date.now());
 
     useEffect(() => {
-        const interval = setInterval(() => setNow(Date.now()), intervalMs);
+        const interval = setInterval(() => setNowMs(Date.now()), intervalMs);
         return () => clearInterval(interval);
     }, [intervalMs]);
 
-    return now;
+    return nowMs;
 }

@@ -53,7 +53,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
 
     const children      = useChildren(sparkId);
     const parent        = useParent(spark.parentId);
-    const now           = useNow();
+    const nowMs         = useNow();
     const overlayRef    = useRef<HTMLDivElement>(null);
     
     const [name, setName]               = useState(spark.text);
@@ -281,7 +281,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                                 Creation Date
                             */}
                             <div style={{ fontSize: 12, color: "var(--color-text-muted)"}}>
-                                Created {formatRelativeDate(spark.createdAt, now)}
+                                Created {formatRelativeDate(spark.createdAt, nowMs)}
                             </div>
                         </div>
                     </div>

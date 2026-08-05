@@ -22,7 +22,7 @@ import { NodeCardShell } from "./NodeCardShell";
 
 export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
     const { spark } = data;
-    const now = useNow();
+    const nowMs = useNow();
 
     const openModal = useUIStore((s) => s.openModal);
 
@@ -49,7 +49,7 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
             boxShadow={boxShadow}
             category={category}
             createdAt={spark.createdAt}
-            now={now}
+            now={nowMs}
             onDoubleClick={() => openModal("spark-detail", spark.id)}
         >
             {spark.text}

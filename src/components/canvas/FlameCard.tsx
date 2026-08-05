@@ -18,7 +18,7 @@ import { tools } from "../../lib/constants";
 
 export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     const { flame } = data;
-    const now = useNow();
+    const nowMs = useNow();
     const openFlame = useUIStore((s) => s.openFlame);
 
     const category = useCategoryStore((s) =>
@@ -50,7 +50,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             relativePosition
             category={category}
             createdAt={flame.createdAt}
-            now={now}
+            now={nowMs}
             onDoubleClick={() => openFlame(flame.id)}
             contentStyle={{ paddingRight: 16 }}
             cornerBadge={(isHovered) => (
