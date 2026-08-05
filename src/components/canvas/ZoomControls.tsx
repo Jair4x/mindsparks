@@ -44,7 +44,7 @@ export function ZoomControls() {
         const newZoom = Math.max(MIN_ZOOM, Math.round((zoom - ZOOM_STEP) * 10) / 10);
         zoomTo(newZoom, { duration: 150 });
         setZoom(newZoom)
-    }, [zoom, getZoom, setZoom]);
+    }, [zoom, setZoom]);
 
     const handleFullscreen = useCallback(() => {
         if (document.fullscreenElement) {
@@ -55,9 +55,7 @@ export function ZoomControls() {
     }, []);
 
     return (
-        <div
-            className="absolute bottom-3.5 right-3.5 z-20 flex items-center gap-1"
-        >
+        <div className="absolute bottom-3.5 right-3.5 z-20 flex items-center gap-1">
             {/* Reset button */}
             <ZoomButton
                 icon={<Home size={13} />}

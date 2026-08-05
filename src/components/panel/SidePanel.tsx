@@ -108,7 +108,7 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 function PanelCreateButton({ onClick }: { onClick: () => void }) {
     return (
         <button
-            aria-label="Crear Spark"
+            aria-label="Create Spark"
             onClick={onClick}
             className="flex items-center justify-center cursor-pointer shrink-0"
             style={{
