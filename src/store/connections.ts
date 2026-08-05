@@ -47,6 +47,9 @@ interface ConnectionStore {
     // Used when deleting a spark or flame to not leave orphan connections.
     deleteConnectionsByNode: (nodeId: string) => void;
 
+    // Used for cascade deletion
+    deleteConnectionsBySpace: (spaceId: string) => void;
+
     getConnectionsBySpace: (spaceId: string) => Connection[];
 
     // Used when hovering over a card to know which edges to draw
@@ -106,6 +109,12 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
         set((state) => ({
             connections: state.connections.filter(
                 (connection) => connection.sourceId !== nodeId && connection.targetId !== nodeId),
+        }));
+    },
+
+    deleteConnectionsBySpace: (spaceId) => {
+        set((state) => ({
+            connections: state.connections.filter((connection) => connection.spaceId !== spaceId)
         }));
     },
 

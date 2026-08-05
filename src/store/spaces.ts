@@ -14,6 +14,7 @@
 import { create } from "zustand";
 import { Space } from "../types";
 import { generateId, now } from "../lib/utils";
+import { deleteSpaceCascade } from "./cascade";
 
 // --------------------------
 // Store types
@@ -144,6 +145,9 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
                 set({ activeSpaceId: defaultSpace.id });
             }
         }
+
+        // Cascade delete, prevent orphaned references in the sibling stores
+        deleteSpaceCascade(id);
 
         set((state) => ({
             spaces: state.spaces.filter((space) => space.id !== id),

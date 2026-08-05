@@ -34,6 +34,9 @@ interface CategoryStore {
     deleteCategory: (id: string) => void;
 
     getCategoriesBySpace: (spaceId: string) => Category[];
+
+    // Used for cascade deletion
+    deleteCategoriesBySpace: (spaceId: string) => void;
 }
 
 // --------------------------
@@ -103,10 +106,18 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
             categories: state.categories.filter((category) => category.id !== id),
         }));
     },
-
+    
     getCategoriesBySpace: (spaceId) => {
         return get().categories.filter(
             (category) => category.spaceId === spaceId
         );
+    },
+    
+    deleteCategoriesBySpace: (spaceId) => {
+        // No need to unlink sparks/flames here (unlike deleteCategory)
+        //  since the sparks and flames in this space are being deleted in the same cascade
+        set((state) => ({
+            categories: state.categories.filter((category) => category.spaceId !== spaceId)
+        }));
     },
 }));

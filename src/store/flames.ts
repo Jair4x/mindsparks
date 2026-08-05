@@ -57,7 +57,11 @@ interface FlameStore {
     // Restores an archived flame.
     restoreFlame: (id: string) => void;
 
+    // Main selector the canvas uses to know what to show.
     getActiveFlamesBySpace: (spaceId: string) => Flame[];
+
+    // Used for cascade deletion
+    deleteFlamesBySpace: (spaceId: string) => void;
 
     // Get the child flames from a specific flame or spark.
     // Used to show the lineage graph on hover.
@@ -188,6 +192,12 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         return get().flames.filter(
             (flame) => flame.spaceId === spaceId && !flame.isArchived
         );
+    },
+
+    deleteFlamesBySpace: (spaceId) => {
+        set((state) => ({
+            flames: state.flames.filter((flame) => flame.spaceId !== spaceId)
+        }));
     },
 
     getChildFlames: (parentId) => {

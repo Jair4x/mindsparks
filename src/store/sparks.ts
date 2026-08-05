@@ -53,6 +53,9 @@ interface SparkStore {
     // Main selector the canvas uses to know what to show.
     getActiveSparksBySpace: (spaceId: string) => Spark[];
 
+    // Used for cascade deletion
+    deleteSparksBySpace: (spaceId: string) => void;
+
     // Get the child sparks from a specific flame or spark.
     // Used to show the lineage graph on hover.
     getChildSparks: (parentId: string) => Spark[];
@@ -150,6 +153,12 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
         return get().sparks.filter(
             (spark) => spark.spaceId === spaceId && !spark.isArchived
         );
+    },
+
+    deleteSparksBySpace: (spaceId) => {
+        set((state) => ({
+            sparks: state.sparks.filter((spark) => spark.spaceId !== spaceId)
+        }));
     },
 
     getChildSparks: (parentId) => {
