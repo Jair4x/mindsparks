@@ -61,7 +61,7 @@ export interface Schema {
 export interface Spark {
     id:             string;
     text:           string;     // title of the idea
-    description?:   string;     // short description of the idea (150 chars max, optional)
+    description?:   string;     // short description of the idea (100 chars max, optional)
     position:       Position;   // where is it in the canvas
     spaceId:        string;     // to which Space it belongs
     categoryId?:    string;     // optional: it might not have a category
