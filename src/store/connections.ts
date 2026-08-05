@@ -105,7 +105,7 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
     deleteConnectionsByNode: (nodeId) => {
         set((state) => ({
             connections: state.connections.filter(
-                (connection) => connection.sourceId !== nodeId && c.targetId !== nodeId),
+                (connection) => connection.sourceId !== nodeId && connection.targetId !== nodeId),
         }));
     },
 
