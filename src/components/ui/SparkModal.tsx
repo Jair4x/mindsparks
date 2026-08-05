@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tag, Flame, X, MoreHorizontal } from "lucide-react";
 import { useSparkStore, useUIStore, useCategoryStore, useConnectionStore } from "../../store";
 import { useNow, formatRelativeDate } from "../../lib/utils";
-import { useChildren } from "../../lib/getChildren";
+import { useChildren, useParent } from "../../lib/nodeRelations";
 
 import {
     SPARK_DESC_MAX_LENGTH as DESC_MAX_LENGTH
@@ -52,6 +52,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
     );
 
     const children      = useChildren(sparkId);
+    const parent        = useParent(spark.parentId);
     const now           = useNow();
     const overlayRef    = useRef<HTMLDivElement>(null);
     
@@ -239,14 +240,14 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                                         {/*
                                             Parent
                                         */}
-                                        {spark.parentId ? (
+                                        {parent ? (
                                             <>
                                                 <div style={{ fontSize: 11, color: "var(--color-text-muted)", marginBottom: 2 }}>
                                                     Parent
                                                 </div>
 
                                                 <div style={{ fontSize: 13, color: "var(--color-text)", marginBottom: 8 }}>
-                                                    {spark.parentId}
+                                                    {"text" in parent ? parent.text : parent.name}
                                                 </div>
                                             </>
                                         ) : null}
