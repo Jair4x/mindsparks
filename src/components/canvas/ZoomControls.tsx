@@ -79,7 +79,7 @@ export function ZoomControls() {
             <div
                 style={{
                     background: "var(--color-surface)",
-                    border: "0.5ps solid var(--color-border)",
+                    border: "0.5px solid var(--color-border)",
                     borderRadius: 6,
                     height: 28,
                     minWidth: 48,
