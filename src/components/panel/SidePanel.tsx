@@ -58,7 +58,7 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
                 
                 No logic for now.
             */}
-            <PanelButton icon={<Search size={17} />} label="Buscar Spark" />
+            <PanelButton icon={<Search size={17} />} label="Search Spark/Flame" />
 
             {/*
                 Grouping buttons
@@ -68,19 +68,19 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
             */}
             <PanelButton
                 icon={<LayoutGrid size={17} />}
-                label="Sin agrupar"
+                label="No grouping"
                 isActive={groupMode === "none"}
                 onClick={() => setGroupMode("none")}
             />
             <PanelButton
                 icon={<Tags size={17} />}
-                label="Agrupar por categoría"
+                label="Group by Category"
                 isActive={groupMode === "category"}
                 onClick={() => setGroupMode("category")}
             />
             <PanelButton
                 icon={<Network size={17} />}
-                label="Agrupar por jerarquía"
+                label="Group by Hierarchy"
                 isActive={groupMode === "hierarchy"}
                 onClick={() => setGroupMode("hierarchy")}
             />
@@ -92,9 +92,9 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 
                 No logic for now.
             */}
-            <PanelButton icon={<Filter size={17} />} label="Filtrar" />
-            <PanelButton icon={<List size={17} />} label="Vista de lista" />
-            <PanelButton icon={<Settings size={17} />} label="Configuración" />
+            <PanelButton icon={<Filter size={17} />} label="Filter" />
+            <PanelButton icon={<List size={17} />} label="List view" />
+            <PanelButton icon={<Settings size={17} />} label="Config" />
         </aside>
     );
 }

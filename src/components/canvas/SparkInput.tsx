@@ -78,7 +78,7 @@ export function SparkInput({ position, onConfirm, onCancel }: SparkInputProps) {
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={handleKeyDown}
                 onBlur={handleBlur}
-                placeholder="Nueva idea..."
+                placeholder="New idea..."
                 rows={2}
                 style={{
                     background: "var(--color-surface)",
@@ -87,7 +87,7 @@ export function SparkInput({ position, onConfirm, onCancel }: SparkInputProps) {
                     padding: "10px 14px",
                     fontSize: 13,
                     color: "var(--color-text)",
-                    width: 200, //* Just to test, might change the value when the canvas is finished.
+                    width: 200, //* Note: Just to test, might change the value when the canvas is finished.
                     resize: "none",
                     outline: "none",
                     fontFamily: "inherit",
@@ -103,7 +103,7 @@ export function SparkInput({ position, onConfirm, onCancel }: SparkInputProps) {
                     paddingLeft: 2,
                 }}
             >
-                Enter para confirmar - Esc para cancelar
+                Enter to Confirm - Esc to Cancel
             </div>
         </div>
     )
