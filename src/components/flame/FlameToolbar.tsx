@@ -13,7 +13,7 @@ import { getToolIcon } from "../../lib/toolConfig";
 // --------------------------
 
 interface FlameToolbarProps {
-    tools: string[];
+    toolNames: string[];
     activeTool: string | null;
     splitTool: string | null;
 
@@ -26,17 +26,17 @@ interface FlameToolbarProps {
 // --------------------------
 
 export function FlameToolbar({
-    tools,
+    toolNames,
     activeTool,
     splitTool,
     onToolClick,
     onToolDrop
 }: FlameToolbarProps) {
-    if (tools.length === 0) return null;
+    if (toolNames.length === 0) return null;
 
     return (
         <div className="flex items-center gap-1">
-            {tools.map((tool) => (
+            {toolNames.map((tool) => (
                 <ToolTab
                     key={tool}
                     tool={tool}

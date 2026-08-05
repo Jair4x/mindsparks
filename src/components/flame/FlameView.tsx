@@ -191,7 +191,7 @@ function FlameViewContent({
                     <Separator />
                     
                     <FlameToolbar
-                        tools={flame.tools}
+                        toolNames={flame.tools}
                         activeTool={activeTool}
                         splitTool={splitTool}
                         onToolClick={(tool) => {
