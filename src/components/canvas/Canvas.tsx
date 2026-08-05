@@ -16,6 +16,7 @@ import {
     applyNodeChanges,
     type NodeChange,
     type NodeMouseHandler,
+    type OnNodeDrag,
     type OnConnect,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -37,7 +38,6 @@ import { SelectionBox } from "./SelectionBox";
 import {
     MIN_ZOOM     as MIN_ZOOM,
     MAX_ZOOM     as MAX_ZOOM,
-    DEFAULT_ZOOM as DEFAULT_ZOOM
 } from "../../lib/constants";
 
 // --------------------------
@@ -95,9 +95,9 @@ export function Canvas() {
 
     const [displayNodes, setDisplayNodes] = useState(nodes);
 
-    const onNodesChange = useCallback((changes: NodeChange[]) => {
+    const onNodesChange = useCallback((changes: NodeChange<MindSparksNode>[]) => {
         setDisplayNodes((nds) =>
-            applyNodeChanges(
+            applyNodeChanges<MindSparksNode>(
                 changes.filter((c) => c.type !== "select"),
                 nds
             )
@@ -159,7 +159,7 @@ export function Canvas() {
     }, [isSelecting, updateSelectionBox]);
 
     useEffect(() => {
-        const handleMouseDown = (e: React.MouseEvent) => {
+        const handleMouseDown = (e: MouseEvent) => {
             if (e.button !== 0 || !e.shiftKey) return; // Shift + left click only
 
             const target = e.target as HTMLElement;
@@ -220,10 +220,9 @@ export function Canvas() {
     // --------------------------
     const resolveAndAnimateCollisions = useCallback((
         droppedId: string,
-        droppedPosition: Position,
         allNodePositions: NodePosition[],
     ) => {
-        const affected = resolveAllCollisions(droppedId, droppedPosition, allNodePositions)
+        const affected = resolveAllCollisions(droppedId, allNodePositions)
             .filter((n) => n.id !== droppedId);
         
         if (affected.length === 0) return;
@@ -271,7 +270,7 @@ export function Canvas() {
     // 
     // We notify Zustand so it updates the assigned spark or node.
     // --------------------------
-    const onNodeDragStop: NodeMouseHandler = useCallback((_event, node) => {
+    const onNodeDragStop: OnNodeDrag<MindSparksNode> = useCallback((_event, node) => {
         const typedNode = node as MindSparksNode;
 
         if (typedNode.type === "spark") {
@@ -288,7 +287,7 @@ export function Canvas() {
             position:   n.position,
         }));
 
-        resolveAndAnimateCollisions(typedNode.id, typedNode.position, allNodePositions);
+        resolveAndAnimateCollisions(typedNode.id, allNodePositions);
     }, [displayNodes, resolveAndAnimateCollisions]);
 
     // --------------------------
@@ -322,7 +321,7 @@ export function Canvas() {
     // to create the spark in the correct position.
     // --------------------------
     const onDoubleClick = useCallback(
-        (event: React.MouseEvent) => {
+        (event: React.MouseEvent<HTMLDivElement>) => {
             if ((event.target as HTMLElement).classList.contains("react-flow__pane")) {
                 if (!isSafeZone(event.clientX, event.clientY)) return;
 
@@ -374,7 +373,7 @@ export function Canvas() {
         const allNodePositions = displayNodes.map((n) => ({ id: n.id, position: n.position }));
         allNodePositions.push({ id: newSpark.id, position: sparkInputPosition!.canvas });
 
-        resolveAndAnimateCollisions(newSpark.id, sparkInputPosition!.canvas, allNodePositions);
+        resolveAndAnimateCollisions(newSpark.id, allNodePositions);
 
         closeSparkInput();
     }, [displayNodes, sparkInputPosition, activeSpaceId, resolveAndAnimateCollisions, closeSparkInput]);
