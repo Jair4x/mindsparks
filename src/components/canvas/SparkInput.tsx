@@ -92,7 +92,7 @@ export function SparkInput({ position, onConfirm, onCancel }: SparkInputProps) {
                     outline: "none",
                     fontFamily: "inherit",
                     lineHeight: 1.45,
-                    boxShadow: "0 0 12px var(--color-accent)22",
+                    boxShadow: "0 0 12px var(--color-accent-glow)",
                 }}
             />
             <div
