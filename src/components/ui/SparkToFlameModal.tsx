@@ -26,7 +26,7 @@ export function SparkToFlameModal() {
     const activeFlameId         = useUIStore((s) => s.activeFlameId);
     
     const spark = useSparkStore((s) =>
-        s.sparks.find((s) => s.id === activeModalNodeId)
+        s.sparks.find((sp) => sp.id === activeModalNodeId)
     );
     const archiveSpark          = useSparkStore((s) => s.archiveSpark);
     const convertSparkToFlame   = useFlameStore((s) => s.convertSparkToFlame);

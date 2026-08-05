@@ -23,7 +23,7 @@ export function SparkModal() {
     const closeModal        = useUIStore((s) => s.closeModal);
     
     const spark = useSparkStore((s) =>
-        s.sparks.find((s) => s.id === activeModalNodeId)
+        s.sparks.find((sp) => sp.id === activeModalNodeId)
     );
 
     if (activeModal !== "spark-detail" || !spark) return null;
