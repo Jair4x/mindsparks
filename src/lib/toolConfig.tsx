@@ -2,7 +2,6 @@
 // Helper stuff for schema tools
 //
 import { FileText, SquareKanban, SquareChartGantt, Presentation, BookOpen, Library, Code, Database, FolderGit2, BookMarked } from "lucide-react";
-import type { Tool } from "../types";
 
 const iconMap: Record<string, React.ReactNode> = {
     FileText: <FileText size={13} />,
