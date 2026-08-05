@@ -9,11 +9,10 @@
 import { useState, useCallback, useEffect } from "react";
 import { ArrowLeft, Info, Settings, MoreHorizontal, LayoutGrid } from "lucide-react";
 import { useUIStore, useFlameStore, useSparkStore } from "../../store";
-import type { string } from "../../types";
 
-// TODO: These two, gonna import and use them, but they don't exist yet.
 import { FlameToolbar } from "./FlameToolbar";
 import { FlameWorkspace } from "./FlameWorkspace";
+import { Flame, Spark } from "../../types";
 
 // --------------------------
 // FlameView
@@ -23,39 +22,58 @@ import { FlameWorkspace } from "./FlameWorkspace";
 
 export function FlameView() {
     const activeFlameId         = useUIStore((s) => s.activeFlameId);
-    const navigationStack       = useUIStore((s) => s.navigationStack);
-    const goBack                = useUIStore((s) => s.goBack);
-    const openModal             = useUIStore((s) => s.openModal);
     
     const flame = useFlameStore((s) =>
         s.flames.find((f) => f.id === activeFlameId)
     );
-    
-    if (!flame) return null;
 
     const spark = useSparkStore((s) =>
-        s.sparks.find((s) => s.id === flame.sparkId)
+        flame ? s.sparks.find((sp) => sp.id === flame.sparkId) : undefined
     );
 
-    const updateFlameName = useFlameStore((s) => s.updateFlameName);
-    const updateSparkName = useSparkStore((s) => s.updateSparkText);
+    if (!flame || !spark) return null;
+
+    return (
+        <FlameViewContent
+            flame={flame}
+            spark={spark}
+        />
+    );
+}
+
+// --------------------------
+// FlameViewContent
+// --------------------------
+
+function FlameViewContent({
+    flame,
+    spark,
+}: {
+    flame: Flame;
+    spark: Spark;
+}) {
+    const navigationStack       = useUIStore((s) => s.navigationStack);
+    const goBack                = useUIStore((s) => s.goBack);
+    const openModal             = useUIStore((s) => s.openModal);
+    const updateFlameName       = useFlameStore((s) => s.updateFlameName);
+    const updateSparkName       = useSparkStore((s) => s.updateSparkText);
 
     const [isEditing, setIsEditing]     = useState(false);
     const [editName, setEditName]       = useState("");
-    
+
     const [activeTool, setActiveTool]   = useState<string | null>(
-        flame?.tools[0] ?? null
+        flame.tools[0] ?? null
     );
     const [splitTool, setSplitTool]     = useState<string | null>(null); // For split view
 
-    const displayName                   = isEditing ? editName : (flame?.name ?? "");
+    const displayName                   = isEditing ? editName : (flame.name ?? "");
 
     // When updating the tools with the modal inside the flame, close the view
     // * Note: The logic for all this split view doesn't really click with me, but it's the current solution I could come up with
     // *       I'll probably change it when I get a proper 3 or so windows split view so deletion works dinamically
     useEffect(() => {
-        const leftNotThere = activeTool && !flame?.tools.includes(activeTool);
-        const rightNotThere = splitTool && !flame?.tools.includes(splitTool);
+        const leftNotThere = activeTool && !flame.tools.includes(activeTool);
+        const rightNotThere = splitTool && !flame.tools.includes(splitTool);
         
         if (leftNotThere && rightNotThere) {
             setActiveTool(null);
@@ -70,7 +88,7 @@ export function FlameView() {
     }, [flame?.tools]);
 
     const handleNameFocus = () => {
-        setEditName(flame?.name ?? "");
+        setEditName(flame.name ?? "");
         setIsEditing(true);
     };
 
@@ -78,8 +96,8 @@ export function FlameView() {
         setIsEditing(false);
         const trimmed = editName.trim();
         if (trimmed && trimmed !== flame.name) {
-            updateFlameName(flame!.id, trimmed);
-            updateSparkName(spark!.id, trimmed);
+            updateFlameName(flame.id, trimmed);
+            updateSparkName(spark.id, trimmed);
         }
     };
 
