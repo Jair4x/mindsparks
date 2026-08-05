@@ -7,7 +7,7 @@
 
 
 import { create } from "zustand";
-import { Flame, FlameSchema, string, Position } from "../types";
+import { Flame, Position } from "../types";
 import { generateId, now } from "../lib/utils";
 import { useConnectionStore } from "./connections";
 
