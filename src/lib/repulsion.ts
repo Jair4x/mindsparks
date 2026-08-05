@@ -136,7 +136,6 @@ export function animateRepulsion(
 // --------------------------
 export function resolveAllCollisions(
     droppedId:          string,
-    movedPosition:      Position,
     allNodes:           NodePosition[],
     maxIterations = 10
 ): NodePosition[] {

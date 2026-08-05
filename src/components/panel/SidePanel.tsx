@@ -5,7 +5,6 @@
 // * Note: Search, filters, list view and settings DON'T have logic yet.
 //
 
-import { Background } from "@xyflow/react";
 import {
     Plus,
     Search,

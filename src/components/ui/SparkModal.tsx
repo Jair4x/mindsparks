@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Tag, Flame, X, MoreHorizontal } from "lucide-react";
-import { useSparkStore, useUIStore, useCategoryStore, useConnectionStore } from "../../store";
+import { useSparkStore, useUIStore, useCategoryStore } from "../../store";
 import { useNow, formatRelativeDate } from "../../lib/utils";
 import { useChildren, useParent } from "../../lib/nodeRelations";
 

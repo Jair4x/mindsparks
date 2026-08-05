@@ -29,7 +29,7 @@ export function handleScroll(
 }
 
 export function ZoomControls() {
-    const { zoomIn, zoomOut, zoomTo, getZoom, setViewport } = useReactFlow();
+    const { zoomTo, getZoom, setViewport } = useReactFlow();
     const zoom = useUIStore((s) => s.zoom);
     const setZoom = useUIStore((s) => s.setZoom);
 

@@ -1,9 +1,6 @@
 import { create } from "zustand";
 import { Spark, Position } from "../types";
 import { generateId, now } from "../lib/utils";
-import {
-    SPARK_DESC_MAX_LENGTH as DESC_MAX_LENGTH
-} from "../../lib/constants";
 
 // --------------------------
 // Store types

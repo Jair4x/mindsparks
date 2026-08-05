@@ -18,7 +18,6 @@ interface FlameToolbarProps {
     splitTool: string | null;
 
     onToolClick: (tool: string) => void;
-    onToolDrop: (tool: string, side: "left" | "right") => void;
 }
 
 // --------------------------
@@ -29,8 +28,7 @@ export function FlameToolbar({
     toolNames,
     activeTool,
     splitTool,
-    onToolClick,
-    onToolDrop
+    onToolClick
 }: FlameToolbarProps) {
     if (toolNames.length === 0) return null;
 
@@ -42,7 +40,6 @@ export function FlameToolbar({
                     tool={tool}
                     isActive={tool === activeTool || tool === splitTool}
                     onClick={() => onToolClick(tool)}
-                    onDrop={onToolDrop}
                 />
             ))}
         </div>
@@ -56,13 +53,11 @@ export function FlameToolbar({
 function ToolTab({
     tool,
     isActive,
-    onClick,
-    onDrop
+    onClick
 }: {
     tool: string;
     isActive: boolean;
     onClick: () => void;
-    onDrop: (tool: string, side: "left" | "right") => void;
 }) {
     const [isDragging, setIsDragging] = useState(false);
     

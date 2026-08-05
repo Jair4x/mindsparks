@@ -7,8 +7,8 @@
 // *       work on tabs like a browser instead of split view and one tool at a time, etc.
 //
 
-import { useState, useCallback, useRef } from "react";
-import { Panel, Group, Separator, useGroupRef } from "react-resizable-panels";
+import { useState, useCallback } from "react";
+import { Panel, Group, Separator } from "react-resizable-panels";
 import { ToolPanel } from "./ToolPanel";
 
 // --------------------------

@@ -201,7 +201,6 @@ function FlameViewContent({
                                 setActiveTool(tool);
                             }
                         }}
-                        onToolDrop={handleToolDrop}
                     />
 
                     <Separator />
