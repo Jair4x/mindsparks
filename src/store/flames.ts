@@ -39,8 +39,10 @@ interface FlameStore {
 
     moveFlameToPosition: (id: string, position: Position) => void;
 
-    // Add a tool into the flame
+    // Update the tools the flame has
     updateFlameTools: (id: string, tools: string[]) => void;
+
+    updateFlameSchema: (id: string, schema: string) => void;
 
     assignCategory: (id: string, categoryId: string | undefined) => void;
 
@@ -134,6 +136,16 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
                 
                 return { ...flame, tools, updatedAt: now() };
             }),
+        }));
+    },
+
+    updateFlameSchema: (id, schema) => {
+        set((state) => ({
+            flames: state.flames.map((flame) =>
+                flame.id === id
+                    ? { ...flame, schema, updatedAt: now() }
+                    : flame
+            )
         }));
     },
 

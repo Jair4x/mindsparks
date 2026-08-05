@@ -6,12 +6,12 @@
 // "manage" mode when managint tools inside a flame
 //
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Flame, Check, Wrench } from "lucide-react";
 import { useUIStore, useSparkStore, useFlameStore } from "../../store";
 import { tools, schemas } from "../../lib/constants";
 import { getToolIcon } from "../../lib/toolConfig";
-import type { Schema, Tool, Position } from "../../types";
+import type { Schema, Tool } from "../../types";
 
 
 // --------------------------
@@ -34,8 +34,9 @@ export function SparkToFlameModal() {
     const flame = useFlameStore((s) =>
         s.flames.find((f) => f.id === activeFlameId)
     );
-    const updateFlameTools = useFlameStore((s) => s.updateFlameTools);
-    
+    const updateFlameTools  = useFlameStore((s) => s.updateFlameTools);
+    const updateFlameSchema = useFlameStore((s) => s.updateFlameSchema);
+
     if (activeModal === "spark-to-flame" && spark) {
         return (
             <ModalContent
@@ -72,8 +73,9 @@ export function SparkToFlameModal() {
                 subtitle={flame.name}
                 initialTools={flame.tools}
                 onClose={closeModal}
-                onConfirm={(_, selectedTools) => {
+                onConfirm={(schemaName, selectedTools) => {
                     updateFlameTools(flame.id, selectedTools);
+                    updateFlameSchema(flame.id, schemaName);
                     closeModal();
                 }}
             />
@@ -102,17 +104,16 @@ function ModalContent({
     onClose: () => void;
     onConfirm: (schema: string, tools: string[]) => void;
 }) {
-    const defaultSchema = schemas.find((s) => s.name === "general");
+    const defaultSchema = schemas.find((s) => s.name === "general") || schemas[0];
     const defaultTools = mode === "convert"
         ? defaultSchema.tools.filter((t) => tools.find((tool) => tool.name === t)?.enabled)
         : initialTools;
 
-    const [selectedSchema, setSelectedSchema]   = useState<string>(defaultSchema.name);
     const [selectedTools, setSelectedTools]     = useState<string[]>(defaultTools);
+    const selectedSchema                        = useMemo(() => deriveSchemaFromTools(selectedTools), [selectedTools]);
     const overlayRef                            = useRef<HTMLDivElement>(null);
 
     const handleSchemaChange = (schemaName: string) => {
-        setSelectedSchema(schemaName);
         const schema        = schemas.find((s) => s.name === schemaName);
         const preselected   = (schema?.tools ?? []).filter(
             (toolName) => tools.find((t) => t.name === toolName)?.enabled
@@ -204,6 +205,16 @@ function ModalContent({
                     </div>
                 )}
 
+                {/* Current schema (manage mode only) */}
+                {mode === "manage" && (
+                    <div className="px-5 pt-4" style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
+                        Schema:{" "}
+                        <span style={{ color: "var(--color-text)" }}>
+                            {schemas.find((s) => s.name === selectedSchema)?.label ?? selectedSchema}
+                        </span>
+                    </div>
+                )}
+
                 {/* Tools */}
                 <div
                     className="px-5 pt-3 pb-4"
@@ -245,7 +256,7 @@ function ModalContent({
                     </button>
 
                     <button
-                        onClick={() => onConfirm(mode === "convert" ? selectedSchema : null, selectedTools)}
+                        onClick={() => onConfirm(selectedSchema, selectedTools)}
                         disabled={!canConfirm}
                         className="flex items-center gap-1.5 border-none text-white"
                         style={{
@@ -264,6 +275,29 @@ function ModalContent({
             </div>
         </div>
     );
+}
+
+// --------------------------
+// deriveSchemaFromTools
+//
+// Finds the schema whose preset exactly matches the given tool set.
+//
+// Returns "custom" if no schema's preset matches.
+// --------------------------
+function deriveSchemaFromTools(selectedTools: string[]): string {
+    const sorted = [...selectedTools].sort();
+
+    const match = schemas.find((schema) => {
+        if (schema.name === "custom") return false;
+
+        const canonical = schema.tools
+            .filter((t) => tools.find((tool) => tool.name === t)?.enabled)
+            .sort();
+        
+        return canonical.length === sorted.length && canonical.every((t, i) => t === sorted[i]);
+    });
+
+    return match?.name ?? "custom";    
 }
 
 // --------------------------
