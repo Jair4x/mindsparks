@@ -9,12 +9,12 @@
 //  - Selected: more prominent border in the base color (var(--color-accent))
 //
 
-import { useState } from "react";
-import { NodeProps } from "@xyflow/react";
-import { useUIStore, useCategoryStore } from "../../store";
+import type { NodeProps } from "@xyflow/react";
 import type { SparkNode } from "../../lib/flowTransforms";
-import { formatRelativeDate } from "../../lib/utils";
+
+import { useUIStore, useCategoryStore } from "../../store";
 import { useNow } from "../../lib/utils";
+import { NodeCardShell } from "./NodeCardShell";
 
 // --------------------------
 // Component
@@ -22,8 +22,6 @@ import { useNow } from "../../lib/utils";
 
 export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
     const { spark } = data;
-    const [isHovered, setIsHovered] = useState(false);
-
     const now = useNow();
 
     const openModal = useUIStore((s) => s.openModal);
@@ -36,7 +34,6 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
             : undefined
     );
 
-    // Double terniary here because screw it.
     const borderColor = selected
         ? "var(--color-accent)"
         : category
@@ -46,72 +43,16 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
     const boxShadow =
         category && !selected ? `0 0 10px ${category.color}22` : undefined;
     
-    const handleClick = () => {
-        openModal("spark-detail", spark.id);
-    }
-
     return (
-        <div
-            onDoubleClick={handleClick}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            style={{
-                background: "var(--color-surface)",
-                border: `0.5px solid ${borderColor}`,
-                borderRadius: 12,
-                padding: "10px 14px",
-                width: 180,
-                cursor: "pointer",
-                transition: "border-color 0.15s",
-                boxShadow,
-            }}
+        <NodeCardShell
+            borderColor={borderColor}
+            boxShadow={boxShadow}
+            category={category}
+            createdAt={spark.createdAt}
+            now={now}
+            onDoubleClick={() => openModal("spark-detail", spark.id)}
         >
-            {/*
-                Metadata: category and date. Only visible on hover.
-            */}
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    marginBottom: isHovered ? 5 : 0,
-                    fontSize: 11,
-                    color: "var(--color-text-muted)",
-                    opacity: isHovered ? 1 : 0,
-                    maxHeight: isHovered ? 20 : 0,
-                    overflow: "hidden",
-                    transition: "opacity 0.15s ease, max-height 0.15s ease, margin-bottom 0.15s ease",
-                }}
-            >
-                {category ? (
-                    <>
-                        <span
-                            style={{
-                                width: 8,
-                                height: 8,
-                                borderRadius: "50%",
-                                background: category.color,
-                                flexShrink: 0,
-                            }}
-                        />
-                        <span>{category.name}</span>
-                    </>
-                ) : null}
-
-                <span style={{ marginLeft: "auto" }}>
-                    {formatRelativeDate(spark.createdAt, now)}
-                </span>
-            </div>
-            <div
-                className="line-clamp-2"
-                style={{
-                    fontSize: 13,
-                    color: "var(--color-text)",
-                    lineHeight: 1.45,
-                }}
-            >
-                {spark.text}
-            </div>
-        </div>
+            {spark.text}
+        </NodeCardShell>
     );
 }
