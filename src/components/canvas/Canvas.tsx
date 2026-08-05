@@ -19,8 +19,10 @@ import {
     type OnConnect,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { handleScroll, ZoomControls } from "./ZoomControls";
 import type { Position } from "../../types";
+import type { NodePosition } from "../../lib/repulsion";
+
+import { handleScroll, ZoomControls } from "./ZoomControls";
 
 import { useSparkStore, useFlameStore, useConnectionStore, useSpaceStore, useUIStore } from "../../store";
 import { sparksAndFlamesToNodes, connectionsToEdges, type MindSparksNode } from "../../lib/flowTransforms";
@@ -203,6 +205,65 @@ export function Canvas() {
     }, [isSelecting, selectionBox, getNodesInBox, replaceSelection, endSelectionBox]);
 
     // --------------------------
+    // resolveAndAnimateCollisions
+    //
+    // Shared by onNodeDragStop and the SparkInput confirm handler:
+    //  given the id/position of whatever just moved or was created, 
+    //  plus the full set of node positions to check against, resolves 
+    //  overlaps and animates the affected nodes into their new spots.
+    //  
+    // affectedNodes are matched back to a Spark or Flame by ID to know 
+    //  which store to persist to. A node not found in either store is
+    //  silently skipped (this can maaaaybe happen for the node that was 
+    //                    just dropped/created, which the caller already
+    //                    excludes via droppedId).
+    // --------------------------
+    const resolveAndAnimateCollisions = useCallback((
+        droppedId: string,
+        droppedPosition: Position,
+        allNodePositions: NodePosition[],
+    ) => {
+        const affected = resolveAllCollisions(droppedId, droppedPosition, allNodePositions)
+            .filter((n) => n.id !== droppedId);
+        
+        if (affected.length === 0) return;
+
+        const startPositions = affected.map((a) => ({
+            id:         a.id,
+            position:   displayNodes.find((n) => n.id === a.id)?.position ?? a.position,
+        }));
+
+        animateRepulsion(
+            startPositions,
+            affected,
+            // onUpdate: reflect the interpolated positions in the canvas each frame.
+            (current) => {
+                setDisplayNodes((prev) =>
+                    prev.map((n) => {
+                        const updated = current.find((c) => c.id === n.id);
+                        return updated ? { ...n, position: updated.position } : n;
+                    })
+                );
+            },
+            // onComplete: persist final positions to whichever store owns each node.
+            (final) => {
+                for (const node of final) {
+                    const spark = useSparkStore.getState().sparks.find((s) => s.id === node.id);
+                    if (spark) {
+                        useSparkStore.getState().moveSparkToPosition(node.id, node.position);
+                        continue;
+                    }
+
+                    const flame = useFlameStore.getState().flames.find((f) => f.id === node.id);
+                    if (flame) {
+                        useFlameStore.getState().moveFlameToPosition(node.id, node.position);
+                    }
+                }
+            }
+        )
+    }, [displayNodes]);
+
+    // --------------------------
     // onNodeDragStop
     //
     // When the user stops dragging a node, React Flow gives us the
@@ -214,15 +275,11 @@ export function Canvas() {
         const typedNode = node as MindSparksNode;
 
         if (typedNode.type === "spark") {
-            useSparkStore
-                .getState()
-                .moveSparkToPosition(typedNode.id, typedNode.position);
+            useSparkStore.getState().moveSparkToPosition(typedNode.id, typedNode.position);
         }
 
         if (typedNode.type === "flame") {
-            useFlameStore
-                .getState()
-                .moveFlameToPosition(typedNode.id, typedNode.position);
+            useFlameStore.getState().moveFlameToPosition(typedNode.id, typedNode.position);
         }
 
         // Which nodes need repulsion.
@@ -231,41 +288,8 @@ export function Canvas() {
             position:   n.position,
         }));
 
-        const affected = resolveAllCollisions(typedNode.id, typedNode.position, allNodePositions);
-
-        if (affected.length === 0) return;
-
-        const startPositions = affected.map((a) => ({
-            id:         a.id,
-            position:   displayNodes.find((n) => n.id === a.id)!.position,
-        }));
-
-        animateRepulsion(
-            startPositions,
-            affected,
-            // onUpdate updates displayNodes in each frame to animate them
-            (current) => {
-                setDisplayNodes((prev) =>
-                    prev.map((n) => {
-                        const updated = current.find((c) => c.id === n.id);
-                        return updated ? { ...n, position: updated.position } : n;
-                    })
-                );
-            },
-            // onComplete persists the final positions on Zustand
-            (final) => {
-                for (const node of final) {
-                    const spark = useSparkStore.getState().sparks.find((s) => s.id === node.id);
-                    if (spark) {
-                        useSparkStore.getState().moveSparkToPosition(node.id, node.position);
-                        continue;
-                    }
-
-                    useFlameStore.getState().moveFlameToPosition(node.id, node.position);
-                }
-            }
-        );
-    }, [displayNodes]);
+        resolveAndAnimateCollisions(typedNode.id, typedNode.position, allNodePositions);
+    }, [displayNodes, resolveAndAnimateCollisions]);
 
     // --------------------------
     // onConnect
@@ -334,6 +358,27 @@ export function Canvas() {
         }
     };
 
+    // --------------------------
+    // handleSparkConfirm
+    //
+    // For SparkInput, resolves the creation of 
+    // the spark and the close nodes collision.
+    // --------------------------
+    const handleSparkConfirm = useCallback((text: string) => {
+        const newSpark = useSparkStore.getState().createSpark({
+            text,
+            position: sparkInputPosition!.canvas,
+            spaceId: activeSpaceId,
+        });
+
+        const allNodePositions = displayNodes.map((n) => ({ id: n.id, position: n.position }));
+        allNodePositions.push({ id: newSpark.id, position: sparkInputPosition!.canvas });
+
+        resolveAndAnimateCollisions(newSpark.id, sparkInputPosition!.canvas, allNodePositions);
+
+        closeSparkInput();
+    }, [displayNodes, sparkInputPosition, activeSpaceId, resolveAndAnimateCollisions, closeSparkInput]);
+
     return (
         <div
             className="w-full h-full"
@@ -390,51 +435,7 @@ export function Canvas() {
             {sparkInputPosition && (
                 <SparkInput
                     position={sparkInputPosition.screen}
-                    onConfirm={(text) => {
-                        const newSpark = useSparkStore.getState().createSpark({
-                            text,
-                            position: sparkInputPosition.canvas,
-                            spaceId: activeSpaceId,
-                        });
-
-                        // Resolve collisions
-                        const allNodePositions = displayNodes.map((n) => ({
-                            id: n.id,
-                            position: n.position,
-                        }));
-
-                        // Add the newly created spark to the list so it becomes a source of repulsion
-                        allNodePositions.push({ id: newSpark.id, position: sparkInputPosition.canvas });
-
-                        const resolved = resolveAllCollisions(newSpark.id, sparkInputPosition.canvas, allNodePositions);
-
-                        const affected = resolved.filter((n) => n.id !== newSpark.id);
-
-                        if (affected.length > 0) {
-                            const startPositions = affected.map((a) => ({
-                            id: a.id,
-                            position: displayNodes.find((n) => n.id === a.id)?.position ?? a.position,
-                            }));
-
-                            animateRepulsion(startPositions, affected, 
-                            (current) => {
-                                setDisplayNodes((prev) =>
-                                prev.map((n) => {
-                                    const updated = current.find((c) => c.id === n.id);
-                                    return updated ? { ...n, position: updated.position } : n;
-                                })
-                                );
-                            },
-                            (final) => {
-                                for (const node of final) {
-                                useSparkStore.getState().moveSparkToPosition(node.id, node.position);
-                                }
-                            }
-                            );
-                        }
-
-                        closeSparkInput();
-                    }}
+                    onConfirm={handleSparkConfirm}
                     onCancel={closeSparkInput}
                 />
             )}
