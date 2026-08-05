@@ -58,7 +58,6 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
     
     const [name, setName]               = useState(spark.text);
     const [description, setDescription] = useState(spark.description ?? "");
-    const [notes, setNotes]             = useState("");
     const [showFamily, setShowFamily]   = useState(false);
     const [showMenu, setShowMenu]       = useState(false);
     
@@ -342,10 +341,10 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                     <div className="text-xs mb-2" style={{ color: "var(--color-text-muted)"}}>
                         Notes
                     </div>
+                    {/* Disabled this since it's not implemented yet. */}
                     <textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Add notes, ideas or details... (Markdown supported)"
+                        placeholder="Coming soon..."
+                        disabled={true}
                         className="w-full min-h-30 max-h-60 leading-5 outline-none resize-none overflow-y-auto"
                         style={{
                             background: "var(--color-surface-raised)",
@@ -355,6 +354,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                             fontSize: 13,
                             fontFamily: "inherit",
                             color: "var(--color-text)",
+                            cursor: "not-allowed",
                         }}
                     />
                 </div>
