@@ -7,6 +7,7 @@
 import { create } from "zustand";
 import { Category } from "../types";
 import { useSparkStore } from "./sparks";
+import { useFlameStore } from "./flames";
 import { generateId, now } from "../lib/utils";
 
 // --------------------------
@@ -87,8 +88,15 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         const { sparks } = useSparkStore.getState();
         const affectedSparks = sparks.filter((spark) => spark.categoryId === id);
 
+        const { flames } = useFlameStore.getState();
+        const affectedFlames = flames.filter((flame) => flame.categoryId === id);
+
         affectedSparks.forEach((spark) => {
             useSparkStore.getState().assignCategory(spark.id, undefined);
+        });
+
+        affectedFlames.forEach((flame) => {
+            useFlameStore.getState().assignCategory(flame.id, undefined);
         });
 
         set((state) => ({
