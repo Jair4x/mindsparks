@@ -3,7 +3,7 @@
 //  Not using React Flow's built-in controls because they look like absolute dogcrap.
 //
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import { Home, Maximize2, Minus, Plus } from "lucide-react";
 import { useUIStore } from "../../store";
@@ -128,22 +128,27 @@ function ZoomButton({
     onClick: () => void;
     disabled?: boolean;
 }) {
+    const [isHovered, setIsHovered] = useState(false);
+
     return (
         <button
             aria-label={label}
             onClick={onClick}
             disabled={disabled}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             style={{
                 width: 28,
                 height: 28,
                 borderRadius: 6,
                 border: "0.5px solid var(--color-border)",
-                background: "var(--color-surface)",
-                color: disabled ? "var(--color-border)" : "var(--color-text-muted)",
+                background: isHovered ? "var(--color-surface-raised)" : "var(--color-surface)",
+                color: disabled ? "var(--color-border)" : isHovered ? "var(--color-text)" : "var(--color-text-muted)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: disabled ? "not-allowed" : "pointer",
+                transition: "background 0.15s, color 0.15s",
             }}
         >
             {icon}

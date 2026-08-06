@@ -262,6 +262,8 @@ function HeaderButton({
     label: string;
     onClick: () => void;
 }) {
+    const [isHovered, setIsHovered] = useState(false);
+
     return (
         <button
             aria-label={label}
@@ -271,17 +273,11 @@ function HeaderButton({
                 width: 28,
                 height: 28,
                 borderRadius: 6,
-                background: "transparent",
-                color: "var(--color-text-muted)",
+                background: isHovered ? "var(--color-surface-raised)" : "transparent",
+                color: isHovered ? "var(--color-text)" : "var(--color-text-muted)",
             }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.background    = "var(--color-surface-raised)";
-                e.currentTarget.style.color         = "var(--color-text)";
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.background    = "transparent";
-                e.currentTarget.style.color         = "var(--color-text-muted)";
-            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
             {icon}
         </button>

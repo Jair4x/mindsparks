@@ -106,6 +106,8 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 //  Has its own background and border so it's distinguished as the main action.
 // --------------------------
 function PanelCreateButton({ onClick }: { onClick: () => void }) {
+    const [isHovered, setIsHovered] = useState(false);
+
     return (
         <button
             aria-label="Create Spark"
@@ -116,19 +118,13 @@ function PanelCreateButton({ onClick }: { onClick: () => void }) {
                 height: 32,
                 borderRadius: "50%",
                 border: "none",
-                background: "var(--color-surface-raised)",
-                color: "var(--color-accent)",
+                background: isHovered ? "var(--color-accent)" : "var(--color-surface-raised)",
+                color: isHovered ? "var(--color-surface)" : "var(--color-accent)",
                 marginBottom: 6,
                 marginTop: 4,
             }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.background = "var(--color-accent)";
-                e.currentTarget.style.color = "var(--color-surface)";
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.background = "var(--color-surface-raised)";
-                e.currentTarget.style.color = "var(--color-accent)";
-            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
         >
             <Plus size={17} />
         </button>
