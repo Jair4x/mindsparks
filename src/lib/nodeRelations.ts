@@ -1,6 +1,8 @@
 //
-// 
+// Functions to get the nodes related to a node.
+//  [Children, Parent] (lineage) or manually related sparks
 //
+// Note: I forgot to make the note before lmao
 //
 
 import { useSparkStore, useFlameStore, useConnectionStore } from "../store";
@@ -58,6 +60,6 @@ export function useRelated(nodeId: string) {
                 
                 return node ? { connectionId: connection.id, node } : null;
             })
-            .filter((entry): entry is { connectionId: String; node: Spark | Flame } => entry !== null);
+            .filter((entry): entry is { connectionId: string; node: Spark | Flame } => entry !== null);
     }, [relatedConnections, sparks, flames, nodeId]);
 }

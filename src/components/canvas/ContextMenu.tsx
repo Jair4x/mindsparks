@@ -8,7 +8,7 @@
 //
 
 import { useEffect, useRef, useState } from "react";
-import { isNode, useReactFlow } from "@xyflow/react";
+import { useReactFlow } from "@xyflow/react";
 import { useShallow } from "zustand/shallow";
 import {
     Copy,
@@ -92,6 +92,7 @@ function ContextMenuContent({
     const createRelatedConnection = useConnectionStore((s) => s.createRelatedConnection);
     const createLineageConnection = useConnectionStore((s) => s.createLineageConnection);
 
+    // For when we create a new space
     const createSpace       = useSpaceStore((s) => s.createSpace);
     const setActiveSpace    = useSpaceStore((s) => s.setActiveSpace);
 
