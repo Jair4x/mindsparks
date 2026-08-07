@@ -12,6 +12,7 @@
 //
 
 import { useState } from "react";
+import { Handle, Position } from "@xyflow/react";
 import type { Category } from "../../types";
 import { formatRelativeDate } from "../../lib/utils";
 
@@ -85,6 +86,18 @@ export function NodeCardShell({
                 position: relativePosition ? "relative" : undefined,
             }}
         >
+            <Handle
+                type="target"
+                position={Position.Top}
+                style={{ opacity: 0, pointerEvents: "none" }}
+            />
+
+            <Handle
+                type="source"
+                position={Position.Top}
+                style={{ opacity: 0, pointerEvents: "none" }}
+            />
+
             {cornerBadge?.(isHovered)}
 
             {/*

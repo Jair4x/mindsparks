@@ -91,7 +91,7 @@ export function connectionToEdge(connection: Connection): Edge {
         id: connection.id,
         source: connection.sourceId,
         target: connection.targetId,
-        type: "default",
+        type: "center",
         style: {
             stroke: isLineage ? "var(--color-accent)" : "var(--color-border-accent)",
             strokeWidth: 1,

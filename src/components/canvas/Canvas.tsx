@@ -32,6 +32,7 @@ import { animateRepulsion, resolveAllCollisions } from "../../lib/repulsion";
 
 import { SparkCard } from "./SparkCard";
 import { FlameCard } from "./FlameCard";
+import { NodeCardEdge } from "./NodeCardEdge";
 import { SparkInput } from "./SparkInput";
 import { SelectionBox } from "./SelectionBox";
 import { ContextMenu } from "./ContextMenu";
@@ -50,6 +51,10 @@ import {
 const nodeTypes = {
     spark: SparkCard,
     flame: FlameCard,
+};
+
+const edgeTypes = {
+    center: NodeCardEdge,
 };
 
 // --------------------------
@@ -429,6 +434,7 @@ export function Canvas() {
                 nodes={displayNodes}
                 edges={edges}
                 nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
                 selectionOnDrag={false}
                 selectNodesOnDrag={false}
                 nodesConnectable={false}
