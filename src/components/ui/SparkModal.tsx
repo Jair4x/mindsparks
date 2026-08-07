@@ -4,14 +4,25 @@
 //
 
 import { useEffect, useRef, useState } from "react";
-import { Tag, Flame, X, MoreHorizontal } from "lucide-react";
+import { Tag, Flame as FlameIcon, X, MoreHorizontal } from "lucide-react";
 import { useSparkStore, useUIStore, useCategoryStore } from "../../store";
 import { useNow, formatRelativeDate } from "../../lib/utils";
-import { useChildren, useParent } from "../../lib/nodeRelations";
+import { useChildren, useParent, useRelated } from "../../lib/nodeRelations";
+import { Spark, Flame } from "../../types";
 
 import {
     SPARK_DESC_MAX_LENGTH as DESC_MAX_LENGTH
 } from "../../lib/constants";
+
+// --------------------------
+// Helper functions
+// --------------------------
+
+function nodeLabel(node: Spark | Flame): string {
+    const name = "text" in node ? node.text : node.name;
+    console.log("tried to parse: ", node);
+    return node.isArchived ? `${name} (archived)` : name;
+}
 
 // --------------------------
 // SparkModal
@@ -53,6 +64,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
 
     const children      = useChildren(sparkId);
     const parent        = useParent(spark.parentId);
+    const related       = useRelated(sparkId);
     const nowMs         = useNow();
     const overlayRef    = useRef<HTMLDivElement>(null);
     
@@ -246,7 +258,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                                                 </div>
 
                                                 <div style={{ fontSize: 13, color: "var(--color-text)", marginBottom: 8 }}>
-                                                    {"text" in parent ? parent.text : parent.name}
+                                                    {nodeLabel(parent)}
                                                 </div>
                                             </>
                                         ) : null}
@@ -261,13 +273,33 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                                                 </div>
                                                 {children.map((child) => (
                                                     <div key={child.id} style={{ fontSize: 13, color: "var(--color-text)" }}>
-                                                        {"text" in child ? child.text : child.name}
+                                                        {nodeLabel(child)}
                                                     </div>
                                                 ))}
                                             </>
                                         )}
 
-                                        {!spark.parentId && children.length === 0 && (
+                                        {related.length > 0 && (
+                                            <>
+                                                <div
+                                                    style={{
+                                                        fontSize: 11,
+                                                        color: "var(--color-text-muted)",
+                                                        marginBottom: 2,
+                                                        marginTop: (parent || children.length > 0) ? 8 : 0,
+                                                    }}
+                                                >
+                                                    Related
+                                                </div>
+                                                {related.map(({ connectionId, node}) => (
+                                                    <div key={connectionId} style={{ fontSize: 13, color: "var(--color-text)" }}>
+                                                        {nodeLabel(node)}
+                                                    </div>
+                                                ))}
+                                            </>
+                                        )}
+
+                                        {!spark.parentId && children.length === 0 && related.length === 0 && (
                                             <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
                                                 No family yet
                                             </div>
@@ -291,7 +323,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                     <div className="flex gap-1.5 mt-3">
                         {/* Convert into flame */}
                         <ActionButton
-                            icon={<Flame size={13} />}
+                            icon={<FlameIcon size={13} />}
                             label="Convert into flame"
                             onClick={() => openModal("spark-to-flame", spark.id)}
                             accent

@@ -3,9 +3,10 @@
 //
 //
 
-import { useSparkStore, useFlameStore } from "../store";
+import { useSparkStore, useFlameStore, useConnectionStore } from "../store";
 import { useShallow } from "zustand/shallow";
 import { useMemo } from "react";
+import { Spark, Flame } from "../types";
 
 // --------------------------
 // useChildren
@@ -30,4 +31,33 @@ export function useParent(parentId: string | undefined) {
     const parentSpark = useSparkStore((s) => (parentId ? s.getSparkById(parentId) : undefined));
 
     return parentFlame ?? parentSpark;
+}
+
+// --------------------------
+// useRelated
+//  Resolves a Spark/Flame's ID to the other nodes they're manually related to
+//  ("related" type connections, not the parent/child "lineage" ones).
+//
+// Since a related Connection doesn't care which side is source/target,
+//  this just returns "whichever end of the connection isn't me".
+// --------------------------
+export function useRelated(nodeId: string) {
+    const relatedConnections = useConnectionStore(useShallow((s) => 
+        s.getConnectionsByNode(nodeId).filter((c) => c.type === "related")
+    ));
+
+    const sparks = useSparkStore((s) => s.sparks);
+    const flames = useFlameStore((f) => f.flames);
+
+    return useMemo(() => {
+        return relatedConnections
+            .map((connection) => {
+                const otherId = connection.sourceId === nodeId ? connection.targetId : connection.sourceId;
+                const node: Spark | Flame | undefined =
+                    sparks.find((s) => s.id === otherId) ?? flames.find((f) => f.id === otherId);
+                
+                return node ? { connectionId: connection.id, node } : null;
+            })
+            .filter((entry): entry is { connectionId: String; node: Spark | Flame } => entry !== null);
+    }, [relatedConnections, sparks, flames, nodeId]);
 }
