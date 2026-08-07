@@ -34,10 +34,12 @@ import { SparkCard } from "./SparkCard";
 import { FlameCard } from "./FlameCard";
 import { SparkInput } from "./SparkInput";
 import { SelectionBox } from "./SelectionBox";
+import { ContextMenu } from "./ContextMenu";
 
 import {
     MIN_ZOOM     as MIN_ZOOM,
     MAX_ZOOM     as MAX_ZOOM,
+    HEADER_HEIGHT,
 } from "../../lib/constants";
 
 // --------------------------
@@ -77,6 +79,8 @@ export function Canvas() {
     const startSelectionBox     = useUIStore((s) => s.startSelectionBox);
     const updateSelectionBox    = useUIStore((s) => s.updateSelectionBox);
     const endSelectionBox       = useUIStore((s) => s.endSelectionBox);
+
+    const openContextMenu       = useUIStore((s) => s.openContextMenu);
 
     const sparks = useSparkStore(
         useShallow((s) => s.getActiveSparksBySpace(activeSpaceId))
@@ -326,7 +330,7 @@ export function Canvas() {
                 if (!isSafeZone(event.clientX, event.clientY)) return;
 
                 try {
-                    const screenPosition = { x: event.clientX, y: event.clientY - 44 }; // minus 44px because the canvas container div starts on pt-11 (44px from top)
+                    const screenPosition = { x: event.clientX, y: event.clientY - HEADER_HEIGHT };
                     const canvasPosition = screenToFlowPosition({ x: event.clientX, y: event.clientY });
                     openSparkInput({ screen: screenPosition, canvas: canvasPosition });
                 } catch (e) {
@@ -378,6 +382,43 @@ export function Canvas() {
         closeSparkInput();
     }, [displayNodes, sparkInputPosition, activeSpaceId, resolveAndAnimateCollisions, closeSparkInput]);
 
+    // --------------------------
+    // handlePaneContextMenu / handleNodeContextMenu
+    //
+    // For ContextMenu, when right-clicking a single
+    // node, multiple or none at all.
+    // --------------------------
+    const handlePaneContextMenu = useCallback((event: React.MouseEvent | MouseEvent) => {
+        event.preventDefault();
+
+        openContextMenu({
+            position: { x: event.clientX, y: event.clientY },
+            nodeId: "",
+            nodeType: null,
+        });
+    }, [openContextMenu]);
+
+    const handleNodeContextMenu: NodeMouseHandler = useCallback((event, node) => {
+        event.preventDefault();
+
+        const nodeType = node.type === "spark" ? "spark" : "flame";
+
+        const alreadySelected =
+            (selection.type === "single" && selection.id === node.id) ||
+            (selection.type === "multi" && selection.nodes.some((n) => n.id === node.id));
+
+        if (!alreadySelected) {
+            selectNode(node.id, nodeType);
+        }
+
+        openContextMenu({
+            position: { x: event.clientX, y: event.clientY },
+            nodeId: node.id,
+            nodeType,
+        });
+    
+    }, [selection, selectNode, openContextMenu]);
+
     return (
         <div
             className="w-full h-full"
@@ -396,6 +437,8 @@ export function Canvas() {
                 onNodesChange={onNodesChange}
                 onNodeDragStop={onNodeDragStop}
                 onPaneMouseMove={handlePaneMouseMove}
+                onPaneContextMenu={handlePaneContextMenu}
+                onNodeContextMenu={handleNodeContextMenu}
                 selectionKeyCode={null}
                 multiSelectionKeyCode={null}
                 panOnDrag={!isSelecting}
@@ -438,6 +481,8 @@ export function Canvas() {
                     onCancel={closeSparkInput}
                 />
             )}
+
+            <ContextMenu />
         </div>
     );
 }

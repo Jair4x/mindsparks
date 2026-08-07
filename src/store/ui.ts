@@ -50,6 +50,12 @@ export type SelectionBox = {
     current: Position;
 };
 
+export type ContextMenuType = {
+    position: Position;
+    nodeId: string;
+    nodeType: "spark" | "flame" | null;
+};
+
 // --------------------------
 // Store Types
 // --------------------------
@@ -62,6 +68,10 @@ interface UIStore {
     // ID of the spark or flame that's being viewed or edited
     // in the active modal. null if no modal is open.
     activeModalNodeId: string | null;
+
+    // --- Menu state ---
+
+    contextMenu: ContextMenuType | null;
 
     // --- Canvas state --
 
@@ -104,8 +114,13 @@ interface UIStore {
 
     // --- Actions: modals ---
 
-    openModal: (modal: ModalType, nodeId?: string) => void;
+    openModal: (modal: ModalType, nodeId?: string | null) => void;
     closeModal: () => void;
+
+    // --- Actions: menu ---
+
+    openContextMenu: (menu: ContextMenuType) => void;
+    closeContextMenu: () => void;
 
     // --- Actions: canvas ---
 
@@ -138,6 +153,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
     activeModal: null,
     activeModalNodeId: null,
     sparkInputPosition: null,
+    contextMenu: null,
     zoom: DEFAULT_ZOOM,
     canvasViewport: { x: 0, y: 0, zoom: 1 },
     selection: { type: "none" },
@@ -158,6 +174,15 @@ export const useUIStore = create<UIStore>((set, get) => ({
 
     closeModal: () => {
         set({ activeModal: null, activeModalNodeId: null });
+    },
+
+    // --- Menu ---
+    openContextMenu: (menu) => {
+        set({ contextMenu: menu });
+    },
+
+    closeContextMenu: () => {
+        set({ contextMenu: null });
     },
 
     // --- Canvas ---

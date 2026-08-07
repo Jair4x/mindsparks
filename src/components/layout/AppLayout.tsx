@@ -5,9 +5,8 @@
 //  It's only use is to distribute the space on screen and react to the state of the UI (if side panel is collapsed or zen mode is active)
 //
 
-import { useEffect } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
-import { Layers, ChevronDown, Maximize2, Minus, Plus, Flame } from "lucide-react";
+import { Layers, ChevronDown } from "lucide-react";
 import { useUIStore, useSpaceStore } from "../../store";
 
 import { SidePanel } from "../panel/SidePanel";
@@ -16,6 +15,7 @@ import { FlameView } from "../flame/FlameView";
 
 import { SparkModal } from "../ui/SparkModal";
 import { SparkToFlameModal } from "../ui/SparkToFlameModal";
+import { CategoryModal } from "../ui/CategoryModal";
 
 import { HEADER_HEIGHT } from "../../lib/constants";
 
@@ -97,6 +97,7 @@ export function AppLayout() {
                         
                         <SparkModal />
                         <SparkToFlameModal />
+                        <CategoryModal />
                     </>
             )}
         </div>
