@@ -14,6 +14,8 @@ export const MIN_ZOOM               = 0.2;      // 20%
 export const MAX_ZOOM               = 2.5;      // 250%
 export const DEFAULT_ZOOM           = 1;
 export const ZOOM_STEP              = 0.1;
+export const DEFAULT_CARD_WIDTH     = 180;      // px
+export const DEFAULT_CARD_HEIGHT    = 40;       // px
 
 // --------------------------
 //          Repulsion

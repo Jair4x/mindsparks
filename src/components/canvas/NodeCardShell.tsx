@@ -15,6 +15,10 @@ import { useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { Category } from "../../types";
 import { formatRelativeDate } from "../../lib/utils";
+import {
+    DEFAULT_CARD_WIDTH,
+    DEFAULT_CARD_HEIGHT
+ } from "../../lib/constants";
 
 // --------------------------
 // Props
@@ -78,7 +82,7 @@ export function NodeCardShell({
                 border: `0.5px solid ${borderColor}`,
                 borderRadius: 12,
                 padding: "10px 14px",
-                width: 180,
+                width: DEFAULT_CARD_WIDTH,
                 cursor: "pointer",
                 transition: "border-color 0.15s",
                 boxShadow,
