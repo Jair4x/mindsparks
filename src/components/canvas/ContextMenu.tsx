@@ -91,6 +91,9 @@ function ContextMenuContent({
 
     const createRelatedConnection = useConnectionStore((s) => s.createRelatedConnection);
     const createLineageConnection = useConnectionStore((s) => s.createLineageConnection);
+    
+    // For repulsion calculation on new child or duplication
+    const requestRepulsion  = useUIStore((s) => s.requestRepulsion);
 
     // For when we create a new space
     const createSpace       = useSpaceStore((s) => s.createSpace);
@@ -143,24 +146,27 @@ function ContextMenuContent({
     // --------------------------
 
     const handleDuplicate = () => {
+        const newIds = [];
         targetNodes.forEach((node) => {
             if (node.type === "spark") {
                 const spark = sparks.find((s) => s.id === node.id);
                 if (!spark) return;
 
-                createSpark({
+                const newSpark = createSpark({
                     text: spark.text,
                     position: { x: spark.position.x + 20, y: spark.position.y + 20 },
                     spaceId: spark.spaceId,
                     categoryId: spark.categoryId,
                     parentId: spark.parentId,
-                })
+                });
+
+                newIds.push(newSpark.id);
             }
             if (node.type === "flame") {
                 const flame = flames.find((f) => f.id === node.id);
                 if (!flame) return;
 
-                const newSpark = createSpark({
+                const tempSpark = createSpark({
                     text: flame.name,
                     position: { x: flame.position.x + 20, y: flame.position.y + 20 },
                     spaceId: flame.spaceId,
@@ -168,19 +174,22 @@ function ContextMenuContent({
                     parentId: flame.parentId,
                 });
 
-                createFlame({
-                    sparkId: newSpark.id,
-                    name: newSpark.text,
-                    position: newSpark.position,
-                    spaceId: newSpark.spaceId,
+                const newFlame = createFlame({
+                    sparkId: tempSpark.id,
+                    name: tempSpark.text,
+                    position: tempSpark.position,
+                    spaceId: tempSpark.spaceId,
                     schema: flame.schema,
                     tools: flame.tools,
                     categoryId: flame.categoryId,
                     parentId: flame.parentId,
                 });
+
+                newIds.push(newFlame.id);
             }
         });
 
+        requestRepulsion(newIds);
         onClose();
     };
 
@@ -205,6 +214,8 @@ function ContextMenuContent({
             targetId: child.id,
             spaceId: parent.spaceId,
         });
+
+        requestRepulsion([child.id]);
 
         onClose();
     };
@@ -319,7 +330,6 @@ function ContextMenuContent({
     return (
         <div
             ref={menuRef}
-            onMouseDown={(e) => e.stopPropagation()}
             style={{
                 position: "fixed",
                 left: x,

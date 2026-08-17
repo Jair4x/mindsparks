@@ -11,8 +11,8 @@ import { Flame, Check, Wrench } from "lucide-react";
 import { useUIStore, useSparkStore, useFlameStore } from "../../store";
 import { tools, schemas } from "../../lib/constants";
 import { getToolIcon } from "../../lib/toolConfig";
+import { reparentNode } from "../../store/cascade";
 import type { Schema, Tool } from "../../types";
-
 
 // --------------------------
 // SparkToFlameModal
@@ -30,7 +30,9 @@ export function SparkToFlameModal() {
     );
     const archiveSpark          = useSparkStore((s) => s.archiveSpark);
     const convertSparkToFlame   = useFlameStore((s) => s.convertSparkToFlame);
-    
+
+    const requestRepulsion      = useUIStore((s) => s.requestRepulsion);
+
     const flame = useFlameStore((s) =>
         s.flames.find((f) => f.id === activeFlameId)
     );
@@ -58,6 +60,13 @@ export function SparkToFlameModal() {
                         parentId: spark.parentId,
                     });
 
+                    // Restore connections if they were
+                    if (newFlame.parentId) {
+                        reparentNode(spark.id, newFlame.id);
+                    }
+
+                    reparentNode(spark.id, newFlame.id);
+                    requestRepulsion([newFlame.id]);
                     closeModal();
                     openFlame(newFlame.id);
                 }}

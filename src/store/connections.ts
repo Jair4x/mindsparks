@@ -54,6 +54,9 @@ interface ConnectionStore {
 
     // Used when hovering over a card to know which edges to draw
     getConnectionsByNode: (nodeId: string) => Connection[];
+
+    // Re-point endpoints instead of leaving them stale
+    repointNode: (oldId: string, newId: string) => void;
 }
 
 // --------------------------
@@ -128,5 +131,15 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
         return get().connections.filter(
             (connection) => connection.sourceId === nodeId || connection.targetId === nodeId
         );
+    },
+
+    repointNode: (oldId, newId) => {
+        set((state) => ({
+            connections: state.connections.map((c) => ({
+                ...c,
+                sourceId: c.sourceId === oldId ? newId : c.sourceId,
+                targetId: c.targetId === oldId ? newId : c.targetId,
+            })),
+        }));
     },
 }));

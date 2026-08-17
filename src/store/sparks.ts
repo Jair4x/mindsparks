@@ -57,6 +57,8 @@ interface SparkStore {
     // Used to show the lineage graph on hover.
     getChildSparks: (parentId: string) => Spark[];
 
+    reassignParent: (id: string, newParentId: string) => void;
+
     getSparkById: (id: string) => Spark | undefined;
 }
 
@@ -162,6 +164,14 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
         return get().sparks.filter(
             (spark) => spark.parentId === parentId
         );
+    },
+
+    reassignParent: (id, newParentId) => {
+        set((state) => ({
+            sparks: state.sparks.map((s) =>
+                s.id === id ? { ...s, parentId: newParentId, updatedAt: now() } : s
+            ),
+        }));
     },
 
     getSparkById: (id) => {

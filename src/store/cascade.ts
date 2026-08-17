@@ -29,3 +29,28 @@ export function deleteSpaceCascade(spaceId: string): void {
     useSparkStore.getState().deleteSparksBySpace(spaceId);
     useCategoryStore.getState().deleteCategoriesBySpace(spaceId);
 }
+
+// --------------------------
+// reparentNode
+//
+// Too lazy to give an explanation here, check the code.
+// --------------------------
+export function reparentNode(oldId: string, newId: string): void {
+    // Repoints any connection (lineage or related) that referenced oldId.
+    //  This is what reconnects a converted spark's existing parent edge
+    //  to the new flame, without needing to check whether a parent existed.
+    //
+    // If there's nothing to repoint, this is a no-op. Plain as that.
+    useConnectionStore.getState().repointNode(oldId, newId);
+
+    // Reparents every spark/flame whose parentId pointed at oldId
+    //  (covers the converted node's children, which repointNode's
+    //  connection-rewrite doesn't touch since parentId is a separate field)
+    useSparkStore.getState().sparks
+        .filter((s) => s.parentId === oldId)
+        .forEach((s) => useSparkStore.getState().reassignParent(s.id, newId));
+    
+    useFlameStore.getState().flames
+        .filter((s) => s.parentId === oldId)
+        .forEach((s) => useFlameStore.getState().reassignParent(s.id, newId));
+}

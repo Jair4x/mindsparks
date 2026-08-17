@@ -124,6 +124,8 @@ export function sparksAndFlamesToNodes(
 //
 // Transforms an array of connections into React Flow edges.
 // --------------------------
-export function connectionsToEdges(connections: Connection[]): Edge[] {
-    return connections.map(connectionToEdge);
+export function connectionsToEdges(connections: Connection[], visibleNodeIds: Set<string>): Edge[] {
+    return connections
+        .filter((c) => visibleNodeIds.has(c.sourceId) && visibleNodeIds.has(c.targetId))
+        .map(connectionToEdge);
 }

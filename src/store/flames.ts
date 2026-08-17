@@ -68,6 +68,8 @@ interface FlameStore {
     // Used to show the lineage graph on hover.
     getChildFlames: (parentId: string) => Flame[];
 
+    reassignParent: (id: string, newParentId: string) => void;
+
     getFlameById: (id: string) => Flame | undefined;
 }
 
@@ -215,6 +217,14 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         return get().flames.filter(
             (flame) => flame.parentId === parentId
         );
+    },
+
+    reassignParent: (id, newParentId) => {
+        set((state) => ({
+            flames: state.flames.map((s) =>
+                s.id === id ? { ...s, parentId: newParentId, updatedAt: now() } : s
+            ),
+        }));
     },
 
     getFlameById: (id) => {

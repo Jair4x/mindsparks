@@ -41,6 +41,8 @@ import {
     MIN_ZOOM     as MIN_ZOOM,
     MAX_ZOOM     as MAX_ZOOM,
     HEADER_HEIGHT,
+    DEFAULT_CARD_WIDTH,
+    DEFAULT_CARD_HEIGHT,
 } from "../../lib/constants";
 
 // --------------------------
@@ -73,6 +75,9 @@ export function Canvas() {
     const setCanvasViewport     = useUIStore((s) => s.setCanvasViewport);
     const canvasViewport        = useUIStore((s) => s.canvasViewport);
 
+    const pendingRepulsion      = useUIStore((s) => s.pendingRepulsion);
+    const clearPendingRepulsion = useUIStore((s) => s.clearPendingRepulsion);
+
     const selectNode            = useUIStore((s) => s.selectNode);
     const toggleNodeSelection   = useUIStore((s) => s.toggleNodeSelection);
     const clearSelection        = useUIStore((s) => s.clearSelection);
@@ -99,9 +104,17 @@ export function Canvas() {
         useShallow((s) => s.getConnectionsBySpace(activeSpaceId))
     );
 
-    const nodes = sparksAndFlamesToNodes(sparks, flames);
-    const edges = connectionsToEdges(connections);
+    // for connection rendering
+    const visibleNodeIds = useMemo(
+        () => new Set([...sparks.map((s) => s.id), ...flames.map((f) => f.id)]),
+        [sparks, flames]
+    );
+    const nodes             = sparksAndFlamesToNodes(sparks, flames);
+    const edges             = connectionsToEdges(connections, visibleNodeIds);
 
+    //
+    // Selection stuff
+    //
     const [displayNodes, setDisplayNodes] = useState(nodes);
 
     const onNodesChange = useCallback((changes: NodeChange<MindSparksNode>[]) => {
@@ -145,8 +158,8 @@ export function Canvas() {
             const screenPos     = flowToScreenPosition(node.position);
             const el            = document.querySelector(`[data-id="${node.id}"]`);
             const rect          = el?.getBoundingClientRect();
-            const nodeWidth     = rect?.width ?? node.width ?? 180;
-            const nodeHeight    = rect?.height ?? node.height ?? 40;
+            const nodeWidth     = rect?.width ?? node.width ?? DEFAULT_CARD_WIDTH;
+            const nodeHeight    = rect?.height ?? node.height ?? DEFAULT_CARD_HEIGHT;
 
             return (
                 screenPos.x < right &&
@@ -423,6 +436,41 @@ export function Canvas() {
         });
     
     }, [selection, selectNode, openContextMenu]);
+
+    // --------------------------
+    // Repulsion
+    //
+    // To call resolveAndAnimateCollisions when a new
+    // node is created via duplication or child creation.
+    // --------------------------
+    useEffect(() => {
+        if (pendingRepulsion.length === 0) return;
+
+        /* A bit of a tangent on this:
+
+            I have to be honest, my junior mind would probably NEVER create this displayNodePositions logic
+            on its own. Copilot gave me this solution, and I REALLY dislike what I don't fully get,
+            but every explanation it gave me ended with me just understanding that displayNodes is
+            somehow "one render behind" when we create a new node via duplication or child nodes, and
+            that we need to map it for a lookup table in order to get the updated nodes positions and
+            calculate repulsion correctly and render it.
+        */
+        // Lookup table
+        const displayNodePositions = new Map(
+            displayNodes.map((n) => [n.id, n.position])
+        );
+
+        const allNodePositions = nodes.map((node) => ({
+            id: node.id,
+            position: displayNodePositions.get(node.id) ?? node.position,
+        }));
+
+        for (const id of pendingRepulsion) {
+            resolveAndAnimateCollisions(id, allNodePositions);
+        }
+
+        clearPendingRepulsion();
+    }, [pendingRepulsion, displayNodes, resolveAndAnimateCollisions, clearPendingRepulsion]);
 
     return (
         <div

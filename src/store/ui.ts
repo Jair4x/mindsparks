@@ -96,6 +96,8 @@ interface UIStore {
 
     navigationStack: string[];  // IDs of flames in the navigation stack
 
+    pendingRepulsion: string[];
+
     // --- Side panel state ---
 
     isPanelCollapsed: boolean;
@@ -126,6 +128,7 @@ interface UIStore {
 
     setCanvasViewport: (viewport: { x: number; y: number; zoom: number }) => void;
     setZoom: (zoom: number) => void;
+
     selectNode: (id: string, nodeType: SelectedNodeType) => void;
     toggleNodeSelection: (node: SelectedNode) => void;
     replaceSelection: (selection: Selection) => void;
@@ -134,6 +137,9 @@ interface UIStore {
     endSelectionBox: () => void;
     clearSelection: () => void;
     setHoveredNode: (id: string | null) => void;
+
+    requestRepulsion: (nodeIds: string[]) => void;
+    clearPendingRepulsion: () => void;
 
     openFlame: (flameId: string) => void;
     goBack: () => void;
@@ -163,6 +169,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
     activeView: "canvas",
     activeFlameId: null,
     navigationStack: [],
+    pendingRepulsion: [],
     isPanelCollapsed: false,
     isZenModeActive: false,
 
@@ -282,6 +289,14 @@ export const useUIStore = create<UIStore>((set, get) => ({
 
     setHoveredNode: (id) => {
         set({ hoveredNodeId: id });
+    },
+
+    requestRepulsion: (nodeIds) => {
+        set((state) => ({ pendingRepulsion: [...state.pendingRepulsion, ...nodeIds] }));
+    },
+
+    clearPendingRepulsion: () => {
+        set({ pendingRepulsion: [] });
     },
 
     openFlame: (flameId) => {
