@@ -87,7 +87,7 @@ export function SparkInput({ position, onConfirm, onCancel }: SparkInputProps) {
                     padding: "10px 14px",
                     fontSize: 13,
                     color: "var(--color-text)",
-                    width: 200, //* Note: Just to test, might change the value when the canvas is finished.
+                    width: 300,
                     resize: "none",
                     outline: "none",
                     fontFamily: "inherit",
