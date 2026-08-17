@@ -7,7 +7,7 @@
 //  - Multiple nodes selected: actions that act on the whole selection.
 //
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useReactFlow } from "@xyflow/react";
 import { useShallow } from "zustand/shallow";
 import {
@@ -252,6 +252,11 @@ function ContextMenuContent({
     // Handlers: multi-only actions
     // --------------------------
 
+    // Create a map of all nodes by ID for quick lookup
+    const nodesById = useMemo(() => new Map(
+        [...sparks, ...flames].map((node) => [node.id, node] as [string, typeof node])
+    ), [sparks, flames]);
+
     // Connects every other selected node to the one that was right-clicked (star topology)
     const handleCreateRelationToNode = () => {
         if (selection.type !== "multi") return;
@@ -259,6 +264,12 @@ function ContextMenuContent({
         selection.nodes
             .filter((n) => n.id !== contextMenu.nodeId)
             .forEach((n) => {
+                // Prevent connections between parent and child nodes
+                const contextNode = nodesById.get(contextMenu.nodeId);
+                const thisNode = nodesById.get(n.id);
+
+                if (contextNode?.parentId === n.id || thisNode?.parentId === contextMenu.nodeId) return;
+
                 createRelatedConnection({
                     sourceId: n.id,
                     targetId: contextMenu.nodeId,
@@ -273,13 +284,24 @@ function ContextMenuContent({
     const handleCreateRelationBetweenAll = () => {
         if (selection.type !== "multi") return;
 
-        const nodes = selection.nodes;
+        const nodes = selection.nodes;        
 
         for (let i = 0; i < nodes.length; i++) {
             for (let j = i + 1; j < nodes.length; j++) {
+                const nodeA = nodes[i];
+                const nodeB = nodes[j];
+
+                // Prevent connections between parent and child nodes
+                const getParentId = (nodeId: string) => {
+                    const node = nodesById.get(nodeId);
+                    return node?.parentId;
+                };
+
+                if (getParentId(nodeA.id) === nodeB.id || getParentId(nodeB.id) === nodeA.id) continue;
+
                 createRelatedConnection({
-                    sourceId: nodes[i].id,
-                    targetId: nodes[j].id,
+                    sourceId: nodeA.id,
+                    targetId: nodeB.id,
                     spaceId: activeSpaceId,
                 });
             }
