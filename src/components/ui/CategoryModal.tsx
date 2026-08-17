@@ -81,11 +81,12 @@ function CategoryModalContent({
     onClose:        () => void;
     onConfirm:      (name: string, color: string) => void;
 }) {
-    const [name, setName]           = useState(initialName);
-    const [color, setColor]         = useState(initialColor);
-    const [isCustom, setIsCustom]   = useState(false);
-    const overlayRef                = useRef<HTMLDivElement>(null);
-    const nameInputRef              = useRef<HTMLInputElement>(null);
+    const [name, setName]                               = useState(initialName);
+    const [color, setColor]                             = useState(initialColor);
+    const [isCustom, setIsCustom]                       = useState(false);
+    const [isCancelBtnHovered, setIsCancelBtnHovered]   = useState(false);
+    const overlayRef                                    = useRef<HTMLDivElement>(null);
+    const nameInputRef                                  = useRef<HTMLInputElement>(null);
 
     // Autofocus name field
     useEffect(() => {
@@ -276,15 +277,18 @@ function CategoryModalContent({
                 >
                     <button
                         onClick={onClose}
-                        className="bg-transparent cursor-pointer"
+                        className="cursor-pointer"
                         style={{
+                            background: isCancelBtnHovered ? "var(--color-accent)" : "transparent",
                             border: "0.5px solid var(--color-border)",
                             borderRadius: 6,
                             padding: "6px 14px",
                             fontSize: 13,
-                            color: "var(--color-text-muted)",
+                            color: isCancelBtnHovered ? "white" : "var(--color-text-muted)",
                             fontFamily: "inherit",
                         }}
+                        onMouseEnter={() => setIsCancelBtnHovered(true)}
+                        onMouseLeave={() => setIsCancelBtnHovered(false)}
                     >
                         Cancel
                     </button>
