@@ -9,17 +9,17 @@
 
 import { BaseEdge, getStraightPath, useInternalNode, type EdgeProps } from "@xyflow/react";
 import type { MindSparksNode } from "../../lib/flowTransforms";
+import { DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH } from "../../lib/constants";
 
 // --------------------------
 // Helper functions
 // --------------------------
 
-function getNodeCenter(node: ReturnType<typeof useInternalNode<MindSparksNode>>) {
+function getNodeCenter(node: ReturnType<typeof useInternalNode<MindSparksNode>>, lastKnown: MindSparksNode) {
     if (!node) return null;
-
     const { positionAbsolute } = node.internals;
-    const width = node.width ?? node.measured.width ?? 0;
-    const height = node.height ?? node.measured.height ?? 0;
+    const width = node.width ?? node.measured.width ?? lastKnown?.width ?? DEFAULT_CARD_WIDTH;
+    const height = node.height ?? node.measured.height ?? lastKnown?.height ?? DEFAULT_CARD_HEIGHT;
 
     return {
         x: positionAbsolute.x + width / 2,
@@ -46,8 +46,11 @@ export function NodeCardEdge({
     const sourceNode = useInternalNode<MindSparksNode>(source);
     const targetNode = useInternalNode<MindSparksNode>(target);
 
-    const sourceCenter = getNodeCenter(sourceNode) ?? { x: sourceX, y: sourceY };
-    const targetCenter = getNodeCenter(targetNode) ?? { x: targetX, y: targetY };
+    const sourceLastKnown = sourceNode?.internals?.userNode ?? null;
+    const targetLastKnown = targetNode?.internals?.userNode ?? null;
+
+    const sourceCenter = getNodeCenter(sourceNode, sourceLastKnown) ?? { x: sourceX, y: sourceY };
+    const targetCenter = getNodeCenter(targetNode, targetLastKnown) ?? { x: targetX, y: targetY };
 
     const [path] = getStraightPath({
         sourceX: sourceCenter.x,

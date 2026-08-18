@@ -18,6 +18,13 @@
 
 import type { Node, Edge } from "@xyflow/react";
 import type { Spark, Flame, Connection } from "../types";
+import { Position } from "@xyflow/react";
+import { DEFAULT_CARD_WIDTH } from "./constants";
+
+const CARD_HANDLES = [
+    { type: "source" as const, position: Position.Top, x: DEFAULT_CARD_WIDTH / 2, y: 0, width: 1, height: 1 },
+    { type: "target" as const, position: Position.Top, x: DEFAULT_CARD_WIDTH / 2, y: 0, width: 1, height: 1 },
+];
 
 // --------------------------
 // Custom node types
@@ -48,15 +55,22 @@ export type MindSparksNode = SparkNode | FlameNode;
 // The full spark goes in data.spark so the SparkCard component can read any field
 //  without needing any additional props.
 // --------------------------
-export function sparkToNode(spark: Spark): SparkNode {
-    return {
+const sparkNodeCache = new Map<string, SparkNode>();
+function sparkToNode(spark: Spark): SparkNode {
+    const cached = sparkNodeCache.get(spark.id);
+    if (cached && cached.data.spark === spark) return cached;
+
+    const node: SparkNode = {
         id: spark.id,
         type: "spark",
         position: spark.position,
         data: { spark },
         draggable: true,
-        selectable: true,
+        selectable: false,
+        handles: CARD_HANDLES,
     };
+    sparkNodeCache.set(spark.id, node);
+    return node;
 }
 
 // --------------------------
@@ -65,15 +79,23 @@ export function sparkToNode(spark: Spark): SparkNode {
 // Transforms a Zustand Flame into a React Flow node.
 // Same pattern as SparkToNode
 // --------------------------
-export function flameToNode(flame: Flame): FlameNode {
-    return {
+const flameNodeCache = new Map<string, FlameNode>();
+
+function flameToNode(flame: Flame): FlameNode {
+    const cached = flameNodeCache.get(flame.id);
+    if (cached && cached.data.flame === flame) return cached;
+
+    const node: FlameNode = {
         id: flame.id,
         type: "flame",
         position: flame.position,
         data: { flame },
         draggable: true,
-        selectable: true,
+        selectable: false,
+        handles: CARD_HANDLES,
     };
+    flameNodeCache.set(flame.id, node);
+    return node;
 }
 
 // --------------------------
@@ -95,7 +117,7 @@ export function connectionToEdge(connection: Connection): Edge {
         style: {
             stroke: isLineage ? "var(--color-accent)" : "var(--color-border-accent)",
             strokeWidth: 1,
-            strokeDasharray: isLineage ? "12 6" : "4 3",
+            strokeDasharray: isLineage ? "8 2" : "6 4",
             opacity: isLineage ? 0.4 : 0.7,
         },
         animated: true, //* Might change this to isLineage if lineage and related lines get easily confused.

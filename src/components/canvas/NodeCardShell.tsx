@@ -16,8 +16,7 @@ import { Handle, Position } from "@xyflow/react";
 import type { Category } from "../../types";
 import { formatRelativeDate } from "../../lib/utils";
 import {
-    DEFAULT_CARD_WIDTH,
-    DEFAULT_CARD_HEIGHT
+    DEFAULT_CARD_WIDTH
  } from "../../lib/constants";
 
 // --------------------------

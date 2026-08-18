@@ -105,12 +105,18 @@ export function Canvas() {
     );
 
     // for connection rendering
-    const visibleNodeIds = useMemo(
+    const visibleNodeIds    = useMemo(
         () => new Set([...sparks.map((s) => s.id), ...flames.map((f) => f.id)]),
         [sparks, flames]
     );
-    const nodes             = sparksAndFlamesToNodes(sparks, flames);
-    const edges             = connectionsToEdges(connections, visibleNodeIds);
+    const nodes             = useMemo(
+        () => sparksAndFlamesToNodes(sparks, flames),
+        [sparks, flames]
+    );
+    const edges             = useMemo(
+        () => connectionsToEdges(connections, visibleNodeIds),
+        [connections, visibleNodeIds]
+    );
 
     //
     // Selection stuff
@@ -134,18 +140,36 @@ export function Canvas() {
     };
 
     useEffect(() => {
-        setDisplayNodes(
-            nodes.map((node) => ({
-                ...node,
-                selected:
+        setDisplayNodes((prev) => {
+            const prevById = new Map(prev.map((n) => [n.id, n]));
+
+            return nodes.map((node) => {
+                const isSelected =
                     selection.type === "single"
                         ? selection.id === node.id
                         : selection.type === "multi"
                             ? selection.nodes.some((n) => n.id === node.id)
-                            : false,
-            }))
-        );
-    }, [sparks, flames, selection]);
+                            : false;
+                
+                const prevNode = prevById.get(node.id);
+
+                // If the node (position, data, etc.) and the selection flag
+                // didn't change, reuse the SAME reference.
+                if (
+                    prevNode &&
+                    prevNode.position === node.position &&
+                    prevNode.data === node.data &&
+                    (prevNode.selected ?? false) === isSelected
+                ) {
+                    return prevNode;
+                }
+
+                return prevNode
+                    ? { ...prevNode, ...node, selected: isSelected }
+                    : { ...node, selected: isSelected };
+            });
+        });
+    }, [nodes, selection]);
 
     // For group selecting
     const getNodesInBox = useCallback((start: Position, current: Position) => {
@@ -486,6 +510,7 @@ export function Canvas() {
                 selectionOnDrag={false}
                 selectNodesOnDrag={false}
                 nodesConnectable={false}
+                elementsSelectable={false}
                 onNodeClick={handleNodeClick}
                 onPaneClick={handlePaneClick}
                 onNodesChange={onNodesChange}
