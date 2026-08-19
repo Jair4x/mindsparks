@@ -445,24 +445,32 @@ function ContextMenuContent({
             {/* Multiple nodes selected */}
             {isNodeContext && isMulti && (
                 <>
-                    <SubmenuItem
-                        icon={<Link size={14} />}
-                        label="Create relation"
-                        isOpen={openSubmenu === "relation"}
-                        onOpen={() => setOpenSubmenu("relation")}
-                        flipLeft={flipSubmenuLeft}
-                    >
+                    {selection.type === "multi" && selection.nodes.length === 2 ? (
                         <MenuItem
-                            icon={<ArrowRight size={14} />}
-                            label="To this node"
-                            onClick={handleCreateRelationToNode}
+                            icon={<Link size={14} />}
+                            label="Create relation"
+                            onClick={handleCreateRelationBetweenAll} // Use between all relation logic because it doesn't depend on which of the two nodes was right-clicked.
                         />
-                        <MenuItem
-                            icon={<Share2 size={14} />}
-                            label="Between all selected nodes"
-                            onClick={handleCreateRelationBetweenAll}
-                        />
-                    </SubmenuItem>
+                    ): (
+                        <SubmenuItem
+                            icon={<Link size={14} />}
+                            label="Create relation"
+                            isOpen={openSubmenu === "relation"}
+                            onOpen={() => setOpenSubmenu("relation")}
+                            flipLeft={flipSubmenuLeft}
+                        >
+                            <MenuItem
+                                icon={<ArrowRight size={14} />}
+                                label="To this node"
+                                onClick={handleCreateRelationToNode}
+                            />
+                            <MenuItem
+                                icon={<Share2 size={14} />}
+                                label="Between all selected nodes"
+                                onClick={handleCreateRelationBetweenAll}
+                            />
+                        </SubmenuItem>
+                    )}
                     
                     <MenuSeparator />
 
