@@ -5,12 +5,13 @@
 //  It's only use is to distribute the space on screen and react to the state of the UI (if side panel is collapsed or zen mode is active)
 //
 
+import { useRef } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { Layers, ChevronDown } from "lucide-react";
 import { useUIStore, useSpaceStore } from "../../store";
 
 import { SidePanel } from "../panel/SidePanel";
-import { Canvas } from "../canvas/Canvas";
+import { Canvas, type CanvasHandle } from "../canvas/Canvas";
 import { FlameView } from "../flame/FlameView";
 
 import { SparkModal } from "../ui/SparkModal";
@@ -27,7 +28,7 @@ export function AppLayout() {
     const isPanelCollapsed  = useUIStore((s) => s.isPanelCollapsed);
     const isZenModeActive   = useUIStore((s) => s.isZenModeActive);
     
-    const openSparkInput    = useUIStore((s) => s.openSparkInput);
+    const canvasRef         = useRef<CanvasHandle>(null);
 
     const activeSpace       = useSpaceStore((s) => s.getActiveSpace());
     const activeView        = useUIStore((s) => s.activeView);
@@ -81,19 +82,14 @@ export function AppLayout() {
                         */}
                         <main className="absolute inset-0 pt-11">
                             <ReactFlowProvider>
-                                <Canvas />
+                                <Canvas ref={canvasRef} />
                             </ReactFlowProvider>
                         </main>
 
                         {/*
                             Side panel.
                         */}
-                        {showPanel && ( <SidePanel onCreateSpark={() => {
-                            openSparkInput({
-                                screen: { x: window.innerWidth / 2, y: window.innerHeight / 2 - 44 },
-                                canvas: { x: window.innerWidth / 2, y: window.innerHeight / 2 }
-                            });
-                        }}/> ) }
+                        {showPanel && ( <SidePanel onCreateSpark={() => canvasRef.current?.createSparkAtCenter()}/> ) }
                         
                         <SparkModal />
                         <SparkToFlameModal />

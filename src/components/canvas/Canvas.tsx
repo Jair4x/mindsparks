@@ -6,7 +6,7 @@
 //
 //
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo, forwardRef, useImperativeHandle } from "react";
 import { useShallow } from "zustand/shallow";
 import {
     useReactFlow,
@@ -59,38 +59,44 @@ const edgeTypes = {
     center: NodeCardEdge,
 };
 
+export interface CanvasHandle {
+    createSparkAtCenter: () => void;
+}
+
 // --------------------------
 // Canvas
+//
+// Definition looks nasty, but it's to be able to expose CanvasHandle.
 // --------------------------
 
-export function Canvas() {
+export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
     const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom, getNodes } = useReactFlow();
 
-    const sparkInputPosition    = useUIStore((s) => s.sparkInputPosition);
-    const openSparkInput        = useUIStore((s) => s.openSparkInput);
-    const closeSparkInput       = useUIStore((s) => s.closeSparkInput);
+    const sparkInputPosition = useUIStore((s) => s.sparkInputPosition);
+    const openSparkInput = useUIStore((s) => s.openSparkInput);
+    const closeSparkInput = useUIStore((s) => s.closeSparkInput);
 
-    const setZoom               = useUIStore((s) => s.setZoom);
-    const setCanvasViewport     = useUIStore((s) => s.setCanvasViewport);
-    const canvasViewport        = useUIStore((s) => s.canvasViewport);
+    const setZoom = useUIStore((s) => s.setZoom);
+    const setCanvasViewport = useUIStore((s) => s.setCanvasViewport);
+    const canvasViewport = useUIStore((s) => s.canvasViewport);
 
-    const pendingRepulsion      = useUIStore((s) => s.pendingRepulsion);
+    const pendingRepulsion = useUIStore((s) => s.pendingRepulsion);
     const clearPendingRepulsion = useUIStore((s) => s.clearPendingRepulsion);
 
-    const selectNode            = useUIStore((s) => s.selectNode);
-    const toggleNodeSelection   = useUIStore((s) => s.toggleNodeSelection);
-    const clearSelection        = useUIStore((s) => s.clearSelection);
-    const replaceSelection      = useUIStore((s) => s.replaceSelection);
-    const selection             = useUIStore((s) => s.selection);
+    const selectNode = useUIStore((s) => s.selectNode);
+    const toggleNodeSelection = useUIStore((s) => s.toggleNodeSelection);
+    const clearSelection = useUIStore((s) => s.clearSelection);
+    const replaceSelection = useUIStore((s) => s.replaceSelection);
+    const selection = useUIStore((s) => s.selection);
     
-    const isSelecting           = useUIStore((s) => s.isSelecting);
-    const selectionBox          = useUIStore((s) => s.selectionBox);
-    const startSelectionBox     = useUIStore((s) => s.startSelectionBox);
-    const updateSelectionBox    = useUIStore((s) => s.updateSelectionBox);
-    const endSelectionBox       = useUIStore((s) => s.endSelectionBox);
+    const isSelecting = useUIStore((s) => s.isSelecting);
+    const selectionBox = useUIStore((s) => s.selectionBox);
+    const startSelectionBox = useUIStore((s) => s.startSelectionBox);
+    const updateSelectionBox = useUIStore((s) => s.updateSelectionBox);
+    const endSelectionBox = useUIStore((s) => s.endSelectionBox);
 
-    const openContextMenu       = useUIStore((s) => s.openContextMenu);
+    const openContextMenu = useUIStore((s) => s.openContextMenu);
 
     const sparks = useSparkStore(
         useShallow((s) => s.getActiveSparksBySpace(activeSpaceId))
@@ -105,15 +111,15 @@ export function Canvas() {
     );
 
     // for connection rendering
-    const visibleNodeIds    = useMemo(
+    const visibleNodeIds = useMemo(
         () => new Set([...sparks.map((s) => s.id), ...flames.map((f) => f.id)]),
         [sparks, flames]
     );
-    const nodes             = useMemo(
+    const nodes = useMemo(
         () => sparksAndFlamesToNodes(sparks, flames),
         [sparks, flames]
     );
-    const edges             = useMemo(
+    const edges = useMemo(
         () => connectionsToEdges(connections, visibleNodeIds),
         [connections, visibleNodeIds]
     );
@@ -173,17 +179,17 @@ export function Canvas() {
 
     // For group selecting
     const getNodesInBox = useCallback((start: Position, current: Position) => {
-        const left      = Math.min(start.x, current.x);
-        const top       = Math.min(start.y, current.y); 
-        const right     = Math.max(start.x, current.x);
-        const bottom    = Math.max(start.y, current.y);
+        const left = Math.min(start.x, current.x);
+        const top = Math.min(start.y, current.y);
+        const right = Math.max(start.x, current.x);
+        const bottom = Math.max(start.y, current.y);
 
         return displayNodes.filter((node) => {
-            const screenPos     = flowToScreenPosition(node.position);
-            const el            = document.querySelector(`[data-id="${node.id}"]`);
-            const rect          = el?.getBoundingClientRect();
-            const nodeWidth     = rect?.width ?? node.width ?? DEFAULT_CARD_WIDTH;
-            const nodeHeight    = rect?.height ?? node.height ?? DEFAULT_CARD_HEIGHT;
+            const screenPos = flowToScreenPosition(node.position);
+            const el = document.querySelector(`[data-id="${node.id}"]`);
+            const rect = el?.getBoundingClientRect();
+            const nodeWidth = rect?.width ?? node.width ?? DEFAULT_CARD_WIDTH;
+            const nodeHeight = rect?.height ?? node.height ?? DEFAULT_CARD_HEIGHT;
 
             return (
                 screenPos.x < right &&
@@ -224,8 +230,8 @@ export function Canvas() {
 
             const selected = getNodesInBox(selectionBox.start, selectionBox.current)
                 .map((node) => ({
-                    id:         node.id,
-                    type:       node.type as "spark" | "flame",
+                    id: node.id,
+                    type: node.type as "spark" | "flame",
                 }));
 
             if (selected.length === 0) {
@@ -274,8 +280,8 @@ export function Canvas() {
         if (affected.length === 0) return;
 
         const startPositions = affected.map((a) => ({
-            id:         a.id,
-            position:   displayNodes.find((n) => n.id === a.id)?.position ?? a.position,
+            id: a.id,
+            position: displayNodes.find((n) => n.id === a.id)?.position ?? a.position,
         }));
 
         animateRepulsion(
@@ -322,7 +328,7 @@ export function Canvas() {
     const getNodeSize = useCallback((id: string) => {
         const measured = getNodes().find((n) => n.id === id)?.measured;
         return {
-            width:  measured?.width  ?? DEFAULT_CARD_WIDTH,
+            width: measured?.width ?? DEFAULT_CARD_WIDTH,
             height: measured?.height ?? DEFAULT_CARD_HEIGHT,
         };
     }, [getNodes]);
@@ -348,9 +354,9 @@ export function Canvas() {
 
         // Which nodes need repulsion.
         const allNodePositions = displayNodes.map((n) => ({
-            id:         n.id,
-            position:   n.position,
-            size:       getNodeSize(n.id),
+            id: n.id,
+            position: n.position,
+            size: getNodeSize(n.id),
         }));
 
         resolveAndAnimateCollisions(typedNode.id, allNodePositions);
@@ -514,9 +520,9 @@ export function Canvas() {
         );
 
         const allNodePositions = nodes.map((node) => ({
-            id:         node.id,
-            position:   displayNodePositions.get(node.id) ?? node.position,
-            size:       getNodeSize(node.id),
+            id: node.id,
+            position: displayNodePositions.get(node.id) ?? node.position,
+            size: getNodeSize(node.id),
         }));
 
         for (const id of pendingRepulsion) {
@@ -525,6 +531,35 @@ export function Canvas() {
 
         clearPendingRepulsion();
     }, [pendingRepulsion, displayNodes, resolveAndAnimateCollisions, clearPendingRepulsion, getNodeSize]);
+
+    // --------------------------
+    // createSparkAtCenter
+    //
+    // Exposed via ref so AppLayout (outside of ReactFlowProvider)
+    //  can ask the creation of a centered spark without duplicating the math
+    //  screenToFlowPosition does or going into UI store for something that's
+    //  a specific event, not a state.
+    // --------------------------
+    useImperativeHandle(ref, () => ({
+        createSparkAtCenter: () => {
+            const visibleCenterY = (window.innerHeight - HEADER_HEIGHT) / 2;
+
+            const centerScreen = {
+                x: window.innerWidth / 2,
+                y: HEADER_HEIGHT + visibleCenterY,
+            };
+
+            try {
+                const canvasPosition = screenToFlowPosition(centerScreen);
+                openSparkInput({
+                    screen: { x: centerScreen.x, y: visibleCenterY },
+                    canvas: canvasPosition,
+                });
+            } catch (err) {
+                console.error("screenToFlowPosition failed:", err);
+            }
+        },
+    }), [screenToFlowPosition, openSparkInput]);
 
     return (
         <div
@@ -594,4 +629,4 @@ export function Canvas() {
             <ContextMenu />
         </div>
     );
-}
+});
