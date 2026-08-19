@@ -135,7 +135,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                         {/* Left: Category button + pill if active */}
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={() => openModal("category-form", spark.id) } // TODO: Change this to an actual selection, not open the category creation modal. (Or edit the category modal, who knows.)
+                                onClick={() => openModal("assign-category", spark.id) }
                                 aria-label="Change category"
                                 className="flex items-center justify-center cursor-pointer"
                                 style={{

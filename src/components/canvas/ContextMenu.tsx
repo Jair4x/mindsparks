@@ -326,8 +326,8 @@ function ContextMenuContent({
         onClose();
     };
 
-    const handleCreateCategory = () => {
-        openModal("category-form", null);
+    const handleManageCategory = () => {
+        openModal("manage-category", null);
         onClose();
     };
 
@@ -377,7 +377,7 @@ function ContextMenuContent({
                     <MenuItem
                         icon={<Tag size={14} />}
                         label="Create Category"
-                        onClick={handleCreateCategory}
+                        onClick={handleManageCategory}
                         onMouseEnter={() => setOpenSubmenu(null)}
                     />
                     <MenuItem
@@ -426,7 +426,7 @@ function ContextMenuContent({
                         <CategorySubmenuContent
                             categories={categories}
                             onSelect={handleAssignCategory}
-                            onCreateNew={handleCreateCategory}
+                            onCreateNew={handleManageCategory}
                         />
                     </SubmenuItem>
 
@@ -490,7 +490,7 @@ function ContextMenuContent({
                         <CategorySubmenuContent
                             categories={categories}
                             onSelect={handleAssignCategory}
-                            onCreateNew={handleCreateCategory}
+                            onCreateNew={handleManageCategory}
                         />
                     </SubmenuItem>
 
@@ -682,7 +682,7 @@ function CategorySubmenuContent({
             {categories.length > 0 && <MenuSeparator />}
             <MenuItem
                 icon={<Plus size={14} />}
-                label="Create new Category"
+                label="Create/Manage Category"
                 onClick={onCreateNew}
             />
         </>
