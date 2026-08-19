@@ -13,6 +13,7 @@
 
 import { useState } from "react";
 import { Handle, Position } from "@xyflow/react";
+import { Check } from "lucide-react";
 import type { Category } from "../../types";
 import { formatRelativeDate } from "../../lib/utils";
 import {
@@ -27,6 +28,7 @@ interface NodeCardShellProps {
     borderColor:    string;
     boxShadow?:     string;
     opacity?:       number;
+    selected?:      boolean;
 
     // Flame needs 'position: relative', so its flame icon can be
     // absolutely positioned within the card. Spark doesn't, so it's opt-in.
@@ -59,6 +61,7 @@ export function NodeCardShell({
     borderColor,
     boxShadow,
     opacity = 1,
+    selected = false,
     relativePosition = false,
     category,
     createdAt,
@@ -78,15 +81,15 @@ export function NodeCardShell({
             onMouseLeave={() => setIsHovered(false)}
             style={{
                 background: "var(--color-surface)",
-                border: `0.5px solid ${borderColor}`,
+                border: `${selected ? 2 : 0.5}px solid ${borderColor}`,
                 borderRadius: 12,
                 padding: "10px 14px",
                 width: DEFAULT_CARD_WIDTH,
                 cursor: "pointer",
-                transition: "border-color 0.15s",
+                transition: "border-color 0.15s, border-width 0.15s",
                 boxShadow,
                 opacity,
-                position: relativePosition ? "relative" : undefined,
+                position: (relativePosition || selected) ? "relative" : undefined,
             }}
         >
             <Handle
@@ -100,6 +103,28 @@ export function NodeCardShell({
                 position={Position.Top}
                 style={{ opacity: 0, pointerEvents: "none" }}
             />
+
+            {/* When selected, a little badge appears indicating you selected a node */}
+            {selected && (
+                <div
+                    style={{
+                        position: "absolute",
+                        top: -8,
+                        left: -8,
+                        width: 16,
+                        height: 16,
+                        borderRadius: "50%",
+                        background: "var(--color-accent)",
+                        color: "var(--color-surface)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxShadow: "0 0 0 2px var(--color-surface)",
+                    }}
+                >
+                    <Check size={10} strokeWidth={3} />
+                </div>
+            )}
 
             {cornerBadge?.(isHovered)}
 

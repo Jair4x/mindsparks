@@ -49,6 +49,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             opacity={flame.isCompleted ? 0.5 : 1}
             relativePosition
             category={category}
+            selected={selected}
             createdAt={flame.createdAt}
             now={nowMs}
             onDoubleClick={() => openFlame(flame.id)}

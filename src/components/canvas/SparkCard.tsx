@@ -48,6 +48,7 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
             borderColor={borderColor}
             boxShadow={boxShadow}
             category={category}
+            selected={selected}
             createdAt={spark.createdAt}
             now={nowMs}
             onDoubleClick={() => openModal("spark-detail", spark.id)}
