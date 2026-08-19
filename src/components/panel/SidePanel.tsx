@@ -30,7 +30,7 @@ type GroupMode = "none" | "category" | "hierarchy";
 import { useState } from "react";
 
 export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
-    const [groupMode, setGroupMode] = useState<GroupMode>("none");
+    const [groupMode, setGroupMode] = useState<GroupMode>("");
 
     return (
         <aside
@@ -55,33 +55,37 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
             {/* 
                 Search
                 
-                No logic for now.
+                No logic for now, so disabled.
             */}
-            <PanelButton icon={<Search size={17} />} label="Search Spark/Flame" />
+            <PanelButton icon={<Search size={17} />} label="Search Spark/Flame" disabled />
 
             {/*
                 Grouping buttons
 
                 One can be active at a time.
                 Active changes the current local groupMode.
+                No real logic for now, so they're disabled.
             */}
             <PanelButton
                 icon={<LayoutGrid size={17} />}
                 label="No grouping"
                 isActive={groupMode === "none"}
                 onClick={() => setGroupMode("none")}
+                disabled
             />
             <PanelButton
                 icon={<Tags size={17} />}
                 label="Group by Category"
                 isActive={groupMode === "category"}
                 onClick={() => setGroupMode("category")}
+                disabled
             />
             <PanelButton
                 icon={<Network size={17} />}
                 label="Group by Hierarchy"
                 isActive={groupMode === "hierarchy"}
                 onClick={() => setGroupMode("hierarchy")}
+                disabled
             />
 
             <PanelDivider />
@@ -89,11 +93,11 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
             {/*
                 Filters, list view and config.
 
-                No logic for now.
+                No logic for now, so they're disabled.
             */}
-            <PanelButton icon={<Filter size={17} />} label="Filter" />
-            <PanelButton icon={<List size={17} />} label="List view" />
-            <PanelButton icon={<Settings size={17} />} label="Config" />
+            <PanelButton icon={<Filter size={17} />}    label="Filter"      disabled />
+            <PanelButton icon={<List size={17} />}      label="List view"   disabled />
+            <PanelButton icon={<Settings size={17} />}  label="Config"      disabled />
         </aside>
     );
 }
@@ -142,16 +146,19 @@ function PanelButton({
     label,
     isActive = false,
     onClick,
+    disabled = false,
 }: {
     icon: React.ReactNode;
     label: string;
     isActive?: boolean;
     onClick?: () => void;
+    disabled?: boolean;
 }) {
     return (
         <button
             aria-label={label}
             onClick={onClick}
+            disabled={disabled}
             className="flex items-center justify-center cursor-pointer transition-colors shrink-0"
             style={{
                 width: 32,
@@ -159,17 +166,22 @@ function PanelButton({
                 borderRadius: 6,
                 border: "none",
                 background: isActive ? "var(--color-surface-raised)" : "transparent",
-                color: isActive ? "var(--color-accent)" : "var(--color-accent-light)",
+                color: disabled
+                    ? "var(--color-text-muted)"
+                    : isActive
+                        ? "var(--color-accent)"
+                        : "var(--color-accent-light)",
+                cursor: disabled ? "not-allowed" : "pointer",
                 margin: "2px 0",
             }}
             onMouseEnter={(e) => {
-                if (!isActive) {
+                if (!isActive && !disabled) {
                     (e.currentTarget as HTMLButtonElement).style.background = "var(--color-surface-raised)";
                     (e.currentTarget as HTMLButtonElement).style.color      = "var(--color-text)";
                 }
             }}
             onMouseLeave={(e) => {
-                if (!isActive) {
+                if (!isActive && !disabled) {
                     (e.currentTarget as HTMLButtonElement).style.background = "transparent";
                     (e.currentTarget as HTMLButtonElement).style.color      = "var(--color-accent-light)";
                 }
