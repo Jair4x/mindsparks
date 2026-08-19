@@ -12,9 +12,11 @@
 
 import type { Position } from "../types";
 import {
-    REPULSION_RADIUS,
+    REPULSION_GAP,
     REPULSION_MAX_FORCE as MAX_FORCE,
     REPULSION_DURATION  as ANIMATION_DURATION,
+    DEFAULT_CARD_WIDTH,
+    DEFAULT_CARD_HEIGHT,
 } from "./constants";
 
 // --------------------------
@@ -24,6 +26,7 @@ import {
 export interface NodePosition {
     id: string;
     position: Position;
+    size?: { width: number; height: number };
 }
 
 
@@ -37,26 +40,42 @@ export interface NodePosition {
 // --------------------------
 function calculateRepulsion(
     droppedId:          string,
-    droppedPosition:    Position,
     allNodes:           NodePosition[]
 ): NodePosition[] {
+    const dropped = allNodes.find((n) => n.id === droppedId);
+    if (!dropped) return [];
+
+    const droppedSize = dropped.size ?? { width: DEFAULT_CARD_WIDTH, height: DEFAULT_CARD_HEIGHT };
     const affected: NodePosition[] = [];
 
     for (const node of allNodes) {
         if (node.id === droppedId) continue;
 
-        const dx = node.position.x - droppedPosition.x;
-        const dy = node.position.y - droppedPosition.y;
-        const distance = Math.sqrt(dx * dx + dy * dy); // sqrt of dx² + dy²
+        const nodeSize = node.size ?? { width: DEFAULT_CARD_WIDTH, height: DEFAULT_CARD_HEIGHT };
 
-        if (distance >= REPULSION_RADIUS) continue;
+        const dx = node.position.x - dropped.position.x;
+        const dy = node.position.y - dropped.position.y;
 
-        // Max force is applied when distance is 0 and 0, AKA distance === REPULSION_RADIUS.
-        const force = MAX_FORCE * (1 - distance / REPULSION_RADIUS);
+        // The "radius" on X is the sum of the median-width of both nodes + the desired gap, 
+        // and for Y is the same, but with the real heights.
+        //
+        // Normalizing dx/dy against those radius: normDistance === 1 means "just touching borders + gap",
+        // paying no mind to whether the approach was lateral or vertical.
+        const spreadX = (droppedSize.width  + nodeSize.width)  / 2 + REPULSION_GAP;
+        const spreadY = (droppedSize.height + nodeSize.height) / 2 + REPULSION_GAP;
+
+        const normX = dx / spreadX;
+        const normY = dy / spreadY;
+        const normDistance = Math.sqrt(normX * normX + normY * normY); // sqrt(normX² + normY²)
+
+        if (normDistance >= 1) continue;
+
+        // Max force is applied when normDistance is 0 (full center overlap).
+        const force = MAX_FORCE * (1 - normDistance);
 
         // Normalize the vector's direction to apply force
         // If distance is 0, push in a random distance.
-        const angle = distance === 0 ? Math.random() * Math.PI * 2 : Math.atan2(dy, dx);
+        const angle = (dx === 0 && dy === 0) ? Math.random() * Math.PI * 2 : Math.atan2(dy, dx);
 
         affected.push({
             id: node.id,
@@ -64,6 +83,7 @@ function calculateRepulsion(
                 x: node.position.x + Math.cos(angle) * force,
                 y: node.position.y + Math.sin(angle) * force,
             },
+            size: node.size,
         });
     }
 
@@ -148,7 +168,7 @@ export function resolveAllCollisions(
         iterations++;
         
         for (const node of current) {
-            const affected = calculateRepulsion(node.id, node.position, current);
+            const affected = calculateRepulsion(node.id, current);
             if (affected.length === 0) continue;
 
             changed = true;

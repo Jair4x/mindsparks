@@ -65,7 +65,7 @@ const edgeTypes = {
 
 export function Canvas() {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
-    const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom } = useReactFlow();
+    const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom, getNodes } = useReactFlow();
 
     const sparkInputPosition    = useUIStore((s) => s.sparkInputPosition);
     const openSparkInput        = useUIStore((s) => s.openSparkInput);
@@ -309,6 +309,25 @@ export function Canvas() {
     }, [displayNodes]);
 
     // --------------------------
+    // getNodeSize
+    //
+    // Reads the real size (height/width) that React Flow measured for a node on screen.
+    // 
+    // Cards have a fixed width but variable height depending on the content,
+    //  so we can't assume a unique size for all of them.
+    //
+    // If the node wasn't rendered not even once (e.g. just created, same frame),
+    //  it doesn't have `measured` yet, so we fallback to the default size.
+    // --------------------------
+    const getNodeSize = useCallback((id: string) => {
+        const measured = getNodes().find((n) => n.id === id)?.measured;
+        return {
+            width:  measured?.width  ?? DEFAULT_CARD_WIDTH,
+            height: measured?.height ?? DEFAULT_CARD_HEIGHT,
+        };
+    }, [getNodes]);
+
+    // --------------------------
     // onNodeDragStop
     //
     // When the user stops dragging a node, React Flow gives us the
@@ -331,10 +350,11 @@ export function Canvas() {
         const allNodePositions = displayNodes.map((n) => ({
             id:         n.id,
             position:   n.position,
+            size:       getNodeSize(n.id),
         }));
 
         resolveAndAnimateCollisions(typedNode.id, allNodePositions);
-    }, [displayNodes, resolveAndAnimateCollisions]);
+    }, [displayNodes, resolveAndAnimateCollisions, getNodeSize]);
 
     // --------------------------
     // onConnect
@@ -416,13 +436,22 @@ export function Canvas() {
             spaceId: activeSpaceId,
         });
 
-        const allNodePositions = displayNodes.map((n) => ({ id: n.id, position: n.position }));
-        allNodePositions.push({ id: newSpark.id, position: sparkInputPosition!.canvas });
+        const allNodePositions = displayNodes.map((n) => ({
+            id: n.id,
+            position: n.position,
+            size: getNodeSize(n.id),
+        }));
+
+        allNodePositions.push({
+            id: newSpark.id,
+            position: sparkInputPosition!.canvas,
+            size: getNodeSize(newSpark.id),
+        });
 
         resolveAndAnimateCollisions(newSpark.id, allNodePositions);
 
         closeSparkInput();
-    }, [displayNodes, sparkInputPosition, activeSpaceId, resolveAndAnimateCollisions, closeSparkInput]);
+    }, [displayNodes, sparkInputPosition, activeSpaceId, resolveAndAnimateCollisions, closeSparkInput, getNodeSize]);
 
     // --------------------------
     // handlePaneContextMenu / handleNodeContextMenu
@@ -485,8 +514,9 @@ export function Canvas() {
         );
 
         const allNodePositions = nodes.map((node) => ({
-            id: node.id,
-            position: displayNodePositions.get(node.id) ?? node.position,
+            id:         node.id,
+            position:   displayNodePositions.get(node.id) ?? node.position,
+            size:       getNodeSize(node.id),
         }));
 
         for (const id of pendingRepulsion) {
@@ -494,7 +524,7 @@ export function Canvas() {
         }
 
         clearPendingRepulsion();
-    }, [pendingRepulsion, displayNodes, resolveAndAnimateCollisions, clearPendingRepulsion]);
+    }, [pendingRepulsion, displayNodes, resolveAndAnimateCollisions, clearPendingRepulsion, getNodeSize]);
 
     return (
         <div

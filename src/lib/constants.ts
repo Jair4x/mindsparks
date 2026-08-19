@@ -21,7 +21,7 @@ export const DEFAULT_CARD_HEIGHT    = 40;       // px
 //          Repulsion
 // --------------------------
 
-export const REPULSION_RADIUS       = 200;
+export const REPULSION_GAP          = 24;       // px (air between borders of two cards)
 export const REPULSION_MAX_FORCE    = 100;
 export const REPULSION_DURATION     = 400;      // ms
 
