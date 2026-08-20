@@ -1,20 +1,25 @@
 //
 // Category modal.
-//  Two versions of the same modal, like SparkToFlameModal:
+//  Three pieces, one file:
 //
-//  "assign-category" mode: opened from a spark/flame to pick which category it belongs to.
-//      Shows a list of the space's categories as single-select buttons, plus the option to
-//      create a new one (which gets assigned right away).
+//  CategoryModal: router. Reads activeModal from the store and mounts whichever of the two below applies.
+//                 Used by callers that go through the store (at the time of this update: only SparkModal, for a single node.)
 //
-//  "manage-category" mode: opened to manage the space's categories in general.
-//      The same list lets you edit an existing category, or create a new one
+//  AssignCategoryModal: reusable, prop-driven. Give it targetNodes (1 or many) and it handles picking
+//                       an existing category or creating a new one and assigning it, no store dependency
+//                       on WHO the targets are. Used by the router above, AND directly by ContextMenu.tsx
+//                       for its (possibly multi-node) selection, without going through activeModal at all.
+//
+//  ManageCategoryModal: pure category administration (create/rename/recolor), no assignment involved.
 //
 
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/shallow";
-import { Pencil, X, Plus, Check, ArrowLeft } from "lucide-react";
+import { Pencil, X, Plus, Check, ArrowLeft, Trash2 as Trash } from "lucide-react";
 import { useUIStore, useCategoryStore, useSpaceStore, useSparkStore, useFlameStore } from "../../store";
 import type { Category } from "../../types";
+import type { SelectedNode } from "../../store";
+import { useAssignCategory } from "../../hooks/useAssignCategory";
 
 // --------------------------
 // Color pallete
@@ -34,7 +39,7 @@ const PRESET_COLORS = [
 type CategoryModalMode = "assign" | "manage";
 
 // --------------------------
-// CategoryModal
+// CategoryModal (router)
 // --------------------------
 
 export function CategoryModal() {
@@ -42,37 +47,76 @@ export function CategoryModal() {
     const activeModalNodeId     = useUIStore((s) => s.activeModalNodeId);
     const closeModal            = useUIStore((s) => s.closeModal);
 
+    // activeModalNodeId doesn't carry its own type, so we resolve it
+    // against both store, same thing the old single-file version did.
+    const sparksAll = useSparkStore((s) => s.sparks);
+    const flamesAll = useFlameStore((s) => s.flames);
+
+    if (activeModal === "assign-category") {
+        // Big ugly multiple terniary operations to find the correct selected nodes
+        const targetNodes: SelectedNode[] = activeModalNodeId
+            ? sparksAll.some((sp) => sp.id === activeModalNodeId)
+                ? [{ id: activeModalNodeId, type: "spark" }]
+                : flamesAll.some((f) => f.id === activeModalNodeId)
+                    ? [{ id: activeModalNodeId, type: "flame" }]
+                    : []
+            : [];
+        
+        return <AssignCategoryModal targetNodes={targetNodes} onClose={closeModal} />;
+    }
+
+    if (activeModal === "manage-category") {
+        return <ManageCategoryModal onClose={closeModal} />;
+    }
+
+    return null;
+}
+
+// --------------------------
+// AssignCategoryModal
+//  The reusable piece. Doesn't know or care whether it was opened via
+//  the store (CategoryModal above) or mounted directly by a caller that already
+//  has its own target nodes (ContextMenu).
+// --------------------------
+
+export function AssignCategoryModal({
+    targetNodes,
+    onClose,
+    startInCreateForm = false,
+}: {
+    targetNodes:        SelectedNode[];
+    onClose:            () => void;
+    startInCreateForm?: boolean;
+}) {
     const activeSpaceId         = useSpaceStore((s) => s.activeSpaceId);
-    
     const categories            = useCategoryStore((s) => s.categories);
     const createCategory        = useCategoryStore((s) => s.createCategory);
     const renameCategory        = useCategoryStore((s) => s.renameCategory);
     const updateCategoryColor   = useCategoryStore((s) => s.updateCategoryColor);
-
-    // activeModalNodeId is used as the spark/flame id being categorized, in "assign-category" mode.
-    const spark                 = useSparkStore((s) => activeModalNodeId ? s.sparks.find((sp) => sp.id === activeModalNodeId) : undefined);
-    const flame                 = useFlameStore((s) => activeModalNodeId ? s.flames.find((f) => f.id === activeModalNodeId) : undefined);
-    const assignSparkCategory   = useSparkStore((s) => s.assignCategory);
-    const assignFlameCategory   = useFlameStore((s) => s.assignCategory);
+    const assignCategory        = useAssignCategory();
     
-    if (activeModal !== "assign-category" && activeModal !== "manage-category") return null;
+    const sparksAll = useSparkStore((s) => s.sparks);
+    const flamesAll = useFlameStore((s) => s.flames);
 
-    const mode: CategoryModalMode   = activeModal === "assign-category" ? "assign" : "manage";
-    const currentCategoryId         = spark?.categoryId ?? flame?.categoryId;
+    // Only meaningful to highlight a "current" category when there's
+    // exactly one target. With several, there isn't a single truth to show.
+    const currentCategoryId = targetNodes.length === 1
+        ? (targetNodes[0].type === "spark"
+            ? sparksAll.find((sp) => sp.id === targetNodes[0].id)?.categoryId
+            : flamesAll.find((f) => f.id === targetNodes[0].id)?.categoryId)
+        : undefined;
     
     const handleAssign = (categoryId: string | undefined) => {
-        if (spark) assignSparkCategory(spark.id, categoryId);
-        else if (flame) assignFlameCategory(flame.id, categoryId);
-
-        closeModal();
+        assignCategory(targetNodes, categoryId);
+        onClose();
     };
 
     return (
         <CategoryModalContent
-            mode={mode}
+            mode="assign"
             categories={categories}
             currentCategoryId={currentCategoryId}
-            onClose={closeModal}
+            onClose={onClose}
             onSelect={handleAssign}
             onSave={(id, name, color) => {
                 renameCategory(id, name);
@@ -80,9 +124,40 @@ export function CategoryModal() {
             }}
             onCreate={(name, color) => {
                 const newCategory = createCategory({ name, color, spaceId: activeSpaceId });
-
-                if (mode === "assign") handleAssign(newCategory.id);
+                handleAssign(newCategory.id);
             }}
+            initialView={startInCreateForm ? "form" : "list"}
+        />
+    );
+}
+
+// --------------------------
+// ManageCategoryModal
+//  Pure administration: create, rename, delete, recolor. Never assigns anything.
+// --------------------------
+
+function ManageCategoryModal({ onClose }: { onClose: () => void }) {
+    const activeSpaceId         = useSpaceStore((s) => s.activeSpaceId);
+    const categories            = useCategoryStore((s) => s.categories);
+    const createCategory        = useCategoryStore((s) => s.createCategory);
+    const renameCategory        = useCategoryStore((s) => s.renameCategory);
+    const updateCategoryColor   = useCategoryStore((s) => s.updateCategoryColor);
+    const deleteCategory        = useCategoryStore((s) => s.deleteCategory);
+    
+    return (
+        <CategoryModalContent
+            mode="manage"
+            categories={categories}
+            onClose={onClose}
+            onSelect={() => { }} // "manage" mode's list never calls onSelect, so no Check/assign shown
+            onSave={(id, name, color) => {
+                renameCategory(id, name);
+                updateCategoryColor(id, color);
+            }}
+            onCreate={(name, color) => {
+                createCategory({ name, color, spaceId: activeSpaceId });
+            }}
+            onDelete={deleteCategory}
         />
     );
 }
@@ -99,6 +174,8 @@ function CategoryModalContent({
     onSelect,
     onSave,
     onCreate,
+    onDelete,
+    initialView = "list",
 }: {
     mode:                   CategoryModalMode;
     categories:             Category[];
@@ -107,14 +184,18 @@ function CategoryModalContent({
     onSelect:               (categoryId: string | undefined) => void;
     onSave:                 (id: string, name: string, color: string) => void;
     onCreate:               (name: string, color: string) => void;
+    onDelete?:              (categoryId: string) => void;
+    initialView?:           "list" | "form";
 }) {
-    const [view, setView]                           = useState<"list" | "form">("list");
+    const [view, setView]                           = useState<"list" | "form" | "confirm-delete">(initialView);
     const [editingCategory, setEditingCategory]     = useState<Category | null>(null);
+    const [deletingCategory, setDeletingCategory]   = useState<Category | null>(null);
     const overlayRef                                = useRef<HTMLDivElement>(null);
 
     const backToList = () => {
         setView("list");
         setEditingCategory(null);
+        setDeletingCategory(null);
     };
 
     const openCreateForm = () => {
@@ -127,10 +208,20 @@ function CategoryModalContent({
         setEditingCategory(category);
     };
 
+    const openDeleteConfirm = (category: Category) => {
+        setView("confirm-delete");
+        setDeletingCategory(category);
+    };
+
+    const confirmDelete = () => {
+        if (deletingCategory) onDelete?.(deletingCategory.id);
+        backToList();
+    };
+
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
             if (e.key !== "Escape") return;
-            if (view === "form") backToList();
+            if (view === "form" || view === "confirm-delete") backToList();
             else onClose();
         };
         window.addEventListener("keydown", handleKey);
@@ -158,7 +249,9 @@ function CategoryModalContent({
 
     const headerTitle = view === "list"
         ? (mode === "assign" ? "Assign category" : "Manage categories")
-        : (editingCategory ? "Edit category" : "New category");
+        : view === "form"
+            ? (editingCategory ? "Edit category" : "New category")
+            : "Delete category";
 
     return (
         <div
@@ -188,7 +281,7 @@ function CategoryModalContent({
                     }}
                 >
                     <div className="flex items-center gap-2">
-                        {view === "form" && (
+                        {(view === "form" || view === "confirm-delete") && (
                             <button
                                 onClick={backToList}
                                 aria-label="Back to categories"
@@ -234,8 +327,9 @@ function CategoryModalContent({
                         onSelectCategory={onSelect}
                         onEditCategory={openEditForm}
                         onCreateNew={openCreateForm}
+                        onDeleteCategory={onDelete ? openDeleteConfirm : undefined}
                     />
-                ) : (
+                ) : view === "form" ? (
                     <CategoryForm
                         isEditing={!!editingCategory}
                         initialName={editingCategory?.name ?? ""}
@@ -243,6 +337,14 @@ function CategoryModalContent({
                         onConfirm={handleFormConfirm}
                         onCancel={backToList}
                     />
+                ) : (
+                    deletingCategory && (
+                        <CategoryDeleteConfirm
+                            category={deletingCategory}
+                            onConfirm={confirmDelete}
+                            onCancel={backToList}
+                        />
+                    )
                 )}
             </div>
         </div>
@@ -263,6 +365,7 @@ function CategoryListView({
     onSelectCategory,
     onEditCategory,
     onCreateNew,
+    onDeleteCategory,
 }: {
     mode:               CategoryModalMode;
     categories:         Category[];
@@ -270,12 +373,40 @@ function CategoryListView({
     onSelectCategory:   (categoryId: string | undefined) => void;
     onEditCategory:     (category: Category) => void;
     onCreateNew:        () => void;
+    onDeleteCategory?:  (category: Category) => void;
 }) {
     return (
         <div className="px-5 py-4 flex flex-col gap-3 overflow-auto">
             <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
                 {mode === "assign" ? "CATEGORIES" : "YOUR CATEGORIES"}
             </div>
+
+            {mode === "assign" && (
+                <button
+                    onClick={() => onSelectCategory(undefined)}
+                    className="flex items-center gap-2.5 cursor-pointer w-full text-left"
+                    style={{
+                        background: "transparent",
+                        border: "0.5px dashed var(--color-border)",
+                        borderRadius: 8,
+                        padding: "8px 12px",
+                        fontFamily: "inherit",
+                    }}
+                >
+                    <span
+                        style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            border: "1.5px dashed var(--color-text-muted)",
+                            flexShrink: 0,
+                        }}
+                    />
+                    <span style={{ fontSize: 13, color: "var(--color-text-muted)", flex: 1 }}>
+                        No category
+                    </span>
+                </button>
+            )}
             
             {categories.length === 0 ? (
                 <div style={{ fontSize: 12, color: "var(--color-text-muted)", padding: "4px 0 8px" }}>
@@ -293,6 +424,7 @@ function CategoryListView({
                                 ? onSelectCategory(category.id === currentCategoryId ? undefined : category.id)
                                 : onEditCategory(category)
                             }
+                            onDelete={onDeleteCategory ? () => onDeleteCategory(category) : undefined}
                         />
                     ))}
                 </div>
@@ -327,13 +459,17 @@ function CategoryListItem({
     mode,
     isSelected,
     onClick,
+    onDelete,
 }: {
     category:   Category;
     mode:       CategoryModalMode;
     isSelected: boolean;
     onClick:    () => void;
+    onDelete?:  () => void;
 }) {
-    const [hovered, setHovered] = useState(false);
+    const [hovered, setHovered]             = useState(false);
+    const [editHovered, setEditHovered]     = useState(false);
+    const [trashHovered, setTrashHovered]   = useState(false);
 
     return (
         <button
@@ -369,11 +505,40 @@ function CategoryListItem({
             )}
 
             {mode === "manage" && (
-                <Pencil
-                    size={12}
-                    color="var(--color-text-muted)"
-                    style={{ opacity: hovered ? 1 : 0.4, transition: "opacity 0.15s" }}
-                />
+                <div className="flex items-center gap-2">
+                    <Pencil
+                        size={12}
+                        style={{
+                            opacity: hovered ? 1 : 0.4,
+                            transition: "opacity 0.15s",
+                            color: editHovered ? "var(--color-text)" : "var(--color-text-muted)",
+                        }}
+                        onMouseEnter={() => setEditHovered(true)}
+                        onMouseLeave={() => setEditHovered(false)}
+                    />
+
+                    {onDelete && (
+                        <span
+                            role="button"
+                            aria-label={`Delete ${category.name}`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete();
+                            }}
+                            className="flex items-center justify-center cursor-pointer"
+                            style={{ opacity: hovered ? 1 : 0.4, transition: "opacity 0.15s" }}
+                        >
+                            <Trash
+                                size={12}
+                                style={{
+                                    color: trashHovered ? "var(--color-danger)" : "var(--color-danger-dark)",
+                                }}
+                                onMouseEnter={() => setTrashHovered(true)}
+                                onMouseLeave={() => setTrashHovered(false)}
+                            />
+                        </span>
+                    )}
+                </div>
             )}
         </button>
     );
@@ -537,7 +702,7 @@ function CategoryForm({
                     onClick={onCancel}
                     className="cursor-pointer"
                     style={{
-                        background: isCancelBtnHovered ? "var(--color-accent)" : "transparent",
+                        background: isCancelBtnHovered ? "var(--color-surface-raised)" : "transparent",
                         border: "0.5px solid var(--color-border)",
                         borderRadius: 6,
                         padding: "6px 14px",
@@ -565,6 +730,95 @@ function CategoryForm({
                     }}
                 >
                     {isEditing ? "Save" : "Create"}
+                </button>
+            </div>
+        </>
+    );
+}
+
+// --------------------------
+// CategoryDeleteConfirm
+// --------------------------
+
+function CategoryDeleteConfirm({
+    category,
+    onConfirm,
+    onCancel,
+}: {
+    category:   Category;
+    onConfirm:  () => void;
+    onCancel:   () => void;
+}) {
+    const [isConfirmHovered, setIsConfirmHovered]   = useState(false);
+    const [isCancelHovered, setIsCancelHovered]     = useState(false);
+
+    return (
+        <>
+            <div className="px-5 py-4 flex flex-col gap-3">
+                <div className="flex items-center gap-2.5">
+                    <span
+                        style={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: "50%",
+                            background: category.color,
+                            flexShrink: 0,
+                        }}
+                    />
+                    <span style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text)" }}>
+                        {category.name}
+                    </span>
+                </div>
+
+                <div style={{ fontSize: 13, color: "var(--color-text-muted)", lineHeight: 1.5 }}>
+                    {/* Plain HTML, I'll 100% change it later, probably, maybe. */}
+
+                    <b>Are you sure you want to delete this category?</b>
+                    <br />
+                    <br />
+                    The sparks and flames that have it assigned are gonna lose it.
+                    <br />
+                    <i>(This action can't be reverted)</i>
+                </div>
+            </div>
+
+            <div
+                className="flex justify-end gap-2 px-5 py-3"
+                style={{ borderTop: "0.5px solid var(--color-border)"}}
+            >
+                <button
+                    onClick={onCancel}
+                    className="cursor-pointer"
+                    style={{
+                        background: isCancelHovered ? "var(--color-surface-raised)" : "transparent",
+                        border: "0.5px solid var(--color-border)",
+                        borderRadius: 6,
+                        padding: "6px 14px",
+                        fontSize: 13,
+                        color: isCancelHovered ? "white" : "var(--color-text-muted)",
+                        fontFamily: "inherit",
+                    }}
+                    onMouseEnter={() => setIsCancelHovered(true)}
+                    onMouseLeave={() => setIsCancelHovered(false)}
+                >
+                    Cancel
+                </button>
+
+                <button
+                    onClick={onConfirm}
+                    onMouseEnter={() => setIsConfirmHovered(true)}
+                    onMouseLeave={() => setIsConfirmHovered(false)}
+                    className="border-none text-white cursor-pointer"
+                    style={{
+                        background: isConfirmHovered ? "var(--color-danger)" : "var(--color-danger-dark)",
+                        borderRadius: 6,
+                        padding: "6px 14px",
+                        fontSize: 13,
+                        fontFamily: "inherit",
+                        transition: "background 0.15s",
+                    }}
+                >
+                    Delete
                 </button>
             </div>
         </>

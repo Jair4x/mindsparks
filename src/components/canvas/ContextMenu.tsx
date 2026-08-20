@@ -17,6 +17,7 @@ import {
     Tag,
     Archive,
     Plus,
+    Pencil,
     ChevronRight,
     GitBranch,
     Flame as FlameIcon,
@@ -34,6 +35,8 @@ import {
 } from "../../store";
 import type { Category } from "../../types";
 import { HEADER_HEIGHT } from "../../lib/constants";
+import { AssignCategoryModal } from "../ui/CategoryModal";
+import { useAssignCategory } from "../../hooks";
 
 // --------------------------
 // ContextMenu
@@ -83,11 +86,13 @@ function ContextMenuContent({
     const createFlame   = useFlameStore((s) => s.convertSparkToFlame);
     const archiveFlame  = useFlameStore((s) => s.archiveFlame);
 
-    const categories    = useCategoryStore(useShallow((s) =>
+    const clearSelection = useUIStore((s) => s.clearSelection);
+
+    const categories     = useCategoryStore(useShallow((s) =>
         s.getCategoriesBySpace(activeSpaceId)
     ));
-    const assignSparkCategory = useSparkStore((s) => s.assignCategory);
-    const assignFlameCategory = useFlameStore((s) => s.assignCategory);
+    const assignCategory = useAssignCategory();
+    const [isAssigningCategory, setIsAssigningCategory] = useState(false);
 
     const createRelatedConnection = useConnectionStore((s) => s.createRelatedConnection);
     const createLineageConnection = useConnectionStore((s) => s.createLineageConnection);
@@ -119,6 +124,8 @@ function ContextMenuContent({
             : [];
 
     useEffect(() => {
+        if (isAssigningCategory) return;
+
         const handleMouseDown = (e: MouseEvent) => {
             if (menuRef.current?.contains(e.target as Node)) return; // let it work normally inside the menu
 
@@ -135,7 +142,7 @@ function ContextMenuContent({
             document.removeEventListener("mousedown", handleMouseDown, true);
             document.removeEventListener("keydown", handleEscape);
         }
-    }, [onClose]);
+    }, [onClose, isAssigningCategory]);
     
     // Note: If the right-clicked node isn't part of the current selection, Canvas.tsx
     //       already selects it (just that node) before opening this menu, so by the time
@@ -228,14 +235,7 @@ function ContextMenuContent({
     };
 
     const handleAssignCategory = (categoryId: string) => {
-        targetNodes.forEach((node) => {
-            if (node.type === "spark") {
-                assignSparkCategory(node.id, categoryId);
-            } else {
-                assignFlameCategory(node.id, categoryId);
-            }
-        });
-
+        assignCategory(targetNodes, categoryId);
         onClose();
     };
 
@@ -245,6 +245,7 @@ function ContextMenuContent({
             else archiveFlame(node.id);
         });
 
+        clearSelection();
         onClose();
     };
 
@@ -326,10 +327,15 @@ function ContextMenuContent({
         onClose();
     };
 
-    const handleManageCategory = () => {
+    // Long ahh variable name that explains itself
+    const handleOpenManageCategoryPanel = () => {
+        setIsAssigningCategory(true);        
+    };
+
+    const handleOpenManageCategoriesModal = () => {
         openModal("manage-category", null);
         onClose();
-    };
+    }
 
     const handleCreateSpace = () => {        
         // TODO: Logic for this when space management gets implemented.
@@ -350,162 +356,177 @@ function ContextMenuContent({
     const flipSubmenuLeft = x > window.innerWidth - menuWidth * 2 - 16;
 
     return (
-        <div
-            ref={menuRef}
-            style={{
-                position: "fixed",
-                left: x,
-                top: y,
-                width: menuWidth,
-                background: "var(--color-surface)",
-                border: "0.5px solid var(--color-border)",
-                borderRadius: 10,
-                padding: "4px 0",
-                zIndex: 200,
-                boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
-            }}
-        >
-            {/* Nothing selected: Right click on empty part of canvas */}
-            {!isNodeContext && (
-                <>
-                    <MenuItem
-                        icon={<Sparkles size={14} />}
-                        label="Create Spark"
-                        onClick={handleCreateSparkHere}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                    />
-                    <MenuItem
-                        icon={<Tag size={14} />}
-                        label="Create Category"
-                        onClick={handleManageCategory}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                    />
-                    <MenuItem
-                        icon={<Layers size={14} />}
-                        label="Create New Space"
-                        onClick={handleCreateSpace}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                        disabled
-                    />
-                </>
-            )}
-
-            {/* Single node selected */}
-            {isNodeContext && !isMulti && (
-                <>
-                    <MenuItem
-                        icon={<GitBranch size={14} />}
-                        label="Create child Spark"
-                        onClick={handleCreateChild}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                    />
-
-                    <MenuSeparator />
-                    
-                    <MenuItem
-                        icon={<Copy size={14} />}
-                        label="Duplicate"
-                        onClick={handleDuplicate}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                    />
-                    <MenuItem
-                        icon={<FlameIcon size={14} />}
-                        label={contextMenu.nodeType === "spark" ? "Convert into Flame" : "Convert back to Spark"}
-                        onClick={handleConvert}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                        disabled={contextMenu.nodeType === "flame"}
-                    />
-                    
-                    <SubmenuItem
-                        icon={<Tag size={14} />}
-                        label="Assign category"
-                        isOpen={openSubmenu === "category"}
-                        onOpen={() => setOpenSubmenu("category")}
-                        flipLeft={flipSubmenuLeft}
-                    >
-                        <CategorySubmenuContent
-                            categories={categories}
-                            onSelect={handleAssignCategory}
-                            onCreateNew={handleManageCategory}
-                        />
-                    </SubmenuItem>
-
-                    <MenuSeparator />
-
-                    <MenuItem
-                        icon={<Archive size={14} />}
-                        label="Archive"
-                        onClick={handleArchive}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                        danger
-                    />
-                </>
-            )}
-
-            {/* Multiple nodes selected */}
-            {isNodeContext && isMulti && (
-                <>
-                    {selection.type === "multi" && selection.nodes.length === 2 ? (
-                        <MenuItem
-                            icon={<Link size={14} />}
-                            label="Create relation"
-                            onClick={handleCreateRelationBetweenAll} // Use between all relation logic because it doesn't depend on which of the two nodes was right-clicked.
-                        />
-                    ): (
-                        <SubmenuItem
-                            icon={<Link size={14} />}
-                            label="Create relation"
-                            isOpen={openSubmenu === "relation"}
-                            onOpen={() => setOpenSubmenu("relation")}
-                            flipLeft={flipSubmenuLeft}
-                        >
+        <>
+            {isAssigningCategory ? (
+                <AssignCategoryModal
+                    targetNodes={targetNodes}
+                    onClose={() => {
+                        setIsAssigningCategory(false);
+                        onClose();
+                    }}
+                    startInCreateForm
+                />
+            ) : (
+                <div
+                    ref={menuRef}
+                    style={{
+                        position: "fixed",
+                        left: x,
+                        top: y,
+                        width: menuWidth,
+                        background: "var(--color-surface)",
+                        border: "0.5px solid var(--color-border)",
+                        borderRadius: 10,
+                        padding: "4px 0",
+                        zIndex: 200,
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                    }}
+                >
+                    {/* Nothing selected: Right click on empty part of canvas */}
+                    {!isNodeContext && (
+                        <>
                             <MenuItem
-                                icon={<ArrowRight size={14} />}
-                                label="To this node"
-                                onClick={handleCreateRelationToNode}
+                                icon={<Sparkles size={14} />}
+                                label="Create Spark"
+                                onClick={handleCreateSparkHere}
+                                onMouseEnter={() => setOpenSubmenu(null)}
                             />
                             <MenuItem
-                                icon={<Share2 size={14} />}
-                                label="Between all selected nodes"
-                                onClick={handleCreateRelationBetweenAll}
+                                icon={<Tag size={14} />}
+                                label="Create Category"
+                                onClick={handleOpenManageCategoryPanel}
+                                onMouseEnter={() => setOpenSubmenu(null)}
                             />
-                        </SubmenuItem>
+                            <MenuItem
+                                icon={<Layers size={14} />}
+                                label="Create New Space"
+                                onClick={handleCreateSpace}
+                                onMouseEnter={() => setOpenSubmenu(null)}
+                                disabled
+                            />
+                        </>
                     )}
-                    
-                    <MenuSeparator />
 
-                    <MenuItem
-                        icon={<Copy size={14} />}
-                        label="Duplicate"
-                        onClick={handleDuplicate}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                    />
-                    <SubmenuItem
-                        icon={<Tag size={14} />}
-                        label="Assign category"
-                        isOpen={openSubmenu === "category"}
-                        onOpen={() => setOpenSubmenu("category")}
-                        flipLeft={flipSubmenuLeft}
-                    >
-                        <CategorySubmenuContent
-                            categories={categories}
-                            onSelect={handleAssignCategory}
-                            onCreateNew={handleManageCategory}
-                        />
-                    </SubmenuItem>
+                    {/* Single node selected */}
+                    {isNodeContext && !isMulti && (
+                        <>
+                            <MenuItem
+                                icon={<GitBranch size={14} />}
+                                label="Create child Spark"
+                                onClick={handleCreateChild}
+                                onMouseEnter={() => setOpenSubmenu(null)}
+                            />
 
-                    <MenuSeparator />
+                            <MenuSeparator />
+                            
+                            <MenuItem
+                                icon={<Copy size={14} />}
+                                label="Duplicate"
+                                onClick={handleDuplicate}
+                                onMouseEnter={() => setOpenSubmenu(null)}
+                            />
+                            <MenuItem
+                                icon={<FlameIcon size={14} />}
+                                label={contextMenu.nodeType === "spark" ? "Convert into Flame" : "Convert back to Spark"}
+                                onClick={handleConvert}
+                                onMouseEnter={() => setOpenSubmenu(null)}
+                                disabled={contextMenu.nodeType === "flame"}
+                            />
+                            
+                            <SubmenuItem
+                                icon={<Tag size={14} />}
+                                label="Assign category"
+                                isOpen={openSubmenu === "category"}
+                                onOpen={() => setOpenSubmenu("category")}
+                                flipLeft={flipSubmenuLeft}
+                            >
+                                <CategorySubmenuContent
+                                    categories={categories}
+                                    onSelect={handleAssignCategory}
+                                    onCreateNew={handleOpenManageCategoryPanel}
+                                    onManage={handleOpenManageCategoriesModal}
+                                />
+                            </SubmenuItem>
 
-                    <MenuItem
-                        icon={<Archive size={14} />}
-                        label="Archive"
-                        onClick={handleArchive}
-                        onMouseEnter={() => setOpenSubmenu(null)}
-                        danger
-                    />
-                </>
+                            <MenuSeparator />
+
+                            <MenuItem
+                                icon={<Archive size={14} />}
+                                label="Archive"
+                                onClick={handleArchive}
+                                onMouseEnter={() => setOpenSubmenu(null)}
+                                danger
+                            />
+                        </>
+                    )}
+
+                    {/* Multiple nodes selected */}
+                    {isNodeContext && isMulti && (
+                        <>
+                            {selection.type === "multi" && selection.nodes.length === 2 ? (
+                                <MenuItem
+                                    icon={<Link size={14} />}
+                                    label="Create relation"
+                                    onClick={handleCreateRelationBetweenAll} // Use between all relation logic because it doesn't depend on which of the two nodes was right-clicked.
+                                />
+                            ) : (
+                                <SubmenuItem
+                                    icon={<Link size={14} />}
+                                    label="Create relation"
+                                    isOpen={openSubmenu === "relation"}
+                                    onOpen={() => setOpenSubmenu("relation")}
+                                    flipLeft={flipSubmenuLeft}
+                                >
+                                    <MenuItem
+                                        icon={<ArrowRight size={14} />}
+                                        label="To this node"
+                                        onClick={handleCreateRelationToNode}
+                                    />
+                                    <MenuItem
+                                        icon={<Share2 size={14} />}
+                                        label="Between all selected nodes"
+                                        onClick={handleCreateRelationBetweenAll}
+                                    />
+                                </SubmenuItem>
+                            )}
+                            
+                            <MenuSeparator />
+
+                            <MenuItem
+                                icon={<Copy size={14} />}
+                                label="Duplicate"
+                                onClick={handleDuplicate}
+                                onMouseEnter={() => setOpenSubmenu(null)}
+                            />
+                            <SubmenuItem
+                                icon={<Tag size={14} />}
+                                label="Assign category"
+                                isOpen={openSubmenu === "category"}
+                                onOpen={() => setOpenSubmenu("category")}
+                                flipLeft={flipSubmenuLeft}
+                            >
+                                <CategorySubmenuContent
+                                    categories={categories}
+                                    onSelect={handleAssignCategory}
+                                    onCreateNew={handleOpenManageCategoryPanel}
+                                    onManage={handleOpenManageCategoriesModal}
+                                />
+                            </SubmenuItem>
+
+                            <MenuSeparator />
+
+                            <MenuItem
+                                icon={<Archive size={14} />}
+                                label="Archive"
+                                onClick={handleArchive}
+                                onMouseEnter={() => setOpenSubmenu(null)}
+                                danger
+                            />
+                        </>
+                    )}
+                </div>
             )}
-        </div>
+        </>
     );
 }
 
@@ -651,10 +672,12 @@ function CategorySubmenuContent({
     categories,
     onSelect,
     onCreateNew,
+    onManage,
 }: {
-    categories: Category[],
-    onSelect: (categoryId: string) => void;
-    onCreateNew: () => void;
+    categories:     Category[],
+    onSelect:       (categoryId: string) => void;
+    onCreateNew:    () => void;
+    onManage:       () => void;
 }) {
     return (
         <>
@@ -682,8 +705,13 @@ function CategorySubmenuContent({
             {categories.length > 0 && <MenuSeparator />}
             <MenuItem
                 icon={<Plus size={14} />}
-                label="Create/Manage Category"
+                label="Create new Category"
                 onClick={onCreateNew}
+            />
+            <MenuItem
+                icon={<Pencil size={14} />}
+                label="Manage categories"
+                onClick={onManage}
             />
         </>
     );
