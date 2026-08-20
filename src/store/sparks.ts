@@ -44,6 +44,9 @@ interface SparkStore {
     // The spark keeps existing and can be seen from the menu.
     archiveSpark: (id: string) => void;
 
+    // Converts a spark into a flame
+    convertSparkToFlame: (id: string) => void;
+
     // Restores an archived spark to the canvas.
     restoreSpark: (id: string) => void;
 
@@ -78,6 +81,7 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
             categoryId,
             parentId,
             isArchived: false,
+            isConvertedToFlame: false,
             createdAt: now(),
             updatedAt: now(),
         };
@@ -133,6 +137,16 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
             sparks: state.sparks.map((spark) =>
                 spark.id === id
                     ? { ...spark, isArchived: true, updatedAt: now() }
+                    : spark
+            ),
+        }));
+    },
+
+    convertSparkToFlame: (id) => {
+        set((state) => ({
+            sparks: state.sparks.map((spark) =>
+                spark.id === id
+                    ? { ...spark, isArchived: true, isConvertedToFlame: true, updatedAt: now() }
                     : spark
             ),
         }));

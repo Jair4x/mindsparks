@@ -28,7 +28,7 @@ export function SparkToFlameModal() {
     const spark = useSparkStore((s) =>
         s.sparks.find((sp) => sp.id === activeModalNodeId)
     );
-    const archiveSpark          = useSparkStore((s) => s.archiveSpark);
+    const convertSpark          = useSparkStore((s) => s.convertSparkToFlame); // Setting up the field in the Spark object
     const convertSparkToFlame   = useFlameStore((s) => s.convertSparkToFlame);
 
     const requestRepulsion      = useUIStore((s) => s.requestRepulsion);
@@ -48,7 +48,7 @@ export function SparkToFlameModal() {
                 initialTools={[]}
                 onClose={closeModal}
                 onConfirm={(schemaName, selectedTools) => {
-                    archiveSpark(spark.id);
+                    convertSpark(spark.id);
                     const newFlame = convertSparkToFlame({
                         sparkId: spark.id,
                         name: spark.text,

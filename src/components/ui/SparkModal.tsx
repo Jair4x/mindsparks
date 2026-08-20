@@ -20,6 +20,7 @@ import {
 
 function nodeLabel(node: Spark | Flame): string {
     const name = "text" in node ? node.text : node.name;
+    if ("isConvertedToFlame" in node && node.isConvertedToFlame) return name; // Don't mark as archived
     return node.isArchived ? `${name} (archived)` : name;
 }
 
@@ -164,7 +165,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                                         }}
                                     />
 
-                                    <span style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                                    <span style={{ fontSize: 12, color: "var(--color-text-muted)", userSelect: "none" }}>
                                         {category.name}
                                     </span>
                                 </div>
@@ -331,7 +332,11 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                         Action buttons
                     */}
                     <div className="flex gap-1.5 mt-3">
-                        {spark.isArchived ? (
+                        {spark.isConvertedToFlame ? (
+                            <div style={{ fontSize: 12, color: "var(--color-text-muted)", userSelect: "none" }}>
+                                This spark was converted into a Flame.
+                            </div>
+                        ) : spark.isArchived ? (
                             <ActionButton
                                 icon={<ArchiveRestore size={13} />}
                                 label="Restore"

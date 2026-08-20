@@ -59,16 +59,17 @@ export interface Schema {
 //  No tools, no structure, it only exists.
 // --------------------------
 export interface Spark {
-    id:             string;
-    text:           string;     // title of the idea
-    description?:   string;     // short description of the idea (100 chars max, optional)
-    position:       Position;   // where is it in the canvas
-    spaceId:        string;     // to which Space it belongs
-    categoryId?:    string;     // optional: it might not have a category
-    parentId?:      string;     // optional: if it's a child of another spark or flame
-    isArchived:     boolean;
-    createdAt:      string;
-    updatedAt:      string;
+    id:                 string;
+    text:               string;     // title of the idea
+    description?:       string;     // short description of the idea (100 chars max, optional)
+    position:           Position;   // where is it in the canvas
+    spaceId:            string;     // to which Space it belongs
+    categoryId?:        string;     // optional: it might not have a category
+    parentId?:          string;     // optional: if it's a child of another spark or flame
+    isArchived:         boolean;
+    isConvertedToFlame: boolean;    // different to isArchived for obvious reasons
+    createdAt:          string;
+    updatedAt:          string;
 }
 
 // --------------------------
