@@ -42,6 +42,7 @@ export function AppLayout() {
                     <FlameView />
                     <SparkModal />
                     <SparkToFlameModal />
+                    <CategoryModal />
                 </>
             ) : (
                     <>
