@@ -14,7 +14,7 @@ import { SidePanel } from "../panel/SidePanel";
 import { Canvas, type CanvasHandle } from "../canvas/Canvas";
 import { FlameView } from "../flame/FlameView";
 
-import { SparkModal } from "../ui/SparkModal";
+import { NodeInfoModal } from "../ui/NodeInfoModal";
 import { SparkToFlameModal } from "../ui/SparkToFlameModal";
 import { CategoryModal } from "../ui/CategoryModal";
 
@@ -40,7 +40,7 @@ export function AppLayout() {
             {activeView === "flame" ? (
                 <>
                     <FlameView />
-                    <SparkModal />
+                    <NodeInfoModal />
                     <SparkToFlameModal />
                     <CategoryModal />
                 </>
@@ -92,7 +92,7 @@ export function AppLayout() {
                         */}
                         {showPanel && ( <SidePanel onCreateSpark={() => canvasRef.current?.createSparkAtCenter()}/> ) }
                         
-                        <SparkModal />
+                        <NodeInfoModal />
                         <SparkToFlameModal />
                         <CategoryModal />
                     </>

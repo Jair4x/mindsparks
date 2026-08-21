@@ -51,7 +51,7 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
             selected={selected}
             createdAt={spark.createdAt}
             now={nowMs}
-            onDoubleClick={() => openModal("spark-detail", spark.id)}
+            onDoubleClick={() => openModal("node-detail", spark.id)}
         >
             {spark.text}
         </NodeCardShell>

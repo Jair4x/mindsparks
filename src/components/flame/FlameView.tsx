@@ -217,7 +217,7 @@ function FlameViewContent({
                     <HeaderButton
                         icon={<Info size={14} />}
                         label="Spark info"
-                        onClick={() => openModal("spark-detail", spark.id)}
+                        onClick={() => openModal("node-detail", flame.id)}
                     />
                     <HeaderButton
                         icon={<Settings size={14} />}

@@ -1,18 +1,25 @@
 //
-// Modal of the details of a spark.
-//  Opens when the user clicks on a spark card in the canvas.
+// Modal of the details of a node.
+//  Opens when the user clicks on a spark card in the canvas, or from.
 //
 
 import { useEffect, useRef, useState } from "react";
-import { Tag, FlameIcon, X, ChevronRight, ArchiveRestore } from "lucide-react";
-import { useSparkStore, useUIStore, useCategoryStore } from "../../store";
+import { Tag, FlameIcon, X, ChevronRight, ArchiveRestore, CheckCircle2 as CheckCircle, RotateCcw } from "lucide-react";
+import { useSparkStore, useFlameStore, useUIStore, useCategoryStore } from "../../store";
 import { useNow, formatRelativeDate } from "../../lib/utils";
 import { useChildren, useParent, useRelated } from "../../lib/nodeRelations";
 import { Spark, Flame } from "../../types";
+import { SPARK_DESC_MAX_LENGTH as DESC_MAX_LENGTH } from "../../lib/constants";
 
-import {
-    SPARK_DESC_MAX_LENGTH as DESC_MAX_LENGTH
-} from "../../lib/constants";
+// --------------------------
+// NodeTarget
+//  Resolved up front so the rest of the component works with the actual
+//  Spark or Flame object, not an id it has to keep re-looking-up.
+// --------------------------
+
+type NodeTarget =
+    | { type: "spark"; node: Spark }
+    | { type: "flame"; node: Flame };
 
 // --------------------------
 // Helper functions
@@ -25,50 +32,68 @@ function nodeLabel(node: Spark | Flame): string {
 }
 
 // --------------------------
-// SparkModal
+// NodeInfoModal
+//  Previously SparkModal, now generalized to include both types of nodes data.
 // --------------------------
 
-export function SparkModal() {
+export function NodeInfoModal() {
     const activeModal       = useUIStore((s) => s.activeModal);
     const activeModalNodeId = useUIStore((s) => s.activeModalNodeId);
     const closeModal        = useUIStore((s) => s.closeModal);
     
-    const spark = useSparkStore((s) =>
-        s.sparks.find((sp) => sp.id === activeModalNodeId)
-    );
+    const flame = useFlameStore((s) => s.flames.find((f) => f.id === activeModalNodeId));
+    const spark = useSparkStore((s) => s.sparks.find((sp) => sp.id === activeModalNodeId));
 
-    if (activeModal !== "spark-detail" || !spark) return null;
+    if (activeModal !== "node-detail") return null;
+
+    const target: NodeTarget | null = flame
+        ? { type: "flame", node: flame }
+        : spark
+            ? { type: "spark", node: spark }
+            : null;
+    
+    if (!target) return null;
 
     return (
-        <SparkModalContent
-            sparkId={spark.id}
+        <NodeInfoModalContent
+            target={target}
             onClose={closeModal}
         />
     );
 }
 
 // --------------------------
-// SparkModalContent
+// NodeInfoModalContent
 // --------------------------
-function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () => void }) {
-    const spark             = useSparkStore((s) => s.sparks.find((s) => s.id === sparkId))!;
-    const updateText        = useSparkStore((s) => s.updateSparkText);
-    const updateDescription = useSparkStore((s) => s.updateSparkDescription);
-    const openModal         = useUIStore((s) => s.openModal);
-    const restoreSpark      = useSparkStore((s) => s.restoreSpark);
 
+function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose: () => void }) {
+    const isFlame = target.type === "flame";
+
+    const updateSparkText        = useSparkStore((s) => s.updateSparkText);
+    const updateSparkDescription = useSparkStore((s) => s.updateSparkDescription);
+    const restoreSpark           = useSparkStore((s) => s.restoreSpark);
+    
+    const updateFlameName   = useFlameStore((s) => s.updateFlameName);
+    const completeFlame     = useFlameStore((s) => s.completeFlame);
+    const reopenFlame       = useFlameStore((s) => s.reopenFlame);
+    const restoreFlame      = useFlameStore((s) => s.restoreFlame);
+    
+    const openModal         = useUIStore((s) => s.openModal);
+    
     const category = useCategoryStore((s) =>
-        spark.categoryId ? s.categories.find((c) => c.id === spark.categoryId) : undefined
+        target.node.categoryId ? s.categories.find((c) => c.id === target.node.categoryId) : undefined
     );
 
-    const children      = useChildren(sparkId);
-    const parent        = useParent(spark.parentId);
-    const related       = useRelated(sparkId);
+    const children      = useChildren(target.node.id);
+    const parent        = useParent(target.node.parentId);
+    const related       = useRelated(target.node.id);
     const nowMs         = useNow();
     const overlayRef    = useRef<HTMLDivElement>(null);
     
-    const [name, setName]                                   = useState(spark.text);
-    const [description, setDescription]                     = useState(spark.description ?? "");
+    const initialName = isFlame ? target.node.name : target.node.text;
+
+    const [name, setName]                                   = useState(initialName);
+    const [description, setDescription]                     = useState(!isFlame ? (target.node.description ?? "") : "");
     const [showFamily, setShowFamily]                       = useState(false);
     const [isCategoryBtnHovered, setIsCategoryBtnHovered]   = useState(false);
     
@@ -86,15 +111,18 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
     // Save name when unfocused
     const handleNameBlur = () => {
         const trimmed = name.trim();
-        if (trimmed && trimmed !== spark.text) {
-            updateText(sparkId, trimmed);
-        }
+        if (!trimmed || trimmed === initialName) return;
+
+        if (isFlame) updateFlameName(target.node.id, trimmed);
+        else updateSparkText(target.node.id, trimmed);
     };
 
     // Save description when unfocused
     const handleDescriptionBlur = () => {
-        if (description !== (spark.description ?? "")) {
-            updateDescription(sparkId, description);
+        if (isFlame) return; // Nothing to save this into for a Flame
+        
+        if (description !== (target.node.description ?? "")) {
+            updateDescription(target.node.id, description);
         }
     };
 
@@ -136,7 +164,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                         {/* Left: Category button + pill if active */}
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={() => openModal("assign-category", spark.id) }
+                                onClick={() => openModal("assign-category", target.node.id) }
                                 aria-label="Change category"
                                 className="flex items-center justify-center cursor-pointer"
                                 style={{
@@ -207,27 +235,29 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                     {/*
                         Description
                     */}
-                    <div className="flex items-center mt-1">
-                        <textarea
-                            rows={2}
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value.slice(0, DESC_MAX_LENGTH))}
-                            onBlur={handleDescriptionBlur}
-                            placeholder="Add a short description..."
-                            className="w-full bg-transparent border-none outline-none mt-1"
-                            style={{
-                                fontSize:   13,
-                                color:      "var(--color-text-muted)",
-                                fontFamily: "inherit",
-                                resize:     "none",
-                            }}
-                        />
-                        {description.length > 0 && (
-                            <div style={{ fontSize: 10, color: "var(--color-text-muted)", flexShrink: 0, marginTop: 2 }}>
-                                {description.length}/{DESC_MAX_LENGTH}
-                            </div>
-                        )}
-                    </div>
+                    {!isFlame && (
+                        <div className="flex items-center mt-1">
+                            <textarea
+                                rows={2}
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value.slice(0, DESC_MAX_LENGTH))}
+                                onBlur={handleDescriptionBlur}
+                                placeholder="Add a short description..."
+                                className="w-full bg-transparent border-none outline-none mt-1"
+                                style={{
+                                    fontSize:   13,
+                                    color:      "var(--color-text-muted)",
+                                    fontFamily: "inherit",
+                                    resize:     "none",
+                                }}
+                            />
+                            {description.length > 0 && (
+                                <div style={{ fontSize: 10, color: "var(--color-text-muted)", flexShrink: 0, marginTop: 2 }}>
+                                    {description.length}/{DESC_MAX_LENGTH}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/*
                         Right column: Family + timestamp
@@ -238,7 +268,7 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
                                 Creation Date
                             */}
                             <div style={{ fontSize: 12, color: "var(--color-text-muted)"}}>
-                                Created {formatRelativeDate(spark.createdAt, nowMs)}
+                                Created {formatRelativeDate(target.node.createdAt, nowMs)}
                             </div>
 
                             {/*
@@ -330,24 +360,47 @@ function SparkModalContent({ sparkId, onClose }: { sparkId: string; onClose: () 
 
                     {/*
                         Action buttons
+                            Okay, so, this has a big, big, BIG, BIIIIIIIG multi-terniary, whatever
                     */}
                     <div className="flex gap-1.5 mt-3">
-                        {spark.isConvertedToFlame ? (
-                            <div style={{ fontSize: 12, color: "var(--color-text-muted)", userSelect: "none" }}>
-                                This spark was converted into a Flame.
+                        {isFlame ? (
+                            target.node.isArchived ? (
+                                <ActionButton
+                                    icon={<ArchiveRestore size={13} />}
+                                    label="Restore"
+                                    onClick={() => { restoreFlame(target.node.id); onClose(); }}
+                                    accent
+                                />
+                            ) : target.node.isCompleted ? (
+                                    <ActionButton
+                                        icon={<RotateCcw size={13} />}
+                                        label="Reopen"
+                                        onClick={() => reopenFlame(target.node.id)}
+                                    />
+                            ) : (
+                                <ActionButton
+                                    icon={<CheckCircle size={13} />}
+                                    label="Mark as completed"
+                                    onClick={() => completeFlame(target.node.id)}
+                                    accent
+                                />
+                            )
+                        ) : target.node.isConvertedToFlame ? (
+                            <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
+                                This node was converted into a Flame.
                             </div>
-                        ) : spark.isArchived ? (
+                        ) : target.node.isArchived ? (
                             <ActionButton
                                 icon={<ArchiveRestore size={13} />}
                                 label="Restore"
-                                onClick={() => { restoreSpark(sparkId); onClose(); }}
+                                onClick={() => { restoreFlame(target.node.id); onClose(); }}
                                 accent
                             />
-                        ): (
+                        ) : (
                             <ActionButton
                                 icon={<FlameIcon size={13} />}
                                 label="Convert into flame"
-                                onClick={() => openModal("spark-to-flame", spark.id)}
+                                onClick={() => openModal("spark-to-flame", target.node.id)}
                                 accent
                             />
                         )}

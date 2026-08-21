@@ -23,7 +23,7 @@ import {
 // Existent modals in the MVP.
 // More will be added as the project evolves.
 export type ModalType =
-    | "spark-detail"        // Modal for the details of a spark
+    | "node-detail"         // Modal for the details of a node (spark/flame)
     | "spark-to-flame"      // Spark to flame conversion modal
     | "manage-tools"        // spark-to-flame, but inside a flame to manage tools
     | "manage-category"     // Modal to create or edit a category
