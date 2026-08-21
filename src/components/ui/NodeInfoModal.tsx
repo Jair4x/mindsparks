@@ -122,7 +122,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
         if (isFlame) return; // Nothing to save this into for a Flame
         
         if (description !== (target.node.description ?? "")) {
-            updateDescription(target.node.id, description);
+            updateSparkDescription(target.node.id, description);
         }
     };
 
@@ -393,7 +393,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                             <ActionButton
                                 icon={<ArchiveRestore size={13} />}
                                 label="Restore"
-                                onClick={() => { restoreFlame(target.node.id); onClose(); }}
+                                onClick={() => { restoreSpark(target.node.id); onClose(); }}
                                 accent
                             />
                         ) : (

@@ -153,7 +153,7 @@ function ContextMenuContent({
     // --------------------------
 
     const handleDuplicate = () => {
-        const newIds = [];
+        const newIds: string[] = [];
         targetNodes.forEach((node) => {
             if (node.type === "spark") {
                 const spark = sparks.find((s) => s.id === node.id);

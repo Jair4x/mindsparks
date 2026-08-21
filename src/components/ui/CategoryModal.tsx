@@ -14,7 +14,6 @@
 //
 
 import { useEffect, useRef, useState } from "react";
-import { useShallow } from "zustand/shallow";
 import { Pencil, X, Plus, Check, ArrowLeft, Trash2 as Trash } from "lucide-react";
 import { useUIStore, useCategoryStore, useSpaceStore, useSparkStore, useFlameStore } from "../../store";
 import type { Category } from "../../types";

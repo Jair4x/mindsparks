@@ -15,7 +15,7 @@ import { DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH } from "../../lib/constants";
 // Helper functions
 // --------------------------
 
-function getNodeCenter(node: ReturnType<typeof useInternalNode<MindSparksNode>>, lastKnown: MindSparksNode) {
+function getNodeCenter(node: ReturnType<typeof useInternalNode<MindSparksNode>>, lastKnown?: MindSparksNode | null) {
     if (!node) return null;
     const { positionAbsolute } = node.internals;
     const width = node.width ?? node.measured.width ?? lastKnown?.width ?? DEFAULT_CARD_WIDTH;

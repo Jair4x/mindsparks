@@ -30,7 +30,7 @@ type GroupMode = "none" | "category" | "hierarchy";
 import { useState } from "react";
 
 export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
-    const [groupMode, setGroupMode] = useState<GroupMode>("");
+    const [groupMode, setGroupMode] = useState<GroupMode>("none");
 
     return (
         <aside
@@ -69,7 +69,7 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
             <PanelButton
                 icon={<LayoutGrid size={17} />}
                 label="No grouping"
-                isActive={groupMode === "none"}
+                //isActive={groupMode === "none"}
                 onClick={() => setGroupMode("none")}
                 disabled
             />
