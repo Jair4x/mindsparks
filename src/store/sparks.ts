@@ -146,7 +146,13 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
         set((state) => ({
             sparks: state.sparks.map((spark) =>
                 spark.id === id
-                    ? { ...spark, isArchived: true, isConvertedToFlame: true, updatedAt: now() }
+                    ? {
+                        ...spark,
+                        isArchived: true,
+                        isConvertedToFlame: true,
+                        parentId: undefined,
+                        updatedAt: now()
+                    }
                     : spark
             ),
         }));
