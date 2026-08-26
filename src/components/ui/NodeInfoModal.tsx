@@ -4,7 +4,7 @@
 //
 
 import { useEffect, useRef, useState } from "react";
-import { Tag, FlameIcon, X, ChevronRight, ArchiveRestore, CheckCircle2 as CheckCircle, RotateCcw } from "lucide-react";
+import { Tag, FlameIcon, X, ChevronRight, ArchiveRestore, CheckCircle2 as CheckCircle, RotateCcw, Circle } from "lucide-react";
 import { useSparkStore, useFlameStore, useUIStore, useCategoryStore } from "../../store";
 import { useNow, formatRelativeDate } from "../../lib/utils";
 import { useChildren, useParent, useRelated } from "../../lib/nodeRelations";
@@ -27,7 +27,6 @@ type NodeTarget =
 
 function nodeLabel(node: Spark | Flame): string {
     const name = "text" in node ? node.text : node.name;
-    if ("isConvertedToFlame" in node && node.isConvertedToFlame) return name; // Don't mark as archived
     return node.isArchived ? `${name} (archived)` : name;
 }
 
@@ -56,6 +55,7 @@ export function NodeInfoModal() {
 
     return (
         <NodeInfoModalContent
+            key={target.node.id}
             target={target}
             onClose={closeModal}
         />
@@ -79,7 +79,8 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const restoreFlame      = useFlameStore((s) => s.restoreFlame);
     
     const openModal         = useUIStore((s) => s.openModal);
-    
+    const openFlame         = useUIStore((s) => s.openFlame);
+
     const category = useCategoryStore((s) =>
         target.node.categoryId ? s.categories.find((c) => c.id === target.node.categoryId) : undefined
     );
@@ -96,7 +97,8 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const [description, setDescription]                     = useState(!isFlame ? (target.node.description ?? "") : "");
     const [showFamily, setShowFamily]                       = useState(false);
     const [isCategoryBtnHovered, setIsCategoryBtnHovered]   = useState(false);
-    
+    const [pendingFlameNav, setPendingFlameNav]             = useState<Flame | null>(null);
+
     const hasFamily = !!parent || children.length > 0 || related.length > 0;
 
     // Close with Esc key
@@ -128,6 +130,27 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
 
     const handleOverlayClick = (e: React.MouseEvent) => {
         if (e.target === overlayRef.current) onClose();
+    };
+
+    const handleFamilyClick = (node: Spark | Flame) => {
+        if ("text" in node) {
+            openModal("node-detail", node.id);
+        } else {
+            setPendingFlameNav(node);
+        }
+    };
+
+    const handleViewFlameInfo = () => {
+        if (!pendingFlameNav) return;
+        openModal("node-detail", pendingFlameNav.id);
+        setPendingFlameNav(null);
+    };
+
+    const handleOpenFlameWorkspace = () => {
+        if (!pendingFlameNav) return;
+        openFlame(pendingFlameNav.id);
+        setPendingFlameNav(null);
+        onClose();
     };
 
     return (
@@ -305,24 +328,20 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                 >
                                     {parent && (
                                         <>
-                                            <div style={{ fontSize: 11, color: "var(--color-text-muted)", textAlign: "center", marginBottom: 2 }}>
+                                            <div style={{ fontSize: 11, color: "var(--color-text-muted)", textAlign: "right", marginBottom: 2 }}>
                                                 Parent
                                             </div>
-                                            <div style={{ fontSize: 13, color: "var(--color-text)", marginBottom: 8, textAlign: "right" }}>
-                                                {nodeLabel(parent)}
-                                            </div>
+                                            <FamilyEntry node={parent} onClick={() => handleFamilyClick(parent)} />
                                         </>
                                     )}
 
                                     {children.length > 0 && (
                                         <>
-                                            <div style={{ fontSize: 11, color: "var(--color-text-muted)", textAlign: "center", marginBottom: 2 }}>
+                                            <div style={{ fontSize: 11, color: "var(--color-text-muted)", textAlign: "right", marginBottom: 2 }}>
                                                 Children
                                             </div>
                                             {children.map((child) => (
-                                                <div key={child.id} style={{ fontSize: 13, color: "var(--color-text)", textAlign: "right" }}>
-                                                    {nodeLabel(child)}
-                                                </div>
+                                                <FamilyEntry key={child.id} node={child} onClick={() => handleFamilyClick(child)} />
                                             ))}
                                         </>
                                     )}
@@ -335,15 +354,13 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                                     color:          "var(--color-text-muted)",
                                                     marginBottom:   2,
                                                     marginTop:      (parent || children.length > 0) ? 8 : 0,
-                                                    textAlign:      "center",
+                                                    textAlign:      "right",
                                                 }}
                                             >
                                                 Related
                                             </div>
                                             {related.map(({ connectionId, node}) => (
-                                                <div key={connectionId} style={{ fontSize: 13, color: "var(--color-text)", textAlign: "right" }}>
-                                                    {nodeLabel(node)}
-                                                </div>
+                                                <FamilyEntry key={connectionId} node={node} onClick={() => handleFamilyClick(node) } />
                                             ))}
                                         </>
                                     )}
@@ -431,6 +448,48 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                         }}
                     />
                 </div>
+
+                {/*------------------------------------------
+                            Confirmation dialog
+                ---------------------------------------------*/}
+                {pendingFlameNav && (
+                    <div
+                        className="fixed inset-0 flex items-center justify-center"
+                        style={{ background: "rgba(0,0,0,0.5)", zIndex: 60 }}
+                        onClick={(e) => { if (e.target === e.currentTarget) setPendingFlameNav(null); }}
+                    >
+                        <div
+                            style={{
+                                background: "var(--color-surface)",
+                                border: "0.5px solid var(--color-border)",
+                                borderRadius: 14,
+                                width: 320,
+                                padding: 16,
+                            }}
+                        >
+                            <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-text)", marginBottom: 4 }}>
+                                {pendingFlameNav.name}
+                            </div>
+                            <div style={{ fontSize: 13, color: "var(--color-text-muted)", marginBottom: 14 }}>
+                                What do you want to see?
+                            </div>
+
+                            <div className="flex flex-col gap-2">
+                                <ActionButton
+                                    icon={<Tag size={13} />}
+                                    label={"Node info"}
+                                    onClick={handleViewFlameInfo}
+                                    accent
+                                />
+                                <ActionButton
+                                    icon={<FlameIcon size={13} />}
+                                    label="Open Workspace"
+                                    onClick={handleOpenFlameWorkspace}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -477,6 +536,41 @@ function ActionButton({
                 {icon}
             </span>
             {label}
+        </button>
+    );
+}
+
+// --------------------------
+// FamilyEntry
+//  A single clickable parent/child/related row in the Family panel.
+// --------------------------
+
+function FamilyEntry({ node, onClick }: { node: Spark | Flame; onClick: () => void; }) {
+    const [hovered, setHovered] = useState(false);
+    const isFlame = !("text" in node);
+
+    return (
+        <button
+            onClick={onClick}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            className="flex items-center justify-end gap-1.5 w-full cursor-pointer bg-transparent border-none"
+            style={{ padding: "1px 0", fontFamily: "inherit" }}
+        >
+            <span
+                style={{
+                    fontSize: 13,
+                    color: hovered ? "var(--color-accent)" : "var(--color-text)",
+                    textAlign: "right",
+                    transition: "color 0.15s",
+                }}
+            >
+                {nodeLabel(node)}
+            </span>
+            {isFlame
+                ? <FlameIcon size={10} fill="var(--color-flame)" color="var(--color-flame)" />
+                : <Circle size={6} fill="var(--color-text-muted)" color="var(--color-text-muted)" />
+            }
         </button>
     );
 }
