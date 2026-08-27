@@ -55,10 +55,10 @@ export type MindSparksNode = SparkNode | FlameNode;
 // The full spark goes in data.spark so the SparkCard component can read any field
 //  without needing any additional props.
 // --------------------------
-const sparkNodeCache = new Map<string, SparkNode>();
+const sparkNodeCache = new WeakMap<string, SparkNode>();
 function sparkToNode(spark: Spark): SparkNode {
-    const cached = sparkNodeCache.get(spark.id);
-    if (cached && cached.data.spark === spark) return cached;
+    const cached = sparkNodeCache.get(spark);
+    if (cached) return cached;
 
     const node: SparkNode = {
         id: spark.id,
@@ -69,7 +69,7 @@ function sparkToNode(spark: Spark): SparkNode {
         selectable: false,
         handles: CARD_HANDLES,
     };
-    sparkNodeCache.set(spark.id, node);
+    sparkNodeCache.set(spark, node);
     return node;
 }
 
@@ -79,11 +79,11 @@ function sparkToNode(spark: Spark): SparkNode {
 // Transforms a Zustand Flame into a React Flow node.
 // Same pattern as SparkToNode
 // --------------------------
-const flameNodeCache = new Map<string, FlameNode>();
+const flameNodeCache = new WeakMap<string, FlameNode>();
 
 function flameToNode(flame: Flame): FlameNode {
-    const cached = flameNodeCache.get(flame.id);
-    if (cached && cached.data.flame === flame) return cached;
+    const cached = flameNodeCache.get(flame);
+    if (cached) return cached;
 
     const node: FlameNode = {
         id: flame.id,
@@ -94,7 +94,7 @@ function flameToNode(flame: Flame): FlameNode {
         selectable: false,
         handles: CARD_HANDLES,
     };
-    flameNodeCache.set(flame.id, node);
+    flameNodeCache.set(flame, node);
     return node;
 }
 
