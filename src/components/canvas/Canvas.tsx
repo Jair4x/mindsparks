@@ -124,137 +124,8 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
         [connections, visibleNodeIds]
     );
 
-    //
-    // Selection stuff
-    //
+    // for selection
     const [displayNodes, setDisplayNodes] = useState(nodes);
-
-    const onNodesChange = useCallback((changes: NodeChange<MindSparksNode>[]) => {
-        setDisplayNodes((nds) =>
-            applyNodeChanges<MindSparksNode>(
-                changes.filter((c) => c.type !== "select"),
-                nds
-            )
-        );
-    }, []);
-
-    const handlePaneClick = (e: React.MouseEvent) => {
-        if (e.target !== e.currentTarget) return;
-        if (e.shiftKey) return; // Drag box selection
-
-        clearSelection();
-    };
-
-    useEffect(() => {
-        setDisplayNodes((prev) => {
-            const prevById = new Map(prev.map((n) => [n.id, n]));
-
-            return nodes.map((node) => {
-                const isSelected =
-                    selection.type === "single"
-                        ? selection.id === node.id
-                        : selection.type === "multi"
-                            ? selection.nodes.some((n) => n.id === node.id)
-                            : false;
-                
-                const prevNode = prevById.get(node.id);
-
-                // If the node (position, data, etc.) and the selection flag
-                // didn't change, reuse the SAME reference.
-                if (
-                    prevNode &&
-                    prevNode.position === node.position &&
-                    prevNode.data === node.data &&
-                    (prevNode.selected ?? false) === isSelected
-                ) {
-                    return prevNode;
-                }
-
-                return prevNode
-                    ? { ...prevNode, ...node, selected: isSelected }
-                    : { ...node, selected: isSelected };
-            });
-        });
-    }, [nodes, selection]);
-
-    // For group selecting
-    const getNodesInBox = useCallback((start: Position, current: Position) => {
-        const left = Math.min(start.x, current.x);
-        const top = Math.min(start.y, current.y);
-        const right = Math.max(start.x, current.x);
-        const bottom = Math.max(start.y, current.y);
-
-        return displayNodes.filter((node) => {
-            const screenPos = flowToScreenPosition(node.position);
-            const el = document.querySelector(`[data-id="${node.id}"]`);
-            const rect = el?.getBoundingClientRect();
-            const nodeWidth = rect?.width ?? node.width ?? DEFAULT_CARD_WIDTH;
-            const nodeHeight = rect?.height ?? node.height ?? DEFAULT_CARD_HEIGHT;
-
-            return (
-                screenPos.x < right &&
-                screenPos.x + nodeWidth > left &&
-                screenPos.y < bottom &&
-                screenPos.y + nodeHeight > top
-            );
-        })
-    }, [displayNodes, flowToScreenPosition]);
-
-    const nodesInBox = useMemo(() => {
-        if (!selectionBox) return [];
-        return getNodesInBox(selectionBox.start, selectionBox.current);
-    }, [selectionBox, getNodesInBox]);
-
-    const handlePaneMouseMove = useCallback((e: React.MouseEvent) => {
-        if (!isSelecting) return;
-        updateSelectionBox({ x: e.clientX, y: e.clientY });
-    }, [isSelecting, updateSelectionBox]);
-
-    useEffect(() => {
-        const handleMouseDown = (e: MouseEvent) => {
-            if (e.button !== 0 || !e.shiftKey) return; // Shift + left click only
-
-            const target = e.target as HTMLElement;
-            if (!target.classList.contains("react-flow__pane")) return;
-
-            startSelectionBox({ x: e.clientX, y: e.clientY });
-        }
-
-        document.addEventListener("mousedown", handleMouseDown, true);
-        return () => document.removeEventListener("mousedown", handleMouseDown, true);
-    }, [startSelectionBox]);
-
-    useEffect(() => {
-        const handleMouseUp = () => {
-            if (!isSelecting || !selectionBox) return;
-
-            const selected = getNodesInBox(selectionBox.start, selectionBox.current)
-                .map((node) => ({
-                    id: node.id,
-                    type: node.type as "spark" | "flame",
-                }));
-
-            if (selected.length === 0) {
-                replaceSelection({ type: "none" });
-            } else if (selected.length === 1) {
-                replaceSelection({
-                    type: "single",
-                    id: selected[0].id,
-                    nodeType: selected[0].type,
-                });
-            } else {
-                replaceSelection({
-                    type: "multi",
-                    nodes: selected,
-                });
-            }
-
-            endSelectionBox();
-        };
-
-        document.addEventListener("mouseup", handleMouseUp);
-        return () => document.removeEventListener("mouseup", handleMouseUp);
-    }, [isSelecting, selectionBox, getNodesInBox, replaceSelection, endSelectionBox]);
 
     // --------------------------
     // resolveAndAnimateCollisions
@@ -560,6 +431,135 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
             }
         },
     }), [screenToFlowPosition, openSparkInput]);
+
+    // --------------------------
+    // Selection
+    // --------------------------
+    const onNodesChange = useCallback((changes: NodeChange<MindSparksNode>[]) => {
+        setDisplayNodes((nds) =>
+            applyNodeChanges<MindSparksNode>(
+                changes.filter((c) => c.type !== "select"),
+                nds
+            )
+        );
+    }, []);
+
+    const handlePaneClick = (e: React.MouseEvent) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.shiftKey) return; // Drag box selection
+
+        clearSelection();
+    };
+
+    useEffect(() => {
+        setDisplayNodes((prev) => {
+            const prevById = new Map(prev.map((n) => [n.id, n]));
+
+            return nodes.map((node) => {
+                const isSelected =
+                    selection.type === "single"
+                        ? selection.id === node.id
+                        : selection.type === "multi"
+                            ? selection.nodes.some((n) => n.id === node.id)
+                            : false;
+                
+                const prevNode = prevById.get(node.id);
+
+                // If the node (position, data, etc.) and the selection flag
+                // didn't change, reuse the SAME reference.
+                if (
+                    prevNode &&
+                    prevNode.position === node.position &&
+                    prevNode.data === node.data &&
+                    (prevNode.selected ?? false) === isSelected
+                ) {
+                    return prevNode;
+                }
+
+                return prevNode
+                    ? { ...prevNode, ...node, selected: isSelected }
+                    : { ...node, selected: isSelected };
+            });
+        });
+    }, [nodes, selection]);
+
+    // For group selecting
+    const getNodesInBox = useCallback((start: Position, current: Position) => {
+        const left = Math.min(start.x, current.x);
+        const top = Math.min(start.y, current.y);
+        const right = Math.max(start.x, current.x);
+        const bottom = Math.max(start.y, current.y);
+
+        return displayNodes.filter((node) => {
+            const screenPos = flowToScreenPosition(node.position);
+            const rect = getNodeSize(node.id);
+            const nodeWidth = rect?.width ?? node.width ?? DEFAULT_CARD_WIDTH;
+            const nodeHeight = rect?.height ?? node.height ?? DEFAULT_CARD_HEIGHT;
+
+            return (
+                screenPos.x < right &&
+                screenPos.x + nodeWidth > left &&
+                screenPos.y < bottom &&
+                screenPos.y + nodeHeight > top
+            );
+        })
+    }, [displayNodes, flowToScreenPosition, getNodeSize]);
+
+    const nodesInBox = useMemo(() => {
+        if (!selectionBox) return [];
+        return getNodesInBox(selectionBox.start, selectionBox.current);
+    }, [selectionBox, getNodesInBox]);
+
+    const handlePaneMouseMove = useCallback((e: React.MouseEvent) => {
+        if (!isSelecting) return;
+        updateSelectionBox({ x: e.clientX, y: e.clientY });
+    }, [isSelecting, updateSelectionBox]);
+
+    useEffect(() => {
+        const handleMouseDown = (e: MouseEvent) => {
+            if (e.button !== 0 || !e.shiftKey) return; // Shift + left click only
+
+            const target = e.target as HTMLElement;
+            if (!target.classList.contains("react-flow__pane")) return;
+
+            startSelectionBox({ x: e.clientX, y: e.clientY });
+        }
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+        return () => document.removeEventListener("mousedown", handleMouseDown, true);
+    }, [startSelectionBox]);
+
+    useEffect(() => {
+        const handleMouseUp = () => {
+            if (!isSelecting || !selectionBox) return;
+
+            const selected = getNodesInBox(selectionBox.start, selectionBox.current)
+                .map((node) => ({
+                    id: node.id,
+                    type: node.type as "spark" | "flame",
+                }));
+
+            if (selected.length === 0) {
+                replaceSelection({ type: "none" });
+            } else if (selected.length === 1) {
+                replaceSelection({
+                    type: "single",
+                    id: selected[0].id,
+                    nodeType: selected[0].type,
+                });
+            } else {
+                replaceSelection({
+                    type: "multi",
+                    nodes: selected,
+                });
+            }
+
+            endSelectionBox();
+        };
+
+        document.addEventListener("mouseup", handleMouseUp);
+        return () => document.removeEventListener("mouseup", handleMouseUp);
+    }, [isSelecting, selectionBox, getNodesInBox, replaceSelection, endSelectionBox]);
 
     return (
         <div
