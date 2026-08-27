@@ -14,6 +14,7 @@
 //
 
 import { useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/shallow";
 import { Pencil, X, Plus, Check, ArrowLeft, Trash2 as Trash } from "lucide-react";
 import { useUIStore, useCategoryStore, useSpaceStore, useSparkStore, useFlameStore } from "../../store";
 import type { Category } from "../../types";
@@ -88,7 +89,7 @@ export function AssignCategoryModal({
     startInCreateForm?: boolean;
 }) {
     const activeSpaceId         = useSpaceStore((s) => s.activeSpaceId);
-    const categories            = useCategoryStore((s) => s.categories);
+    const categories            = useCategoryStore(useShallow((s) => s.getCategoriesBySpace(activeSpaceId)));
     const createCategory        = useCategoryStore((s) => s.createCategory);
     const renameCategory        = useCategoryStore((s) => s.renameCategory);
     const updateCategoryColor   = useCategoryStore((s) => s.updateCategoryColor);
@@ -137,7 +138,7 @@ export function AssignCategoryModal({
 
 function ManageCategoryModal({ onClose }: { onClose: () => void }) {
     const activeSpaceId         = useSpaceStore((s) => s.activeSpaceId);
-    const categories            = useCategoryStore((s) => s.categories);
+    const categories            = useCategoryStore(useShallow((s) => s.getCategoriesBySpace(activeSpaceId)));
     const createCategory        = useCategoryStore((s) => s.createCategory);
     const renameCategory        = useCategoryStore((s) => s.renameCategory);
     const updateCategoryColor   = useCategoryStore((s) => s.updateCategoryColor);
