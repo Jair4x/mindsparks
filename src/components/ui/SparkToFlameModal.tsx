@@ -60,12 +60,9 @@ export function SparkToFlameModal() {
                         parentId: spark.parentId,
                     });
 
-                    // Restore connections if they were
-                    if (newFlame.parentId) {
-                        reparentNode(spark.id, newFlame.id);
-                    }
-
+                    // Restore connections if they were any
                     reparentNode(spark.id, newFlame.id);
+
                     requestRepulsion([newFlame.id]);
                     closeModal();
                     openFlame(newFlame.id);
