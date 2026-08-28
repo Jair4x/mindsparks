@@ -44,7 +44,7 @@ interface ConnectionStore {
     // The "related" type connections can be deleted manually by the user.
     deleteConnection: (id: string) => void;
 
-    // Used when deleting a spark or flame to not leave orphan connections.
+    // Used when deleting (not archiving) a spark or flame to not leave orphan connections.
     deleteConnectionsByNode: (nodeId: string) => void;
 
     // Used for cascade deletion
