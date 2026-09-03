@@ -1,3 +1,4 @@
+mod folders;
 mod vault;
 
 #[tauri::command]
@@ -14,6 +15,7 @@ pub fn run() {
             greet,
             vault::get_vault_state,
             vault::set_vault_path,
+            folders::resolve_flame_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

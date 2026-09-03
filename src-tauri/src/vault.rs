@@ -80,3 +80,13 @@ pub fn set_vault_path(app: AppHandle, path: String) -> Result<(), String> {
 
     Ok(())
 }
+
+pub fn get_vault_path(app: &AppHandle) -> Result<PathBuf, String> {
+    match get_vault_state(app.clone())? {
+        VaultState::Ready { path } => Ok(PathBuf::from(path)),
+        VaultState::NotSet => Err("No vault has been configured yet.".into()),
+        VaultState::Missing { path } => {
+            Err(format!("The configured vault folder is missing: {path}"))
+        },
+    }
+}
