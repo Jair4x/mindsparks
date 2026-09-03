@@ -7,7 +7,7 @@
 
 
 import { create } from "zustand";
-import { Flame, Position } from "../types";
+import { Flame, Position, ToolInstance } from "../types";
 import { generateId, now } from "../lib/utils";
 
 // --------------------------
@@ -40,7 +40,7 @@ interface FlameStore {
     moveFlameToPosition: (id: string, position: Position) => void;
 
     // Update the tools the flame has
-    updateFlameTools: (id: string, tools: string[]) => void;
+    updateFlameTools: (id: string, tools: ToolInstance[]) => void;
 
     updateFlameSchema: (id: string, schema: string) => void;
 

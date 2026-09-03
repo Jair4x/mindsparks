@@ -1,9 +1,12 @@
 import "./App.css";
 import { AppLayout } from "./components/layout/AppLayout";
+import { VaultGate } from "./components/vault/VaultGate";
 
 function App() {
   return (
-    <AppLayout />
+    <VaultGate>
+      <AppLayout />
+    </VaultGate>
   );
 }
 

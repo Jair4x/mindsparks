@@ -33,11 +33,25 @@ export interface Category {
 //  The powers available to use in Flames to work on projects.
 // --------------------------
 export interface Tool {
-    name:           string;
-    label:          string;
-    description:    string;
-    icon:           string;     // Lucide icon name
-    enabled:        boolean;    // if it's implemented in the current version
+    name:                   string;
+    label:                  string;
+    description:            string;
+    icon:                   string;     // Lucide icon name
+    enabled:                boolean;    // if it's implemented in the current version
+    allowMultipleInstances: boolean;    // To decide if a tool could have more than one instance open at the same time.
+}
+
+// --------------------------
+// ToolInstance
+//  A single instance of a tool living inside a Flame. For tools
+//  that don't allow multiple instances (see Tool.allowMultipleInstances above),
+//  a Flame will only ever have one of these per tool type.
+// --------------------------
+export interface ToolInstance {
+    id:                     string;     // Unique id of THIS instance (used as activeTool/splitTool as for the MVP)
+    type:                   string;     // References Tool.name above
+    label?:                 string;     // custom name, useful to distinguish 2 tools, for example. ("Notes - API" vs "Notes - Auth")
+    createdAt:              string;
 }
 
 // --------------------------
@@ -87,7 +101,7 @@ export interface Flame {
     categoryId?:    string;
     parentId?:      string;
     schema:         string;         // name of the selected schema (predefined or custom), referencing Schema
-    tools:          string[];       // name of the active tools in this flame, referencing tools[]
+    tools:          ToolInstance[]; // name of the active tools in this flame, referencing tools[]
     isArchived:     boolean;
     isCompleted:    boolean;        // if the user marked it as finished
     createdAt:      string;
