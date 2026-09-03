@@ -12,10 +12,25 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "Mindsparks",
         "width": 800,
         "height": 600,
         "dragDropEnabled": false
+      },
+      {
+        "label": "quick-capture",
+        "title": "MindSparks Quick Capture",
+        "url": "index.html?window=quick-capture",
+        "width": 480,
+        "height": 160,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "resizable": false,
+        "center": true,
+        "visible": false,
+        "shadow": true
       }
     ],
     "security": {
