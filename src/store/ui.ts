@@ -107,14 +107,6 @@ interface UIStore {
 
     isZenModeActive: boolean;
 
-    // --- Spark input state ---
-    sparkInputPosition: { screen: Position; canvas: Position; } | null;
-    openSparkInput: (position: {
-        screen: Position;
-        canvas: Position;
-    }) => void;
-    closeSparkInput: () => void;
-
     // --- Actions: modals ---
 
     openModal: (modal: ModalType, nodeId?: string | null) => void;
@@ -159,7 +151,6 @@ interface UIStore {
 export const useUIStore = create<UIStore>((set, get) => ({
     activeModal: null,
     activeModalNodeId: null,
-    sparkInputPosition: null,
     contextMenu: null,
     zoom: DEFAULT_ZOOM,
     canvasViewport: { x: 0, y: 0, zoom: 1 },
@@ -321,16 +312,6 @@ export const useUIStore = create<UIStore>((set, get) => ({
                 navigationStack: stack,
             };
         });
-    },
-
-    // --- Spark creation ---
-
-    openSparkInput: (position) => {
-        set({ sparkInputPosition: position });
-    },
-
-    closeSparkInput: () => {
-        set({ sparkInputPosition: null });
     },
 
     // --- Side panel & Zen mode ---

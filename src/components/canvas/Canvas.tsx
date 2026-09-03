@@ -33,9 +33,10 @@ import { animateRepulsion, resolveAllCollisions } from "../../lib/repulsion";
 import { SparkCard } from "./SparkCard";
 import { FlameCard } from "./FlameCard";
 import { NodeCardEdge } from "./NodeCardEdge";
-import { SparkInput } from "./SparkInput";
 import { SelectionBox } from "./SelectionBox";
 import { ContextMenu } from "./ContextMenu";
+
+import { openQuickCapture } from "../../lib/quickCaptureEvents";
 
 import {
     MIN_ZOOM     as MIN_ZOOM,
@@ -64,18 +65,30 @@ export interface CanvasHandle {
 }
 
 // --------------------------
+// centerNodeOnPoint
+//
+// Self explanatory, when creating a node, it appears on the center of the
+//  cursor, not the upper left side as React Flow does by default.
+//
+// This would've been added later, but this is UX and it bothered me that
+//  I didn't do this before.
+// --------------------------
+function centerNodeOnPoint(point: Position): Position {
+    return {
+        x: point.x - DEFAULT_CARD_WIDTH / 2,
+        y: point.y - DEFAULT_CARD_HEIGHT / 2,
+    };
+}
+
+// --------------------------
 // Canvas
 //
-// Definition looks nasty, but it's to be able to expose CanvasHandle.
+// Definition looks (kinda) nasty, but it's to be able to expose CanvasHandle.
 // --------------------------
 
 export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
     const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom, getNodes } = useReactFlow();
-
-    const sparkInputPosition = useUIStore((s) => s.sparkInputPosition);
-    const openSparkInput = useUIStore((s) => s.openSparkInput);
-    const closeSparkInput = useUIStore((s) => s.closeSparkInput);
 
     const setZoom = useUIStore((s) => s.setZoom);
     const setCanvasViewport = useUIStore((s) => s.setCanvasViewport);
@@ -130,7 +143,7 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     // --------------------------
     // resolveAndAnimateCollisions
     //
-    // Shared by onNodeDragStop and the SparkInput confirm handler:
+    // Used by onNodeDragStop:
     //  given the id/position of whatever just moved or was created, 
     //  plus the full set of node positions to check against, resolves 
     //  overlaps and animates the affected nodes into their new spots.
@@ -269,15 +282,18 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
                 if (!isSafeZone(event.clientX, event.clientY)) return;
 
                 try {
-                    const screenPosition = { x: event.clientX, y: event.clientY - HEADER_HEIGHT };
                     const canvasPosition = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-                    openSparkInput({ screen: screenPosition, canvas: canvasPosition });
+                    openQuickCapture({
+                        mode: "inline",
+                        spaceId: activeSpaceId,
+                        sparkPosition: centerNodeOnPoint(canvasPosition),
+                    });
                 } catch (e) {
                     console.error("screenToFlowPosition failed:", e);
                 }
             }
         },
-        [screenToFlowPosition, openSparkInput]
+        [screenToFlowPosition, activeSpaceId]
     );
 
     // --------------------------
@@ -299,36 +315,6 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
             selectNode(node.id, nodeType);
         }
     };
-
-    // --------------------------
-    // handleSparkConfirm
-    //
-    // For SparkInput, resolves the creation of 
-    // the spark and the close nodes collision.
-    // --------------------------
-    const handleSparkConfirm = useCallback((text: string) => {
-        const newSpark = useSparkStore.getState().createSpark({
-            text,
-            position: sparkInputPosition!.canvas,
-            spaceId: activeSpaceId,
-        });
-
-        const allNodePositions = displayNodes.map((n) => ({
-            id: n.id,
-            position: n.position,
-            size: getNodeSize(n.id),
-        }));
-
-        allNodePositions.push({
-            id: newSpark.id,
-            position: sparkInputPosition!.canvas,
-            size: getNodeSize(newSpark.id),
-        });
-
-        resolveAndAnimateCollisions(newSpark.id, allNodePositions);
-
-        closeSparkInput();
-    }, [displayNodes, sparkInputPosition, activeSpaceId, resolveAndAnimateCollisions, closeSparkInput, getNodeSize]);
 
     // --------------------------
     // handlePaneContextMenu / handleNodeContextMenu
@@ -422,15 +408,16 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
 
             try {
                 const canvasPosition = screenToFlowPosition(centerScreen);
-                openSparkInput({
-                    screen: { x: centerScreen.x, y: visibleCenterY },
-                    canvas: canvasPosition,
+                openQuickCapture({
+                    mode: "inline",
+                    spaceId: activeSpaceId,
+                    sparkPosition: centerNodeOnPoint(canvasPosition),
                 });
             } catch (err) {
                 console.error("screenToFlowPosition failed:", err);
             }
         },
-    }), [screenToFlowPosition, openSparkInput]);
+    }), [screenToFlowPosition, activeSpaceId]);
 
     // --------------------------
     // Selection
@@ -615,14 +602,6 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
             {selectionBox && (
                 <SelectionBox
                     nodeCount={nodesInBox.length}
-                />
-            )}
-
-            {sparkInputPosition && (
-                <SparkInput
-                    position={sparkInputPosition.screen}
-                    onConfirm={handleSparkConfirm}
-                    onCancel={closeSparkInput}
                 />
             )}
 

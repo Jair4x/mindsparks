@@ -1,10 +1,11 @@
 mod folders;
 mod vault;
 
-use tauri::Manager;
+use tauri::{Manager, Emitter};
 use tauri_plugin_global_shortcut::ShortcutState;
 
 const QUICK_CAPTURE_SHORTCUT: &str = "ctrl+shift+space";
+const QUICK_CAPTURE_OPEN_EVENT: &str = "quick-capture:open";
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -21,8 +22,11 @@ fn toggle_quick_capture(app: &tauri::AppHandle) {
     if is_visible {
         let _ = window.hide();
     } else {
-        let _ = window.show();
-        let _ = window.set_focus();
+        let _ = app.emit_to(
+            "quick_capture",
+            QUICK_CAPTURE_OPEN_EVENT,
+            serde_json::json!({ "mode": "global" }),
+        );
     }
 }
 
@@ -36,7 +40,7 @@ pub fn run() {
             {
                 app.handle().plugin(
                     tauri_plugin_global_shortcut::Builder::new()
-                        .with_shortcuts(([QUICK_CAPTURE_SHORTCUT]))?
+                        .with_shortcut(QUICK_CAPTURE_SHORTCUT)? 
                         .with_handler(|app, _shortcut, event| {
                             if event.state == ShortcutState::Pressed {
                                 toggle_quick_capture(app);
@@ -46,7 +50,26 @@ pub fn run() {
                 )?;
             }
 
+            // Okay, so, sometimes Windows screws things up and window transparency is nonexistent.
+            // By resizing the window to the same size it already was by default, it gets fixed, at least on my machine.
+            #[cfg(target_os = "windows")]
+            if let Some(qc) = app.get_webview_window("quick-capture") {
+                if let Ok(size) = qc.inner_size() {
+                    let _ = qc.set_size(size);
+                }
+            }
+
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { .. } = event {
+                    if let Some(quick_capture) = window.app_handle().get_webview_window("quick-capture")
+                    {
+                        let _ = quick_capture.close();
+                    }
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             greet,

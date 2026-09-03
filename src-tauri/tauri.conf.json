@@ -23,14 +23,15 @@
         "title": "MindSparks Quick Capture",
         "url": "index.html?window=quick-capture",
         "width": 480,
-        "height": 160,
+        "height": 195,
         "decorations": false,
         "alwaysOnTop": true,
         "skipTaskbar": true,
         "resizable": false,
         "center": true,
         "visible": false,
-        "shadow": true
+        "shadow": false,
+        "transparent": true
       }
     ],
     "security": {

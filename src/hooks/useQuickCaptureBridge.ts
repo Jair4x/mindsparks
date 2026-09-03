@@ -43,7 +43,7 @@ export function useQuickCaptureBridge() {
         const unlisten = listen<CreateSparkPayload>(CREATE_SPARK_EVENT, (event) => {
             const newSpark = useSparkStore.getState().createSpark({
                 text: event.payload.text,
-                position: { x: 200, y: 200 },
+                position: event.payload.position,
                 spaceId: event.payload.spaceId,
             });
 

@@ -6,22 +6,34 @@
 //
 
 import { useEffect, useRef, useState, type SyntheticEvent, type KeyboardEvent } from "react";
+import { ChevronDown } from "lucide-react";
 import { emitTo, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { LogicalSize } from "@tauri-apps/api/dpi";
 import {
     SPACES_UPDATED_EVENT,
     CREATE_SPARK_EVENT,
     QUICK_CAPTURE_READY_EVENT,
+    QUICK_CAPTURE_OPEN_EVENT,
     type SpacesUpdatedPayload,
+    type QuickCaptureOpenPayload,
+    type QuickCaptureMode,
 } from "../lib/quickCaptureEvents";
-import type { Space } from "../types";
+import type { Space, Position } from "../types";
+
+const GLOBAL_MODE_SIZE = { width: 480, height: 195 }; // Because it has the header and stuff
+const INLINE_MODE_SIZE = { width: 480, height: 140 };
 
 export function QuickCaptureApp() {
-    const [spaces, setSpaces]   = useState<Space[]>([]);
-    const [spaceId, setSpaceId] = useState("");
-    const [text, setText]       = useState("");
-    const inputRef              = useRef<HTMLInputElement>(null);
+    const [mode, setMode]                   = useState<QuickCaptureMode>("global");
+    const [spaces, setSpaces]               = useState<Space[]>([]);
+    const [spaceId, setSpaceId]             = useState("");
+    const [sparkPosition, setSparkPosition] = useState<Position>({ x: 0, y: 0 });
+    const [text, setText]                   = useState("");
+    const inputRef                          = useRef<HTMLInputElement>(null);
 
+    // Spaces.
+    // Only used on "global" mode, but it doesn't hurt to always have them ready.
     useEffect(() => {
         let unlisten: (() => void) | undefined;
 
@@ -35,6 +47,33 @@ export function QuickCaptureApp() {
 
         return () => {
             unlisten?.();
+        };
+    }, []);
+
+    // Opening
+    // Decides the mode, the space (fixed on "inline", chosen on "global") and where the new Spark ends up in the canvas.
+    useEffect(() => {
+        const unlisten = listen<QuickCaptureOpenPayload>(QUICK_CAPTURE_OPEN_EVENT, async (event) => {
+            const { mode: newMode, spaceId: fixedSpaceId, sparkPosition: newPosition } = event.payload;
+
+            setMode(newMode);
+            setSparkPosition(newPosition ?? { x: 200, y: 200 });
+
+            if (newMode === "inline" && fixedSpaceId) {
+                setSpaceId(fixedSpaceId);
+            }
+
+            setText("");
+
+            const size = newMode === "global" ? GLOBAL_MODE_SIZE : INLINE_MODE_SIZE;
+
+            await getCurrentWindow().setSize(new LogicalSize(size.width, size.height));
+            await getCurrentWindow().show();
+            await getCurrentWindow().setFocus();
+        });
+
+        return () => {
+            unlisten.then((fn) => fn());
         };
     }, []);
 
@@ -54,7 +93,11 @@ export function QuickCaptureApp() {
         const trimmed = text.trim();
         if (!trimmed || !spaceId) return;
 
-        await emitTo("main", CREATE_SPARK_EVENT, { text: trimmed, spaceId });
+        await emitTo("main", CREATE_SPARK_EVENT, {
+            text: trimmed,
+            spaceId,
+            position: sparkPosition,
+        });
 
         setText("");
         await getCurrentWindow().hide();
@@ -65,72 +108,111 @@ export function QuickCaptureApp() {
     }
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="w-screen h-screen flex flex-col justify-between px-5 py-4"
-            style={{ background: "var(--color-bg)" }}
+        <div
+            className="w-screen h-screen flex flex-col items-center justify-center p-2"
+            style={{ background: "transparent" }}
         >
-            <div className="flex flex-row items-center gap-1">
-                <label
-                    htmlFor="quick-capture-space"
-                    style={{ fontSize: 12, color: "var(--color-text-muted)" }}
+            {mode === "global" && (
+                <span
+                    style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        color: "var(--color-accent-light)",
+                    }}
                 >
-                    Space to send this idea to:
-                </label>
-                <select
-                    id="quick-capture-space"
-                    value={spaceId}
-                    onChange={(e) => setSpaceId(e.target.value)}
+                    MindSparks
+                </span>
+            )}
+            <form
+                onSubmit={handleSubmit}
+                className="w-full h-full flex flex-col justify-between px-5 py-4"
+                style={{
+                    background: "var(--color-surface)",
+                    border: "1px solid var(--color-accent)",
+                    borderRadius: 14,
+                    marginTop: mode === "global" ? 5 : 0,
+                }}
+            >
+                {mode === "global" && (
+                    <div className="flex flex-row items-center gap-1">
+                        <label
+                            htmlFor="quick-capture-space"
+                            style={{ fontSize: 12, color: "var(--color-text-muted)" }}
+                        >
+                            Space to send this idea to:
+                        </label>
+                        <div style={{ position: "relative" }}>
+                            <select
+                                id="quick-capture-space"
+                                value={spaceId}
+                                onChange={(e) => setSpaceId(e.target.value)}
+                                style={{
+                                    appearance: "none",
+                                    WebkitAppearance: "none",
+                                    background: "var(--color-bg)",
+                                    color: "var(--color-text)",
+                                    fontSize: 12,
+                                    border: "1px solid var(--color-border)",
+                                    borderRadius: 6,
+                                    padding: "5px 28px 5px 8px",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                {spaces.map((space) => (
+                                    <option key={space.id} value={space.id}>
+                                        {space.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <ChevronDown
+                                size={12}
+                                style={{
+                                    position: "absolute",
+                                    right: 8,
+                                    top: "50%",
+                                    transform: "translateY(-50%)",
+                                    pointerEvents: "none",
+                                    color: "var(--color-text-muted)",
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                <input
+                    ref={inputRef}
+                    autoFocus
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="What's the idea?"
                     style={{
                         background: "transparent",
-                        color: "var(--color-text-muted)",
-                        fontSize: 12,
-                        border: "1px solid var(--color-border)",
-                        borderRadius: 6,
-                        padding: "4px 8px",
-                    }}
-                >
-                    {spaces.map((space) => (
-                        <option key={space.id} value={space.id}>
-                            {space.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <input
-                ref={inputRef}
-                autoFocus
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="What's the idea?"
-                style={{
-                    background: "transparent",
-                    border: "none",
-                    outline: "none",
-                    color: "var(--color-text)",
-                    fontSize: 18,
-                }}
-            />
-
-            <div className="flex justify-end">
-                <button
-                    type="submit"
-                    disabled={!text.trim() || !spaceId}
-                    style={{
-                        background: "var(--color-accent)",
-                        color: "var(--color-bg)",
-                        borderRadius: 6,
-                        padding: "6px 14px",
-                        fontSize: 13,
                         border: "none",
-                        opacity: !text.trim() || !spaceId ? 0.5 : 1,
+                        outline: "none",
+                        color: "var(--color-text)",
+                        fontSize: 18,
                     }}
-                >
-                    Capture
-                </button>
-            </div>
-        </form>
+                />
+
+                <div className="flex justify-end">
+                    <button
+                        type="submit"
+                        disabled={!text.trim() || !spaceId}
+                        style={{
+                            background: "var(--color-accent)",
+                            color: "var(--color-bg)",
+                            borderRadius: 6,
+                            padding: "6px 14px",
+                            fontSize: 13,
+                            border: "none",
+                            opacity: !text.trim() || !spaceId ? 0.5 : 1,
+                        }}
+                    >
+                        Capture
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }
