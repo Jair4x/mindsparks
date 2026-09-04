@@ -30,7 +30,7 @@ interface FlameStore {
         position:       Position;
         spaceId:        string;
         schema:         string;
-        tools:          ToolInstance[];
+        tools:          Array<string | { type: string; label?: string }>;
         categoryId?:    string;
         parentId?:      string;
     }) => Flame;
@@ -90,11 +90,16 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         categoryId,
         parentId,
     }) => {
-        const toolInstances: ToolInstance[] = tools.map((type) => ({
-            id: generateId(),
-            type,
-            createdAt: now(),
-        }));
+        const toolInstances: ToolInstance[] = tools.map((entry) => {
+            const isPlainType = typeof entry === "string";
+
+            return {
+                id: generateId(),
+                type: isPlainType ? entry : entry.type,
+                label: isPlainType ? undefined : entry.label,
+                createdAt: now(),
+            }
+        });
 
         const newFlame: Flame = {
             id: generateId(),

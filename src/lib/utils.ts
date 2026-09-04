@@ -3,7 +3,8 @@
 //  Set of helper functions to comply with "DRY" (Don't Repeat Yourself)
 // --------------------------
 import { useState, useEffect } from "react";
-import { SAFE_ZONE_MARGIN } from "./constants";
+import type { Position } from "../types";
+import { SAFE_ZONE_MARGIN, DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH } from "./constants";
 
 // Generate a random ID
 export function generateId(): string {
@@ -57,4 +58,20 @@ export function useNow(intervalMs = 20000) {
     }, [intervalMs]);
 
     return nowMs;
+}
+
+// --------------------------
+// centerNodeOnPoint
+//
+// Self explanatory, when creating a node, it appears on the center of the
+//  cursor, not the upper left side as React Flow does by default.
+//
+// This would've been added later, but this is UX and it bothered me that
+//  I didn't do this before.
+// --------------------------
+export function centerNodeOnPoint(point: Position): Position {
+    return {
+        x: point.x - DEFAULT_CARD_WIDTH / 2,
+        y: point.y - DEFAULT_CARD_HEIGHT / 2,
+    };
 }

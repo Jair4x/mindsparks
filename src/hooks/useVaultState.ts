@@ -5,7 +5,7 @@ interface UseVaultStateResult {
     state:          VaultState | null;  // null while initial setup is in progress.
     isChoosing:     boolean;            // true while the picker is open or is saving.
     error:          string | null;
-    chooseFolder:   () => promise<void>;
+    chooseFolder:   () => Promise<void>;
 }
 
 export function useVaultState(): UseVaultStateResult {

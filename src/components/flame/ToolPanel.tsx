@@ -25,7 +25,7 @@ interface ToolPanelProps {
 
 export function ToolPanel({ flameId, instance, onClose }: ToolPanelProps) {
     const toolDef   = tools.find((t) => t.name === instance.type);
-    const label     = instance.label ?? toolDef?.label ?? tool;
+    const label     = instance.label ?? toolDef?.label ?? instance.type;
     const icon      = toolDef ? getToolIcon(toolDef.icon) : null;
 
     return (

@@ -55,7 +55,7 @@ export type MindSparksNode = SparkNode | FlameNode;
 // The full spark goes in data.spark so the SparkCard component can read any field
 //  without needing any additional props.
 // --------------------------
-const sparkNodeCache = new WeakMap<string, SparkNode>();
+const sparkNodeCache = new WeakMap<Spark, SparkNode>();
 function sparkToNode(spark: Spark): SparkNode {
     const cached = sparkNodeCache.get(spark);
     if (cached) return cached;
@@ -79,7 +79,7 @@ function sparkToNode(spark: Spark): SparkNode {
 // Transforms a Zustand Flame into a React Flow node.
 // Same pattern as SparkToNode
 // --------------------------
-const flameNodeCache = new WeakMap<string, FlameNode>();
+const flameNodeCache = new WeakMap<Flame, FlameNode>();
 
 function flameToNode(flame: Flame): FlameNode {
     const cached = flameNodeCache.get(flame);

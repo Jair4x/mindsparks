@@ -27,7 +27,7 @@ import { handleScroll, ZoomControls } from "./ZoomControls";
 
 import { useSparkStore, useFlameStore, useConnectionStore, useSpaceStore, useUIStore } from "../../store";
 import { sparksAndFlamesToNodes, connectionsToEdges, type MindSparksNode } from "../../lib/flowTransforms";
-import { isSafeZone } from "../../lib/utils";
+import { isSafeZone, centerNodeOnPoint } from "../../lib/utils";
 import { animateRepulsion, resolveAllCollisions } from "../../lib/repulsion";
 
 import { SparkCard } from "./SparkCard";
@@ -62,22 +62,6 @@ const edgeTypes = {
 
 export interface CanvasHandle {
     createSparkAtCenter: () => void;
-}
-
-// --------------------------
-// centerNodeOnPoint
-//
-// Self explanatory, when creating a node, it appears on the center of the
-//  cursor, not the upper left side as React Flow does by default.
-//
-// This would've been added later, but this is UX and it bothered me that
-//  I didn't do this before.
-// --------------------------
-function centerNodeOnPoint(point: Position): Position {
-    return {
-        x: point.x - DEFAULT_CARD_WIDTH / 2,
-        y: point.y - DEFAULT_CARD_HEIGHT / 2,
-    };
 }
 
 // --------------------------

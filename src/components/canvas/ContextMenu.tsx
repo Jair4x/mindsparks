@@ -34,7 +34,8 @@ import {
     useSpaceStore
 } from "../../store";
 import type { Category } from "../../types";
-import { HEADER_HEIGHT } from "../../lib/constants";
+import { centerNodeOnPoint } from "../../lib/utils";
+import { openQuickCapture } from "../../lib/quickCaptureEvents";
 import { AssignCategoryModal } from "../ui/CategoryModal";
 import { useAssignCategory } from "../../hooks";
 
@@ -75,7 +76,6 @@ function ContextMenuContent({
 
     const selection         = useUIStore((s) => s.selection);
     const openModal         = useUIStore((s) => s.openModal);
-    const openSparkInput    = useUIStore((s) => s.openSparkInput);
     const activeSpaceId     = useSpaceStore((s) => s.activeSpaceId);
 
     const sparks        = useSparkStore((s) => s.sparks);
@@ -187,7 +187,7 @@ function ContextMenuContent({
                     position: tempSpark.position,
                     spaceId: tempSpark.spaceId,
                     schema: flame.schema,
-                    tools: flame.tools,
+                    tools: flame.tools.map((t) => ({ type: t.type, label: t.label })),
                     categoryId: flame.categoryId,
                     parentId: flame.parentId,
                 });
@@ -317,12 +317,12 @@ function ContextMenuContent({
 
     const handleCreateSparkHere = () => {
         const canvasPosition = screenToFlowPosition(contextMenu.position);
-        const screenPosition = {
-            x: contextMenu.position.x,
-            y: contextMenu.position.y - HEADER_HEIGHT,
-        };
-            
-        openSparkInput({ screen: screenPosition, canvas: canvasPosition });
+        
+        openQuickCapture({
+            mode: "inline",
+            spaceId: activeSpaceId,
+            sparkPosition: centerNodeOnPoint(canvasPosition),
+        });
         
         onClose();
     };

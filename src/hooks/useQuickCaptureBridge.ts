@@ -7,7 +7,6 @@
 //
 
 import { useEffect } from "react";
-import { useShallow } from "zustand/shallow";
 import { emitTo, listen } from "@tauri-apps/api/event";
 import { useSpaceStore, useSparkStore, useUIStore } from "../store";
 import {

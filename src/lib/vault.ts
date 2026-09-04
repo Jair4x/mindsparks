@@ -15,7 +15,7 @@ export async function getVaultState(): Promise<VaultState> {
     return invoke<VaultState>("get_vault_state");
 }
 
-export async function setVaultPath(path: string): Promise<void> {
+export async function setVaultPath(path: string): Promise<VaultState> {
     return invoke<VaultState>("set_vault_path", { path });
 }
 
