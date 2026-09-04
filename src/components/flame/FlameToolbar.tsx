@@ -7,17 +7,18 @@
 import React, { useState } from "react";
 import { tools } from "../../lib/constants";
 import { getToolIcon } from "../../lib/toolConfig";
+import type { ToolInstance } from "../../types";
 
 // --------------------------
 // Props
 // --------------------------
 
 interface FlameToolbarProps {
-    toolNames: string[];
-    activeTool: string | null;
-    splitTool: string | null;
+    toolInstances: ToolInstance[];
+    activeTool: string | null;  // instanceid
+    splitTool: string | null;   // instanceid
 
-    onToolClick: (tool: string) => void;
+    onToolClick: (instanceId: string) => void;
 }
 
 // --------------------------
@@ -25,21 +26,21 @@ interface FlameToolbarProps {
 // --------------------------
 
 export function FlameToolbar({
-    toolNames,
+    toolInstances,
     activeTool,
     splitTool,
     onToolClick
 }: FlameToolbarProps) {
-    if (toolNames.length === 0) return null;
+    if (toolInstances.length === 0) return null;
 
     return (
         <div className="flex items-center gap-1">
-            {toolNames.map((tool) => (
+            {toolInstances.map((instance) => (
                 <ToolTab
-                    key={tool}
-                    tool={tool}
-                    isActive={tool === activeTool || tool === splitTool}
-                    onClick={() => onToolClick(tool)}
+                    key={instance.id}
+                    instance={instance}
+                    isActive={instance.id === activeTool || instance.id === splitTool}
+                    onClick={() => onToolClick(instance.id)}
                 />
             ))}
         </div>
@@ -51,23 +52,23 @@ export function FlameToolbar({
 // --------------------------
 
 function ToolTab({
-    tool,
+    instance,
     isActive,
     onClick
 }: {
-    tool: string;
+    instance: ToolInstance;
     isActive: boolean;
     onClick: () => void;
 }) {
     const [isDragging, setIsDragging] = useState(false);
     
-    const toolDef = tools.find((t) => t.name === tool);
-    const label = toolDef?.label ?? tool;
+    const toolDef = tools.find((t) => t.name === instance.type);
+    const label = instance.label ?? toolDef?.label ?? instance.type;
     const icon = toolDef ? getToolIcon(toolDef.icon) : null;
 
     const handleDragStart = (e: React.DragEvent) => {
-        // Save the name of the tool so FlameWorkspace knows which tool is being dragged
-        e.dataTransfer.setData("tool", tool);
+        // Save the ID of the tool so FlameWorkspace knows which tool is being dragged
+        e.dataTransfer.setData("tool", instance.id);
         e.dataTransfer.effectAllowed = "move";
         setIsDragging(true);
     };

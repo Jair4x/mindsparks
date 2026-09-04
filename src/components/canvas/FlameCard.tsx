@@ -39,8 +39,11 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
 
     // Get the Tool objects for the active tools in this flame
     const activeTools = flame.tools
-        .map((toolName) => tools.find((t) => t.name === toolName))
-        .filter(Boolean);
+        .map((instance) => {
+            const toolDef = tools.find((t) => t.name === instance.type);
+            return toolDef ? { instanceId: instance.id, toolDef } : null;
+        })
+        .filter((entry) => entry !== null);
     
     return (
         <NodeCardShell
@@ -78,10 +81,10 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             )}
             footer={activeTools.length > 0 && (
                 <div className="flex items-center gap-1 mt-2">
-                    {activeTools.map((tool) => tool && (
+                    {activeTools.map(({ instanceId, toolDef }) => (
                         <div
-                            key={tool.name}
-                            title={tool.label}
+                            key={instanceId}
+                            title={toolDef.label}
                             className="flex items-center justify-center"
                             style={{
                                 width: 20,
@@ -91,7 +94,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
                                 color: "var(--color-accent)",
                             }}
                         >
-                            {getToolIcon(tool.icon)}
+                            {getToolIcon(toolDef.icon)}
                         </div>
                     ))}
                 </div>

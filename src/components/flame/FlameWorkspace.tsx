@@ -10,6 +10,7 @@
 import { useState, useCallback } from "react";
 import { Panel, Group, Separator } from "react-resizable-panels";
 import { ToolPanel } from "./ToolPanel";
+import type { ToolInstance } from "../../types";
 
 // --------------------------
 // Props
@@ -17,10 +18,11 @@ import { ToolPanel } from "./ToolPanel";
 
 interface FlameWorkspaceProps {
     flameId: string;
-    activeTool: string | null;
-    splitTool: string | null;
-    onToolDrop: (tool: string, side: "left" | "right") => void;
-    onCloseTool: (tool: string) => void;
+    toolInstances: ToolInstance[];
+    activeTool: string | null;  // instanceId
+    splitTool: string | null;   // instanceId
+    onToolDrop: (instanceId: string, side: "left" | "right") => void;
+    onCloseTool: (instanceId: string) => void;
 }
 
 // --------------------------
@@ -29,11 +31,14 @@ interface FlameWorkspaceProps {
 
 export function FlameWorkspace({
     flameId,
+    toolInstances,
     activeTool,
     splitTool,
     onToolDrop,
     onCloseTool,
 }: FlameWorkspaceProps) {
+    const activeInstance    = toolInstances.find((t) => t.id === activeTool) ?? null;
+    const splitInstance     = toolInstances.find((t) => t.id === splitTool) ?? null;
     const [isDraggingOver, setIsDraggingOver] = useState(false);
 
     const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -102,18 +107,20 @@ export function FlameWorkspace({
             )}
 
             {/* Normal view or split view */}
-            {splitTool
+            {splitTool && splitInstance
                 ? (
                     <Group
                         orientation="horizontal"
                         className="h-full"
                     >
                         <Panel defaultSize={"50%"} minSize={"25%"}>
-                            <ToolPanel
-                                flameId={flameId}
-                                tool={activeTool}
-                                onClose={() => onCloseTool(activeTool)}
-                            />
+                            {activeInstance && (
+                                <ToolPanel
+                                    flameId={flameId}
+                                    instance={activeInstance}
+                                    onClose={() => onCloseTool(activeInstance.id)}
+                                />
+                            )}
                         </Panel>
 
                         <Separator
@@ -134,18 +141,20 @@ export function FlameWorkspace({
                         <Panel minSize={"25%"}>
                             <ToolPanel
                                 flameId={flameId}
-                                tool={splitTool}
-                                onClose={() => onCloseTool(splitTool)}
+                                instance={splitInstance}
+                                onClose={() => onCloseTool(splitInstance.id)}
                             />
                         </Panel>
                     </Group>
                 )
                 : (
-                    <ToolPanel
-                        flameId={flameId}
-                        tool={activeTool}
-                        onClose={() => onCloseTool(activeTool)}
-                    />
+                    activeInstance && (
+                        <ToolPanel
+                            flameId={flameId}
+                            instance={activeInstance}
+                            onClose={() => onCloseTool(activeInstance.id)} 
+                        />
+                    )
                 )}
         </div>
     );

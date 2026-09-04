@@ -13,6 +13,7 @@ import { tools, schemas } from "../../lib/constants";
 import { getToolIcon } from "../../lib/toolConfig";
 import { reparentNode } from "../../store/cascade";
 import type { Schema, Tool } from "../../types";
+import { generateId, now } from "../../lib/utils";
 
 // --------------------------
 // SparkToFlameModal
@@ -77,10 +78,18 @@ export function SparkToFlameModal() {
                 mode="manage"
                 title="Manage Tools"
                 subtitle={flame.name}
-                initialTools={flame.tools}
+                initialTools={flame.tools.map((instance) => instance.type)}
                 onClose={closeModal}
                 onConfirm={(schemaName, selectedTools) => {
-                    updateFlameTools(flame.id, selectedTools);
+                    const existingByType = new Map(
+                        flame.tools.map((instance) => [instance.type, instance])
+                    );
+
+                    const updatedInstances = selectedTools.map((type) =>
+                        existingByType.get(type) ?? { id: generateId(), type, createdAt: now() }
+                    );
+
+                    updateFlameTools(flame.id, updatedInstances);
                     updateFlameSchema(flame.id, schemaName);
                     closeModal();
                 }}

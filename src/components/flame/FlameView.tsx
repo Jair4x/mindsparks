@@ -62,7 +62,7 @@ function FlameViewContent({
     const [editName, setEditName]       = useState("");
 
     const [activeTool, setActiveTool]   = useState<string | null>(
-        flame.tools[0] ?? null
+        flame.tools[0]?.id ?? null
     );
     const [splitTool, setSplitTool]     = useState<string | null>(null); // For split view
 
@@ -72,8 +72,8 @@ function FlameViewContent({
     // * Note: The logic for all this split view doesn't really click with me, but it's the current solution I could come up with
     // *       I'll probably change it when I get a proper 3 or so windows split view so deletion works dinamically
     useEffect(() => {
-        const leftNotThere = activeTool && !flame.tools.includes(activeTool);
-        const rightNotThere = splitTool && !flame.tools.includes(splitTool);
+        const leftNotThere = activeTool && !flame.tools.some((t) => t.id === activeTool);
+        const rightNotThere = splitTool && !flame.tools.some((t) => t.id === splitTool);
         
         if (leftNotThere && rightNotThere) {
             setActiveTool(null);
@@ -191,14 +191,14 @@ function FlameViewContent({
                     <Separator />
                     
                     <FlameToolbar
-                        toolNames={flame.tools}
+                        toolInstances={flame.tools}
                         activeTool={activeTool}
                         splitTool={splitTool}
-                        onToolClick={(tool) => {
-                            if (tool === activeTool || tool === splitTool) {
-                                handleCloseTool(tool);
+                        onToolClick={(instanceId) => {
+                            if (instanceId === activeTool || instanceId === splitTool) {
+                                handleCloseTool(instanceId);
                             } else {
-                                setActiveTool(tool);
+                                setActiveTool(instanceId);
                             }
                         }}
                     />
@@ -238,6 +238,7 @@ function FlameViewContent({
             <section className="flex-1 min-h-0">
                 <FlameWorkspace
                     flameId={flame.id}
+                    toolInstances={flame.tools}
                     activeTool={activeTool}
                     splitTool={splitTool}
                     onToolDrop={handleToolDrop}

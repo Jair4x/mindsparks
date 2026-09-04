@@ -7,6 +7,7 @@
 import { X } from "lucide-react";
 import { tools } from "../../lib/constants";
 import { getToolIcon } from "../../lib/toolConfig";
+import type { ToolInstance } from "../../types";
 
 // --------------------------
 // Props
@@ -14,7 +15,7 @@ import { getToolIcon } from "../../lib/toolConfig";
 
 interface ToolPanelProps {
     flameId: string;
-    tool: string;
+    instance: ToolInstance;
     onClose: () => void;
 }
 
@@ -22,10 +23,10 @@ interface ToolPanelProps {
 // ToolPanel
 // --------------------------
 
-export function ToolPanel({ flameId, tool, onClose }: ToolPanelProps) {
-    const toolDef = tools.find((t) => t.name === tool);
-    const label = toolDef?.label ?? tool;
-    const icon = toolDef ? getToolIcon(toolDef.icon) : null;
+export function ToolPanel({ flameId, instance, onClose }: ToolPanelProps) {
+    const toolDef   = tools.find((t) => t.name === instance.type);
+    const label     = instance.label ?? toolDef?.label ?? tool;
+    const icon      = toolDef ? getToolIcon(toolDef.icon) : null;
 
     return (
         <div
@@ -78,7 +79,7 @@ export function ToolPanel({ flameId, tool, onClose }: ToolPanelProps) {
             
             {/* Tool content */}
             <div className="flex-1 overflow-auto">
-                <ToolContent flameId={flameId} tool={tool} />
+                <ToolContent flameId={flameId} instance={instance} />
             </div>
         </div>
     );
@@ -92,8 +93,8 @@ export function ToolPanel({ flameId, tool, onClose }: ToolPanelProps) {
 // ! Note: Placeholders for now.
 // --------------------------
 
-function ToolContent({ flameId, tool }: { flameId: string; tool: string }) {
-    switch (tool) {
+function ToolContent({ flameId, instance }: { flameId: string; instance: ToolInstance }) {
+    switch (instance.type) {
         case "markdown":
             // TODO: Replace with <MarkdownTool flameId={flameId} /> when done
             return (

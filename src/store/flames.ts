@@ -30,7 +30,7 @@ interface FlameStore {
         position:       Position;
         spaceId:        string;
         schema:         string;
-        tools:          string[];
+        tools:          ToolInstance[];
         categoryId?:    string;
         parentId?:      string;
     }) => Flame;
@@ -90,6 +90,12 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         categoryId,
         parentId,
     }) => {
+        const toolInstances: ToolInstance[] = tools.map((type) => ({
+            id: generateId(),
+            type,
+            createdAt: now(),
+        }));
+
         const newFlame: Flame = {
             id: generateId(),
             name,
@@ -97,7 +103,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             position,
             spaceId,
             schema,
-            tools,
+            tools: toolInstances,
             categoryId,
             parentId,
             isArchived: false,
