@@ -3,5 +3,10 @@
     "identifier": "quick-capture",
     "description": "Capability for the quick-capture window",
     "windows": ["quick-capture"],
-    "permissions": ["core:default", "core:window:allow-hide", "core:window:allow-show", "core:window:allow-set-size"]
+    "permissions": [
+        "core:default", 
+        "core:window:allow-hide",
+        "core:window:allow-show",
+        "core:window:allow-set-size"
+    ]
 }
