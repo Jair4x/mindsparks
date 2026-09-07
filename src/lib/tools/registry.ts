@@ -1,5 +1,6 @@
 import type { ToolContentAdapter } from "./types";
+import { markdownAdapter } from "./adapters";
 
 export const toolAdapters: Record<string, ToolContentAdapter<any>> = {
-    // "markdown": markdownAdapter, <-- added on the next commit, commented to not crash
+    markdown: markdownAdapter,
 };

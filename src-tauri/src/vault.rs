@@ -5,8 +5,9 @@
 
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Manager};
+use tauri_plugin_fs::FsExt;
 
 const CONFIG_FILE_NAME: &str = "vault-config.json";
 
@@ -78,6 +79,8 @@ pub fn set_vault_path(app: AppHandle, path: String) -> Result<(), String> {
     fs::write(&config_path, json)
         .map_err(|e| format!("Could not write vault config: {e}"))?;
 
+    grant_vault_scope(&app, &vault_path)?;
+
     Ok(())
 }
 
@@ -89,4 +92,13 @@ pub fn get_vault_path(app: &AppHandle) -> Result<PathBuf, String> {
             Err(format!("The configured vault folder is missing: {path}"))
         },
     }
+}
+
+// Allow the access for fs to the vault's folder.
+// Called both when choosing the vault for the first time
+// as well as when running the app if it's set up
+pub fn grant_vault_scope(app: &AppHandle, vault_path: &Path) -> Result<(), String> {
+    app.fs_scope()
+        .allow_directory(vault_path, true)
+        .map_err(|e| format!("Couldn't grant fs access to vault: {e}"))
 }

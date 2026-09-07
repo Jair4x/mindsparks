@@ -35,6 +35,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             #[cfg(desktop)]
             {
@@ -48,6 +49,10 @@ pub fn run() {
                         })
                         .build(),
                 )?;
+            }
+
+            if let Ok(vault::VaultState::Ready { path }) = vault::get_vault_state(app.handle().clone()) {
+                let _ = vault::grant_vault_scope(app.handle(), &std::path::PathBuf::from(path));
             }
 
             // Okay, so, sometimes Windows screws things up and window transparency is nonexistent.
