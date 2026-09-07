@@ -3,3 +3,4 @@
 export * from "./useAssignCategory";
 export * from "./useVaultState";
 export * from "./useQuickCaptureBridge";
+export * from "./useToolSession";
