@@ -1,13 +1,13 @@
 //
 // Tool container in the flame workspace.
 //
-// * Note: Tools are just placeholders for now, until I implement each one separately.
-//
 
 import { X } from "lucide-react";
 import { tools } from "../../lib/constants";
 import { getToolIcon } from "../../lib/toolConfig";
 import type { ToolInstance } from "../../types";
+
+import { MarkdownTool } from "../tools/MarkdownTool";
 
 // --------------------------
 // Props
@@ -96,18 +96,10 @@ export function ToolPanel({ flameId, instance, onClose }: ToolPanelProps) {
 function ToolContent({ flameId, instance }: { flameId: string; instance: ToolInstance }) {
     switch (instance.type) {
         case "markdown":
-            // TODO: Replace with <MarkdownTool flameId={flameId} /> when done
-            return (
-                <div
-                    className="flex items-center justify-center h-full text-white"
-                    style={{ color: "var(--color-border)", fontSize: 13 }}
-                >
-                    Markdown editor coming soon
-                </div>
-            );
+            return <MarkdownTool flameId={flameId} instance={instance} />;
         
         case "kanban":
-            // TODO: Replace with <KanbanTool flameId={flameId} /> when done
+            // TODO: Replace with <KanbanTool flameId={flameId} instance={instance} /> when done
             return (
                 <div
                     className="flex items-center justify-center h-full text-white"
