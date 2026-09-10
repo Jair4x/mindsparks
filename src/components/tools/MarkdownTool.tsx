@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { writeTextFile, mkdir, stat } from "@tauri-apps/plugin-fs";
+import { writeTextFile, mkdir, stat, rename, remove } from "@tauri-apps/plugin-fs";
+import { confirm } from "@tauri-apps/plugin-dialog";
 import { join } from "@tauri-apps/api/path";
 import { useFlameStore, useSpaceStore } from "../../store";
 import { useToolSession } from "../../hooks";
 import { markdownAdapter } from "../../lib/tools/adapters";
-import { buildFileTree, generateUniqueName, getChildrenAt, displayName, type MarkdownFileNode } from "../../lib/tools/markdown/markdownFileTree";
+import { buildFileTree, generateUniqueName, getChildrenAt, displayName, remapPath, type MarkdownFileNode } from "../../lib/tools/markdown/markdownFileTree";
 import { FileTreeToolbar } from "./markdown/fileTreeToolbar";
 import { FileTree } from "./markdown/FileTree";
 import type { ToolInstance } from "../../types";
 
 import { ArrowRightToLine as ExpandIcon } from "lucide-react";
 import { MarkdownEditor } from "./markdown/MarkdownEditor";
+import { FileTreeContextMenu } from "./markdown/FileTreeContextMenu";
 
 interface MarkdownSession {
     openFilePath: string | null;
@@ -27,6 +29,8 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     const [isSidebarCollapsed, setIsSidebarCollapsed]   = useState(false);
     const [lastClickedPath, setLastClickedPath]         = useState<string | null>(null);
     const [session, setSession]                         = useToolSession<MarkdownSession>(instance.id, { openFilePath: null });
+    const [renamingPath, setRenamingPath] = useState<string | null>(null);
+    const [contextMenu, setContextMenu] = useState<{ node: MarkdownFileNode; x: number; y: number } | null>(null);
 
     // Create or resolve tool data
     useEffect(() => {
@@ -85,6 +89,71 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         }
     }
 
+    async function handleConfirmRename(node: MarkdownFileNode, parentDir: string, newName: string) {
+        setRenamingPath(null);
+
+        const trimmed = newName.trim();
+        if (!trimmed || !rootPath) return;
+
+        let extension = node.kind === "file" && node.isMarkdown ? `.md` : "";
+        const siblings = getChildrenAt(nodes, parentDir, rootPath);
+
+        const existingNames = new Set(
+            siblings
+                .filter((sibling) => sibling.path !== node.path)
+                .map((sibling) => sibling.name)
+        );
+
+        const match = trimmed.match(/^(.*?)(?:\s+(\d+))$/); // numbers at the end of the filename (i.e. things like "Untitled 1", "Notes 4")
+        const baseName = match?.[1]?.trim() || trimmed;
+        let count = match?.[2] ? Number(match[2]) : 0; // set as number at the end of filename, else just 0
+
+        let finalName = `${baseName}${match?.[2] ? ` ${count}` : ""}${extension}`;
+
+        while (existingNames.has(finalName)) {
+            count++;
+            finalName = `${baseName} ${count}${extension}`;
+        }
+
+        if (finalName === node.name) return;
+
+        const newPath = await join(parentDir, finalName);
+        await rename(node.path, newPath);
+
+        setExpandedPaths((prev) => new Set([...prev].map((p) => remapPath(p, node.path, newPath))));
+        setSelectedFolderPath((prev) => (prev ? remapPath(prev, node.path, newPath) : prev));
+        setLastClickedPath((prev) => (prev ? remapPath(prev, node.path, newPath) : prev));
+        setSession({
+            openFilePath: session.openFilePath ? remapPath(session.openFilePath, node.path, newPath) : null,
+        });
+
+        await refreshTree(rootPath);
+    }
+
+    async function handleDelete(node: MarkdownFileNode) {
+        if (!rootPath) return;
+
+        const label = node.kind === "folder" ? "this folder (and everything inside)" : "this file";
+        const confirmed = await confirm(`Delete ${label}? This can't be undone.`, {
+            title: "Delete",
+            kind: "warning",
+        });
+        if (!confirmed) return;
+
+        await remove(node.path, { recursive: node.kind === "folder" });
+
+        const wasOpenedFileAffected =
+            session.openFilePath === node.path ||
+            (session.openFilePath?.startsWith(node.path + "\\") ?? false) ||
+            (session.openFilePath?.startsWith(node.path + "/") ?? false);
+
+        if (wasOpenedFileAffected) setSession({ openFilePath: null });
+        if (selectedFolderPath === node.path) setSelectedFolderPath(null);
+        if (lastClickedPath === node.path) setLastClickedPath(null);
+
+        await refreshTree(rootPath);
+    }
+
     if (!rootPath) {
         return (
             <div className="flex items-center justify-center h-full" style={{ color: "var(--color-text-muted)" }}>
@@ -130,8 +199,10 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                     >
                         <FileTree
                             nodes={nodes}
+                            parentPath={rootPath}
                             selectedPath={lastClickedPath}
                             expandedPaths={expandedPaths}
+                            renamingPath={renamingPath}
                             onSelectFile={(path) => {
                                 setSession({ openFilePath: path });
                                 setLastClickedPath(path);
@@ -140,13 +211,18 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                                 setSelectedFolderPath(path);
                                 setLastClickedPath(path);
                             }}
-                            onToggleExpand={(path) => 
+                            onSelectUnknown={(path) => setLastClickedPath(path)}
+                            onToggleExpand={(path) =>
                                 setExpandedPaths((prev) => {
                                     const next = new Set(prev);
                                     next.has(path) ? next.delete(path) : next.add(path);
                                     return next;
                                 })
                             }
+                            onStartRename={setRenamingPath}
+                            onConfirmRename={handleConfirmRename}
+                            onCancelRename={() => setRenamingPath(null)}
+                            onContextMenu={(node, x, y) => setContextMenu({ node, x, y })}
                         />
                     </div>
                 </div>
@@ -165,6 +241,22 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                     </div>
                 )}
             </div>
+
+            {contextMenu && (
+                <FileTreeContextMenu
+                    x={contextMenu.x}
+                    y={contextMenu.y}
+                    onRename={() => {
+                        setRenamingPath(contextMenu.node.path);
+                        setContextMenu(null);
+                    }}
+                    onDelete={() => {
+                        handleDelete(contextMenu.node);
+                        setContextMenu(null);
+                    }}
+                    onClose={() => setContextMenu(null)}
+                />
+            )}
         </div>
     );
 }

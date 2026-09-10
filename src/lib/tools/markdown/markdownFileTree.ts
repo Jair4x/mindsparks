@@ -5,6 +5,7 @@ export interface MarkdownFileNode {
     name: string;
     path: string;
     kind: "file" | "folder";
+    isMarkdown?: boolean; // only needed when kind === "file"
     children?: MarkdownFileNode[];
 }
 
@@ -14,26 +15,25 @@ export async function buildFileTree(rootPath: string): Promise<MarkdownFileNode[
     const entries = await readDir(rootPath);
 
     const nodes = await Promise.all(
-        entries
-            .filter((entry) => entry.isDirectory || entry.name.endsWith('.md'))
-            .map(async (entry): Promise<MarkdownFileNode> => {
-                const path = await join(rootPath, entry.name);
+        entries.map(async (entry): Promise<MarkdownFileNode> => {
+            const path = await join(rootPath, entry.name);
 
-                if (entry.isDirectory) {
-                    return {
-                        name: entry.name,
-                        path,
-                        kind: "folder",
-                        children: await buildFileTree(path),
-                    };
-                }
-
+            if (entry.isDirectory) {
                 return {
                     name: entry.name,
                     path,
-                    kind: "file",
+                    kind: "folder",
+                    children: await buildFileTree(path),
                 };
-            })
+            }
+
+            return {
+                name: entry.name,
+                path,
+                kind: "file",
+                isMarkdown: entry.name.endsWith(".md"),
+            };
+        })
     );
 
     // folders first, files later, in alphabetical order
@@ -84,4 +84,15 @@ export function getChildrenAt(
 ): MarkdownFileNode[] {
     if (targetPath === rootPath) return nodes;
     return findFolderChildren(nodes, targetPath) ?? [];
+}
+
+export function remapPath(path: string, oldPath: string, newPath: string): string {
+    if (path === oldPath) return newPath;
+
+    // folder
+    if (path.startsWith(oldPath) && (path[oldPath.length] === "\\" || path[oldPath.length] === "/")) {
+        return newPath + path.slice(oldPath.length);
+    }
+
+    return path;
 }

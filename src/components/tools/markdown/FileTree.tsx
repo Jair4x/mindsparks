@@ -1,49 +1,58 @@
-import { useState } from "react";
-import { Folder, FolderOpen, FileText } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Folder, FolderOpen, FileText, FileQuestion } from "lucide-react";
 import { displayName, type MarkdownFileNode } from "../../../lib/tools/markdown/markdownFileTree";
 
 interface FileTreeProps {
-    nodes:          MarkdownFileNode[];
-    selectedPath:   string | null;
-    expandedPaths:  Set<string>;
-    onSelectFile:   (path: string) => void;
-    onSelectFolder: (path: string) => void;
-    onToggleExpand: (path: string) => void;
-    depth?:         number;
+    nodes:              MarkdownFileNode[];
+    parentPath:         string;
+    selectedPath:       string | null;
+    expandedPaths:      Set<string>;
+    renamingPath:       string | null;
+    onSelectFile:       (path: string) => void;
+    onSelectFolder:     (path: string) => void;
+    onSelectUnknown:    (path: string) => void;
+    onToggleExpand:     (path: string) => void;
+    onStartRename:      (path: string) => void;
+    onConfirmRename:    (node: MarkdownFileNode, parentPath: string, newName: string) => void;
+    onCancelRename:     () => void;
+    onContextMenu:      (node: MarkdownFileNode, x: number, y: number) => void;
+    depth?:             number;
 }
 
-export function FileTree({
-    nodes,
-    selectedPath,
-    expandedPaths,
-    onSelectFile,
-    onSelectFolder,
-    onToggleExpand,
-    depth = 0,
-}: FileTreeProps) {
+interface FileTreeRowProps {
+    node:               MarkdownFileNode;
+    parentPath:         string;
+    depth:              number;
+    isSelected:         boolean;
+    isExpanded:         boolean;
+    isRenaming:         boolean;
+    onSelectFile:       (path: string) => void;
+    onSelectFolder:     (path: string) => void;
+    onSelectUnknown:    (path: string) => void;
+    onToggleExpand:     (path: string) => void;
+    onStartRename:      (path: string) => void;
+    onConfirmRename:    (node: MarkdownFileNode, parentPath: string, newName: string) => void;
+    onCancelRename:     () => void;
+    onContextMenu:      (node: MarkdownFileNode, x: number, y: number) => void;
+    children?:          React.ReactNode;
+}
+
+export function FileTree({ nodes, parentPath, ...theRest }: FileTreeProps) { // listen okay it's a lot of props, don't judge
     return (
         <div>
             {nodes.map((node) => (
                 <FileTreeRow
                     key={node.path}
                     node={node}
-                    depth={depth}
-                    isSelected={node.path === selectedPath}
-                    isExpanded={expandedPaths.has(node.path)}
-                    onSelectFile={onSelectFile}
-                    onSelectFolder={onSelectFolder}
-                    onToggleExpand={onToggleExpand}
+                    parentPath={parentPath}
+                    depth={theRest.depth ?? 0}
+                    isSelected={node.path === theRest.selectedPath}
+                    isExpanded={theRest.expandedPaths.has(node.path)}
+                    isRenaming={node.path === theRest.renamingPath}
+                    {...theRest}
                 >
-                    {node.kind === "folder" && expandedPaths.has(node.path) && node.children && (
-                        <FileTree
-                            nodes={node.children}
-                            selectedPath={selectedPath}
-                            expandedPaths={expandedPaths}
-                            onSelectFile={onSelectFile}
-                            onSelectFolder={onSelectFolder}
-                            onToggleExpand={onToggleExpand}
-                            depth={depth + 1}
-                        />
+                    {node.kind === "folder" && theRest.expandedPaths.has(node.path) && node.children && (
+                        <FileTree {...theRest} nodes={node.children} parentPath={node.path} depth={(theRest.depth ?? 0) + 1} />
                     )}
                 </FileTreeRow>
             ))}
@@ -53,31 +62,52 @@ export function FileTree({
 
 function FileTreeRow({
     node,
+    parentPath,
     depth,
     isSelected,
     isExpanded,
+    isRenaming,
     onSelectFile,
     onSelectFolder,
+    onSelectUnknown,
     onToggleExpand,
+    onStartRename,
+    onConfirmRename,
+    onCancelRename,
+    onContextMenu,
     children,
-}: {
-    node:           MarkdownFileNode;
-    depth:          number;
-    isSelected:     boolean;
-    isExpanded:     boolean;
-    onSelectFile:   (path: string) => void;
-    onSelectFolder: (path: string) => void;
-    onToggleExpand: (path: string) => void;
-    children?:      React.ReactNode;
-}) {
+}: FileTreeRowProps) {
     const [isHovered, setIsHovered] = useState(false);
+    const currentDisplayName        = node.kind === "file" && node.isMarkdown ? displayName(node.name) : node.name;
+    const [draftName, setDraftName] = useState(currentDisplayName);
+
+    useEffect(() => {
+        if (isRenaming) setDraftName(currentDisplayName);
+    }, [isRenaming, currentDisplayName]);
 
     function handleClick() {
         if (node.kind === "folder") {
             onToggleExpand(node.path);
             onSelectFolder(node.path);
-        } else {
+        } else if (node.isMarkdown) {
             onSelectFile(node.path);
+        } else {
+            onSelectUnknown(node.path);
+        }
+    }
+
+    function handleDoubleClick(e: React.MouseEvent) {
+        e.stopPropagation();
+        onStartRename(node.path);
+    }
+
+    function handleRenameKeyDown(e: React.KeyboardEvent) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            onConfirmRename(node, parentPath, draftName);
+        } else if (e.key === "Escape") {
+            e.preventDefault();
+            onCancelRename();
         }
     }
 
@@ -86,11 +116,24 @@ function FileTreeRow({
         : isHovered
             ? "var(--color-text)"
             : "var(--color-text-muted)";
-    
+
+
+    let icon = <FileText size={13} />;    
+    if (node.kind === "folder") {
+        icon = isExpanded ? <FolderOpen size={13} /> : <Folder size={13} />;
+    } else if (!node.isMarkdown) {
+        icon = <FileQuestion size={13} />;
+    }
+
     return (
         <div>
             <div
                 onClick={handleClick}
+                onDoubleClick={handleDoubleClick}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+                    onContextMenu(node, e.clientX, e.clientY);
+                }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 className="flex items-center gap-1.5 cursor-pointer"
@@ -103,11 +146,30 @@ function FileTreeRow({
                     transition: "color 0.15s",
                 }}
             >
-                {node.kind === "folder"
-                    ? (isExpanded ? <FolderOpen size={13} /> : <Folder size={13} />)
-                    : <FileText size={13} />
-                }
-                <span className="truncate">{node.kind === "file" ? displayName(node.name) : node.name}</span>
+                {icon}
+                {isRenaming ? (
+                    <input
+                        autoFocus
+                        value={draftName}
+                        onChange={(e) => setDraftName(e.target.value)}
+                        onKeyDown={handleRenameKeyDown}
+                        onBlur={() => onConfirmRename(node, parentPath, draftName)}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: "var(--color-bg)",
+                            border: "1px solid var(--color-accent)",
+                            borderRadius: 3,
+                            color: "var(--color-text)",
+                            fontSize: "inherit",
+                            fontFamily: "inherit",
+                            padding: "0 3px",
+                            width: "100%",
+                            outline: "none",
+                        }}
+                    /> 
+                ): (
+                    <span className="truncate">{currentDisplayName}</span>
+                )}
             </div>
             {children}
         </div>
