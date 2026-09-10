@@ -10,6 +10,7 @@ import { FileTree } from "./markdown/FileTree";
 import type { ToolInstance } from "../../types";
 
 import { ArrowRightToLine as ExpandIcon } from "lucide-react";
+import { MarkdownEditor } from "./markdown/MarkdownEditor";
 
 interface MarkdownSession {
     openFilePath: string | null;
@@ -155,10 +156,8 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                 {session.openFilePath ? (
                     <>
                         <EditorHeader filePath={session.openFilePath} />
-                        <div className="flex-1 flex items-center justify-center" style={{ color: "var(--color-text-muted)" }}>
-                            Editor coming soon on another commit I guess.
-                            <br />
-                            Path: {session.openFilePath}
+                        <div className="flex-1 overflow-hidden">
+                            <MarkdownEditor filePath={session.openFilePath} />
                         </div>
                     </>
                 ): (
