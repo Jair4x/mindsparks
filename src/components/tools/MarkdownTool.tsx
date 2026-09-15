@@ -233,7 +233,14 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                     <>
                         <EditorHeader filePath={session.openFilePath} />
                         <div className="flex-1 overflow-hidden">
-                            <MarkdownEditor filePath={session.openFilePath} />
+                            <MarkdownEditor
+                                filePath={session.openFilePath}
+                                fileTree={nodes}
+                                onOpenFile={(path) => {
+                                    setSession({ openFilePath: path });
+                                    setLastClickedPath(path);
+                                }}
+                            />
                         </div>
                     </>
                 ): (

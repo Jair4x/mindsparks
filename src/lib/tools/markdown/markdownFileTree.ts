@@ -96,3 +96,17 @@ export function remapPath(path: string, oldPath: string, newPath: string): strin
 
     return path;
 }
+
+export function flattenFiles(nodes: MarkdownFileNode[]): { path: string; name: string; }[] {
+    return nodes.flatMap((node) => {
+        if (node.kind === "file" && node.isMarkdown) {
+            return [{ path: node.path, name: displayName(node.name) }];
+        }
+
+        if (node.kind === "folder" && node.children) {
+            return flattenFiles(node.children);
+        }
+
+        return [];
+    });
+}

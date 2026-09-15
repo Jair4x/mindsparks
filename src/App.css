@@ -25,4 +25,31 @@
 
   --color-info: #4A90E2;
   --color-info-dark: #33649c;
+
+  /* Markdown editor stuff (some values aren't final, obviously) */
+  /*                    From atomic-editor                       */
+  --atomic-editor-bg: #16161a;
+  --atomic-editor-bg-panel: #1c1c21;
+  --atomic-editor-bg-surface: #232328;
+  --atomic-editor-border: #2e2e34;
+  --atomic-editor-fg: #e8e8ea;
+  --atomic-editor-fg-muted: #9a9aa0;
+  --atomic-editor-fg-faint: #6b6b72;
+
+  --atomic-editor-accent: var(--color-accent);
+  --atomic-editor-accent-bright: var(--color-accent-light);
+  --atomic-editor-link: var(--color-accent-light);
+  --atomic-editor-link-hover: var(--color-accent-light);
+
+  --atomic-editor-body-leading: 2.5;
+}
+
+[data-theme="light"] {
+  --atomic-editor-bg: #ffffff;
+  --atomic-editor-bg-panel: #f7f7f8;
+  --atomic-editor-bg-surface: #f0f0f2;
+  --atomic-editor-border: #e2e2e6;
+  --atomic-editor-fg: #1a1a1e;
+  --atomic-editor-fg-muted: #6b6b72;
+  --atomic-editor-fg-faint: #9a9aa0;
 }

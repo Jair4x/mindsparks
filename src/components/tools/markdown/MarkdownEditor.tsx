@@ -4,24 +4,40 @@
 // Uses milkdown as the library for it.
 //
 
-import { useEffect, useRef, useState } from "react";
-import { Editor, rootCtx, defaultValueCtx } from "@milkdown/core";
-import { commonmark } from "@milkdown/preset-commonmark";
-import { gfm } from "@milkdown/preset-gfm";
-import { prism } from "@milkdown/plugin-prism";
-import { listener, listenerCtx } from "@milkdown/plugin-listener";
-import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react";
-import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { AtomicCodeMirrorEditor, wikiLinks } from "@atomic-editor/editor";
+import '@atomic-editor/editor/styles.css';
+import { readTextFile, writeTextFile, exists } from "@tauri-apps/plugin-fs";
+import { dirname, join } from "@tauri-apps/api/path";
+import { flattenFiles, type MarkdownFileNode } from "../../../lib/tools/markdown/markdownFileTree";
+import { toRelativePath } from "../../../lib/tools/markdown/relativePath";
 
-import "prosemirror-view/style/prosemirror.css";
-import "./milkdown-editor.css";
+interface MarkdownEditorProps {
+    filePath:   string;
+    fileTree:   MarkdownFileNode[];
+    onOpenFile: (path: string) => void;
+}
 
 const SAVE_DEBOUNCE_MS = 500;
 
-function MilkdownInstance({ filePath, initialContent }: { filePath: string; initialContent: string }) {
-    const saveTimeout       = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const pendingContent    = useRef<string | null>(null); // last unsaved changes
+export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEditorProps) {
+    const [initialContent, setInitialContent]   = useState<string | null>(null);
+    const saveTimeout                           = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const pendingContent                        = useRef<string | null>(null); // last unsaved changes
     
+    useEffect(() => {
+        let cancelled = false;
+        setInitialContent(null);
+
+        readTextFile(filePath).then((content) => {
+            if (!cancelled) setInitialContent(content);
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [filePath]);
+
     function flushPendingSave() {
         if (pendingContent.current === null) return;
 
@@ -33,36 +49,20 @@ function MilkdownInstance({ filePath, initialContent }: { filePath: string; init
         );
     }
 
-    useEditor(
-        (root) =>
-            Editor.make()
-                .config((ctx) => {
-                    ctx.set(rootCtx, root);
-                    ctx.set(defaultValueCtx, initialContent);
-                })
-                .use(commonmark)
-                .use(gfm)
-                .use(prism)
-                .use(listener)
-                .config((ctx) => {
-                    ctx.get(listenerCtx).markdownUpdated((_ctx, markdown, prevMarkdown) => {
-                        if (markdown === prevMarkdown) return;
+    function handleChange(markdown: string) {
+        pendingContent.current = markdown;
 
-                        pendingContent.current = markdown;
+        if (saveTimeout.current) clearTimeout(saveTimeout.current);
 
-                        if (saveTimeout.current) clearTimeout(saveTimeout.current);
+        saveTimeout.current = setTimeout(() => {
+            saveTimeout.current = null;
+            flushPendingSave();
+        }, SAVE_DEBOUNCE_MS);
+    }
 
-                        saveTimeout.current = setTimeout(() => {
-                            saveTimeout.current = null;
-                            flushPendingSave();
-                        }, SAVE_DEBOUNCE_MS);
-                    });
-                }),
-        []
-    );
-
-    // When editor gets unmounted (change active file or close panel)
-    // save the unsaved changes
+    // Save the unsaved changes if any
+    // when unmounting or changing file.
+    // Different from handleChange above because this only happens ↑↑
     useEffect(() => {
         return () => {
             if (saveTimeout.current) {
@@ -73,23 +73,47 @@ function MilkdownInstance({ filePath, initialContent }: { filePath: string; init
         };
     }, []);
 
-    return <Milkdown />;
-}
+    const extensions = useMemo(
+        () => [
+            wikiLinks({
+                suggest: async (query: string) => {
+                    const currentDir    = await dirname(filePath);
+                    const files         = flattenFiles(fileTree);
+                    const lowerQuery    = query.toLowerCase();
+                    
+                    const matches       = files.filter((f) => f.name.toLowerCase().includes(lowerQuery));
 
-export function MarkdownEditor({ filePath }: { filePath: string }) {
-    const [initialContent, setInitialContent] = useState<string | null>(null);
+                    return Promise.all(
+                        matches.slice(0, 20).map(async (f) => ({
+                            target: toRelativePath(currentDir, f.path).replace(/\.md$/, ""),
+                            label: f.name,
+                        }))
+                    );
+                },
 
-    useEffect(() => {
-        let cancelled = false;
-        setInitialContent(null);
-        readTextFile(filePath).then((content) => {
-            if (!cancelled) setInitialContent(content);
-        });
+                resolve: async (target: string) => {
+                    const currentDir    = await dirname(filePath);
+                    const withExt       = target.endsWith(".md") ? target : `${target}.md`;
+                    const absolutePath  = await join(currentDir, withExt);
+                    const fileExists    = await exists(absolutePath);
 
-        return () => {
-            cancelled = true;
-        };
-    }, [filePath]);
+                    return {
+                        label: target.split("/").pop() ?? target,
+                        status: fileExists ? "resolved" : "missing",
+                    };
+                },
+
+                onOpen: async (target: string) => {
+                    const currentDir    = await dirname(filePath);
+                    const withExt       = target.endsWith(".md") ? target : `${target}.md`;
+                    const absolutePath  = await join(currentDir, withExt);
+                    
+                    onOpenFile(absolutePath);
+                },
+            }),
+        ],
+        [filePath, fileTree]
+    );
 
     if (initialContent === null) {
         return (
@@ -100,10 +124,13 @@ export function MarkdownEditor({ filePath }: { filePath: string }) {
     }
 
     return (
-        <div className="milkdown-editor-root h-full overflow-auto">
-            <MilkdownProvider>
-                <MilkdownInstance key={filePath} filePath={filePath} initialContent={initialContent} />
-            </MilkdownProvider>
+        <div className="h-full">
+            <AtomicCodeMirrorEditor
+                key={filePath}
+                markdownSource={initialContent}
+                onMarkdownChange={handleChange}
+                extensions={extensions}
+            />
         </div>
     );
 }
