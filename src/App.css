@@ -21,5 +21,8 @@
   --color-danger: #EF4444;
   --color-danger-dark: #B8362A;
   --color-success: #4EE999;
-  --color-danger-dark: #2f9661;
+  --color-success-dark: #2f9661;
+
+  --color-info: #4A90E2;
+  --color-info-dark: #33649c;
 }
