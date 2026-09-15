@@ -19,6 +19,7 @@ export interface QuickCaptureOpenPayload {
     mode:           QuickCaptureMode;
     spaceId?:       string;
     sparkPosition?: Position;
+    parentId?:      string;
 }
 
 export interface SpacesUpdatedPayload {
@@ -29,6 +30,7 @@ export interface CreateSparkPayload {
     text:           string;
     spaceId:        string;
     position:       Position;
+    parentId?:      string;
 }
 
 export function openQuickCapture(payload: QuickCaptureOpenPayload) {

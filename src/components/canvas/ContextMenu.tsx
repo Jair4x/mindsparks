@@ -209,20 +209,12 @@ function ContextMenuContent({
         
         if (!parent) return;
 
-        const child = createSpark({
-            text: "New idea", // TODO?: Maybe open the input to set the name?
-            position: { x: parent.position.x + 100, y: parent.position.y },
-            spaceId: parent.spaceId,
+        openQuickCapture({
+            mode: "inline",
+            spaceId: activeSpaceId,
+            sparkPosition: { x: parent.position.x + 100, y: parent.position.y + 50 },
             parentId: parent.id,
         });
-
-        createLineageConnection({
-            sourceId: parent.id,
-            targetId: child.id,
-            spaceId: parent.spaceId,
-        });
-
-        requestRepulsion([child.id]);
 
         onClose();
     };

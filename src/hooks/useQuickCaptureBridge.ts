@@ -8,7 +8,7 @@
 
 import { useEffect } from "react";
 import { emitTo, listen } from "@tauri-apps/api/event";
-import { useSpaceStore, useSparkStore, useUIStore } from "../store";
+import { useSpaceStore, useConnectionStore, useSparkStore, useUIStore } from "../store";
 import {
     SPACES_UPDATED_EVENT,
     CREATE_SPARK_EVENT,
@@ -40,11 +40,22 @@ export function useQuickCaptureBridge() {
 
     useEffect(() => {
         const unlisten = listen<CreateSparkPayload>(CREATE_SPARK_EVENT, (event) => {
+            const { text, position, spaceId, parentId } = event.payload;
+
             const newSpark = useSparkStore.getState().createSpark({
-                text: event.payload.text,
-                position: event.payload.position,
-                spaceId: event.payload.spaceId,
+                text,
+                position,
+                spaceId,
+                parentId,
             });
+
+            if (parentId) {
+                useConnectionStore.getState().createLineageConnection({
+                    sourceId: parentId,
+                    targetId: newSpark.id,
+                    spaceId,
+                });
+            }
 
             useUIStore.getState().requestRepulsion([newSpark.id]);
         });

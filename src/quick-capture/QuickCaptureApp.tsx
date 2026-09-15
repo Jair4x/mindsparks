@@ -29,6 +29,7 @@ export function QuickCaptureApp() {
     const [spaces, setSpaces]               = useState<Space[]>([]);
     const [spaceId, setSpaceId]             = useState("");
     const [sparkPosition, setSparkPosition] = useState<Position>({ x: 0, y: 0 });
+    const [parentId, setParentId]           = useState<string | undefined>();
     const [text, setText]                   = useState("");
     const inputRef                          = useRef<HTMLInputElement>(null);
 
@@ -54,10 +55,16 @@ export function QuickCaptureApp() {
     // Decides the mode, the space (fixed on "inline", chosen on "global") and where the new Spark ends up in the canvas.
     useEffect(() => {
         const unlisten = listen<QuickCaptureOpenPayload>(QUICK_CAPTURE_OPEN_EVENT, async (event) => {
-            const { mode: newMode, spaceId: fixedSpaceId, sparkPosition: newPosition } = event.payload;
+            const {
+                mode:           newMode,
+                spaceId:        fixedSpaceId,
+                sparkPosition:  newPosition,
+                parentId:       newParentId,
+            } = event.payload;
 
             setMode(newMode);
             setSparkPosition(newPosition ?? { x: 200, y: 200 });
+            setParentId(newParentId);
 
             if (newMode === "inline" && fixedSpaceId) {
                 setSpaceId(fixedSpaceId);
@@ -97,6 +104,7 @@ export function QuickCaptureApp() {
             text: trimmed,
             spaceId,
             position: sparkPosition,
+            parentId,
         });
 
         setText("");
