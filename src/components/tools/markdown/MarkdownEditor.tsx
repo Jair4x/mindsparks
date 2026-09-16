@@ -98,6 +98,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
                     const fileExists    = await exists(absolutePath);
 
                     return {
+                        target,
                         label: target.split("/").pop() ?? target,
                         status: fileExists ? "resolved" : "missing",
                     };
