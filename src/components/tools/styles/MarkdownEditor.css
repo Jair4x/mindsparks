@@ -1,0 +1,15 @@
+/* --------------------------
+      Styles for tools:
+        Markdown Tool
+------------------------- */
+
+.titled-code-block__title {
+    font-size: 14px;
+    font-family: monospace;
+    color: var(--color-accent);
+    background: var(--atomic-editor-bg-surface);
+    border: 1px solid var(--atomic-editor-border);
+    border-radius: 6px 6px 0 0;
+    padding: 4px 10px;
+    cursor: text;
+}

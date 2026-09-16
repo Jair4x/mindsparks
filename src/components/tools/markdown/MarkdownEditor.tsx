@@ -5,12 +5,16 @@
 //
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { AtomicCodeMirrorEditor, wikiLinks } from "@atomic-editor/editor";
-import '@atomic-editor/editor/styles.css';
 import { readTextFile, writeTextFile, exists } from "@tauri-apps/plugin-fs";
 import { dirname, join } from "@tauri-apps/api/path";
 import { flattenFiles, type MarkdownFileNode } from "../../../lib/tools/markdown/markdownFileTree";
 import { toRelativePath } from "../../../lib/tools/markdown/relativePath";
+
+import { AtomicCodeMirrorEditor, wikiLinks } from "@atomic-editor/editor";
+import '@atomic-editor/editor/styles.css';
+import '../styles/MarkdownEditor.css';
+
+import { stylizedCodeBlocks } from "../../../lib/tools/markdown/stylizedCodeBlocks";
 
 interface MarkdownEditorProps {
     filePath:   string;
@@ -112,6 +116,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
                     onOpenFile(absolutePath);
                 },
             }),
+            stylizedCodeBlocks,
         ],
         [filePath, fileTree]
     );
