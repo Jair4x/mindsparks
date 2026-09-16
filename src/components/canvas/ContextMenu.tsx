@@ -95,7 +95,6 @@ function ContextMenuContent({
     const [isAssigningCategory, setIsAssigningCategory] = useState(false);
 
     const createRelatedConnection = useConnectionStore((s) => s.createRelatedConnection);
-    const createLineageConnection = useConnectionStore((s) => s.createLineageConnection);
     
     // For repulsion calculation on new child or duplication
     const requestRepulsion  = useUIStore((s) => s.requestRepulsion);
