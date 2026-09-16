@@ -13,3 +13,8 @@
     padding: 4px 10px;
     cursor: text;
 }
+
+/* For full width */
+.atomic-cm-editor {
+    --atomic-editor-measure: none;
+}
