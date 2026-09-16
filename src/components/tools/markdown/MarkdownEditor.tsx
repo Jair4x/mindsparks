@@ -15,6 +15,7 @@ import '@atomic-editor/editor/styles.css';
 import '../styles/MarkdownEditor.css';
 
 import { stylizedCodeBlocks } from "../../../lib/tools/markdown/stylizedCodeBlocks";
+import { placeholder } from "@codemirror/view";
 
 interface MarkdownEditorProps {
     filePath:   string;
@@ -79,6 +80,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
 
     const extensions = useMemo(
         () => [
+            placeholder("Start writing..."),
             wikiLinks({
                 suggest: async (query: string) => {
                     const currentDir    = await dirname(filePath);
