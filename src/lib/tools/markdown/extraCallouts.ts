@@ -11,10 +11,10 @@ import { Decoration, EditorView, WidgetType, type DecorationSet } from "@codemir
 import { syntaxTree } from "@codemirror/language";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { parseCallout } from "./calloutStyles";
+import { parseCallout, type CalloutStyle } from "./calloutStyles";
 
 class CalloutIconWidget extends WidgetType {
-    constructor(readonly icon: ReturnType<typeof parseCallout>["style"]["icon"], readonly color: string) {
+    constructor(readonly icon: CalloutStyle["icon"], readonly color: string) {
         super();
     }
 
