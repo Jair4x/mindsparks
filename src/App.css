@@ -22,9 +22,11 @@
   --color-danger-dark: #B8362A;
   --color-success: #4EE999;
   --color-success-dark: #2f9661;
-
   --color-info: #4A90E2;
   --color-info-dark: #33649c;
+  --color-warning: #ef9144;
+  --color-warning-dark: #b86a2a;
+
 
   /* Markdown editor stuff (some values aren't final, obviously) */
   /*                    From atomic-editor                       */
