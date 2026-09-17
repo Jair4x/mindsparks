@@ -15,6 +15,7 @@ import '@atomic-editor/editor/styles.css';
 import '../styles/MarkdownEditor.css';
 
 import { stylizedCodeBlocks } from "../../../lib/tools/markdown/stylizedCodeBlocks";
+import { extraCallouts } from "../../../lib/tools/markdown/extraCallouts";
 import { placeholder } from "@codemirror/view";
 
 interface MarkdownEditorProps {
@@ -119,6 +120,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
                 },
             }),
             stylizedCodeBlocks,
+            extraCallouts,
         ],
         [filePath, fileTree]
     );

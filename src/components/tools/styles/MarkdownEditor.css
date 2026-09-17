@@ -14,6 +14,23 @@
     cursor: text;
 }
 
+.cm-line.callout-line {
+    border-left: 3px solid var(--callout-color);
+    background: color-mix(in srgb, var(--callout-color) 10%, transparent);
+    padding-left: 10px !important;
+    text-decoration: none;
+}
+
+.callout-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+}
+
+.callout-title {
+    font-weight: 700;
+}
+
 /* For full width */
 .atomic-cm-editor {
     --atomic-editor-measure: none;
