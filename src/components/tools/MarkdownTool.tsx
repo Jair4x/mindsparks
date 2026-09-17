@@ -9,6 +9,7 @@ import { buildFileTree, generateUniqueName, getChildrenAt, displayName, remapPat
 import { FileTreeToolbar } from "./markdown/fileTreeToolbar";
 import { FileTree } from "./markdown/FileTree";
 import { watchFileTree } from "../../lib/tools/markdown/fileTreeWatcher";
+import { Group, Panel, Separator } from "react-resizable-panels";
 import type { ToolInstance } from "../../types";
 
 import { ArrowRightToLine as ExpandIcon } from "lucide-react";
@@ -178,93 +179,118 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         );
     }
 
-    return (
-        <div className="flex h-full">
-            {isSidebarCollapsed ? (
-                <div
-                    className="flex flex-col items-center shrink-0"
-                    style={{ width: 28, borderRight: "1px solid var(--color-border)", paddingTop: 6 }}
-                >
-                    <button
-                        onClick={() => setIsSidebarCollapsed(false)}
-                        title="Show file tree"
-                        className="flex items-center justify-center cursor-pointer bg-transparent border-none"
-                        style={{ width: 22, height: 22, borderRadius: 4, color: "var(--color-text-muted)" }}
-                    >
-                        <ExpandIcon size={13} />
-                    </button>
-                </div>
-            ): (
-                <div
-                    className="flex flex-col shrink-0"
-                    style={{ width: 200, borderRight: "1px solid var(--color-border)" }}
-                >
-                    <FileTreeToolbar
-                        onNewFile={handleNewFile}
-                        onNewFolder={handleNewFolder}
-                        onCollapseSidebar={() => setIsSidebarCollapsed(true)}
-                    />
-                    <div 
-                        className="flex-1 overflow-auto py-1"
-                        onClick={(e) => {
-                            if (e.target === e.currentTarget) {
-                                setSelectedFolderPath(null);
-                                setLastClickedPath(null);
-                            }
-                        }}
-                    >
-                        <FileTree
-                            nodes={nodes}
-                            parentPath={rootPath}
-                            selectedPath={lastClickedPath}
-                            expandedPaths={expandedPaths}
-                            renamingPath={renamingPath}
-                            onSelectFile={(path) => {
+    const editorPane = (
+        <div className="flex-1 flex flex-col">
+            {session.openFilePath ? (
+                <>
+                    <EditorHeader filePath={session.openFilePath} />
+                    <div className="flex-1 overflow-hidden py-1.5">
+                        <MarkdownEditor
+                            key={session.openFilePath}
+                            filePath={session.openFilePath}
+                            fileTree={nodes}
+                            onOpenFile={(path) => {
                                 setSession({ openFilePath: path });
                                 setLastClickedPath(path);
                             }}
-                            onSelectFolder={(path) => {
-                                setSelectedFolderPath(path);
-                                setLastClickedPath(path);
-                            }}
-                            onSelectUnknown={(path) => setLastClickedPath(path)}
-                            onToggleExpand={(path) =>
-                                setExpandedPaths((prev) => {
-                                    const next = new Set(prev);
-                                    next.has(path) ? next.delete(path) : next.add(path);
-                                    return next;
-                                })
-                            }
-                            onStartRename={setRenamingPath}
-                            onConfirmRename={handleConfirmRename}
-                            onCancelRename={() => setRenamingPath(null)}
-                            onContextMenu={(node, x, y) => setContextMenu({ node, x, y })}
                         />
                     </div>
-                </div>
+                </>
+            ): (
+                <div className="flex-1" />
             )}
+        </div>
+    );
 
-            <div className="flex-1 flex flex-col">
-                {session.openFilePath ? (
-                    <>
-                        <EditorHeader filePath={session.openFilePath} />
-                        <div className="flex-1 overflow-hidden py-1.5">
-                            <MarkdownEditor
-                                key={session.openFilePath}
-                                filePath={session.openFilePath}
-                                fileTree={nodes}
-                                onOpenFile={(path) => {
-                                    setSession({ openFilePath: path });
-                                    setLastClickedPath(path);
-                                }}
-                            />
-                        </div>
-                    </>
-                ): (
-                    <div className="flex-1 flex items-center justify-center" style={{ color: "var(--color-text-muted)" }}>
+    return (
+        <div className="flex h-full">
+            {isSidebarCollapsed ? (
+                <>
+                    <div
+                        className="flex flex-col items-center shrink-0"
+                        style={{ width: 28, borderRight: "1px solid var(--color-border)", paddingTop: 6 }}
+                    >
+                        <button
+                            onClick={() => setIsSidebarCollapsed(false)}
+                            title="Show file tree"
+                            className="flex items-center justify-center cursor-pointer bg-transparent border-none"
+                            style={{ width: 22, height: 22, borderRadius: 4, color: "var(--color-text-muted)" }}
+                        >
+                            <ExpandIcon size={13} />
+                        </button>
                     </div>
-                )}
-            </div>
+                    {editorPane}
+                </>
+            ): (
+                <Group orientation="horizontal" className="h-full flex-1 flex">
+                    <Panel defaultSize={"200px"} minSize={"200px"} maxSize={"40%"}>
+                        <div
+                            className="flex flex-col h-full"
+                            style={{ borderRight: "1px solid var(--color-border)" }}
+                        >
+                            <FileTreeToolbar
+                                onNewFile={handleNewFile}
+                                onNewFolder={handleNewFolder}
+                                onCollapseSidebar={() => setIsSidebarCollapsed(true)}
+                            />
+                            <div 
+                                className="flex-1 overflow-auto py-1"
+                                onClick={(e) => {
+                                    if (e.target === e.currentTarget) {
+                                        setSelectedFolderPath(null);
+                                        setLastClickedPath(null);
+                                    }
+                                }}
+                            >
+                                <FileTree
+                                    nodes={nodes}
+                                    parentPath={rootPath}
+                                    selectedPath={lastClickedPath}
+                                    expandedPaths={expandedPaths}
+                                    renamingPath={renamingPath}
+                                    onSelectFile={(path) => {
+                                        setSession({ openFilePath: path });
+                                        setLastClickedPath(path);
+                                    }}
+                                    onSelectFolder={(path) => {
+                                        setSelectedFolderPath(path);
+                                        setLastClickedPath(path);
+                                    }}
+                                    onSelectUnknown={(path) => setLastClickedPath(path)}
+                                    onToggleExpand={(path) =>
+                                        setExpandedPaths((prev) => {
+                                            const next = new Set(prev);
+                                            next.has(path) ? next.delete(path) : next.add(path);
+                                            return next;
+                                        })
+                                    }
+                                    onStartRename={setRenamingPath}
+                                    onConfirmRename={handleConfirmRename}
+                                    onCancelRename={() => setRenamingPath(null)}
+                                    onContextMenu={(node, x, y) => setContextMenu({ node, x, y })}
+                                />
+                            </div>
+                        </div>
+                    </Panel>
+
+                    <Separator
+                        style={{
+                            width: 4,
+                            background: "var(--color-border-subtle)",
+                            cursor: "col-resize",
+                            transition: "background 0.15s",
+                        }}
+                        onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLElement).style.background = "var(--color-accent)";
+                        }}
+                        onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLElement).style.background = "var(--color-border-subtle)";
+                        }}
+                    />
+
+                    <Panel minSize={"50%"}>{editorPane}</Panel>
+                </Group>
+            )}
 
             {contextMenu && (
                 <FileTreeContextMenu
