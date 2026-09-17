@@ -10,6 +10,7 @@ import { dirname, join } from "@tauri-apps/api/path";
 import { flattenFiles, type MarkdownFileNode } from "../../../lib/tools/markdown/markdownFileTree";
 import { toRelativePath } from "../../../lib/tools/markdown/relativePath";
 
+import { ATOMIC_CODE_LANGUAGES } from "@atomic-editor/editor/code-languages";
 import { AtomicCodeMirrorEditor, wikiLinks } from "@atomic-editor/editor";
 import '@atomic-editor/editor/styles.css';
 import '../styles/MarkdownEditor.css';
@@ -140,6 +141,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
                 markdownSource={initialContent}
                 onMarkdownChange={handleChange}
                 extensions={extensions}
+                codeLanguages={ATOMIC_CODE_LANGUAGES}
             />
         </div>
     );
