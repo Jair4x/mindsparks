@@ -5,7 +5,7 @@
 //
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { readTextFile, writeTextFile, exists } from "@tauri-apps/plugin-fs";
+import { readTextFile, writeTextFile, exists, watch } from "@tauri-apps/plugin-fs";
 import { dirname, join } from "@tauri-apps/api/path";
 import { flattenFiles, type MarkdownFileNode } from "../../../lib/tools/markdown/markdownFileTree";
 import { toRelativePath } from "../../../lib/tools/markdown/relativePath";
@@ -17,7 +17,8 @@ import '../styles/MarkdownEditor.css';
 
 import { stylizedCodeBlocks } from "../../../lib/tools/markdown/stylizedCodeBlocks";
 import { extraCallouts } from "../../../lib/tools/markdown/extraCallouts";
-import { placeholder } from "@codemirror/view";
+import { EditorView, placeholder } from "@codemirror/view";
+import { setupViewListener } from "../../../lib/tools/markdown/externalChangeExt";
 
 interface MarkdownEditorProps {
     filePath:   string;
@@ -29,15 +30,24 @@ const SAVE_DEBOUNCE_MS = 500;
 
 export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEditorProps) {
     const [initialContent, setInitialContent]   = useState<string | null>(null);
+    const [externalContent, setExternalContent] = useState<string | null>(null);
+
+    const viewRef                               = useRef<EditorView | null>(null);
+    const currentContent                        = useRef(""); // what's on the editor right now
+    const lastPersistedContent                  = useRef(""); // the last we KNOW it's saved on disk
     const saveTimeout                           = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const pendingContent                        = useRef<string | null>(null); // last unsaved changes
     
     useEffect(() => {
         let cancelled = false;
         setInitialContent(null);
+        setExternalContent(null);
 
         readTextFile(filePath).then((content) => {
-            if (!cancelled) setInitialContent(content);
+            if (cancelled) return;
+
+            currentContent.current = content;
+            lastPersistedContent.current = content;
+            setInitialContent(content);
         });
 
         return () => {
@@ -45,25 +55,54 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
         };
     }, [filePath]);
 
-    function flushPendingSave() {
-        if (pendingContent.current === null) return;
+    // Watcher for the current opened file
+    useEffect(() => {
+        let cancelled = false;
+        let unwatch: (() => void) | undefined;
 
-        const content = pendingContent.current;
-        pendingContent.current = null;
+        watch(
+            filePath,
+            async (event) => {
+                const changedPaths: string[] = (event as { paths?: string[] }).paths ?? [];
+                const affectsThisFile = changedPaths.some(
+                    (p) => p.replace(/\\/g, "/") === filePath.replace(/\\/g, "/")
+                );
+                if (!affectsThisFile) return;
 
-        writeTextFile(filePath, content).catch((e) =>
-            console.error("Couldn't save markdown file: ", e)
-        );
+                const diskContent = await readTextFile(filePath).catch(() => null);
+                if (diskContent === null) return; // file could've been deleted
+                if (diskContent === lastPersistedContent.current) return; // echo from saving the file
+
+                setExternalContent(diskContent);
+            },
+            { delayMs: 300 }
+        ).then((fn) => {
+            if (cancelled) {
+                fn();
+            } else {
+                unwatch = fn;
+            }
+        });
+
+        return () => {
+            cancelled = true;
+            unwatch?.();
+        };
+    }, [filePath]);
+
+    function persistNow(content: string) {
+        lastPersistedContent.current = content;
+        writeTextFile(filePath, content).catch((e) => console.error("Couldn't save markdown file: ", e));
     }
 
     function handleChange(markdown: string) {
-        pendingContent.current = markdown;
+        currentContent.current = markdown;
 
         if (saveTimeout.current) clearTimeout(saveTimeout.current);
 
         saveTimeout.current = setTimeout(() => {
             saveTimeout.current = null;
-            flushPendingSave();
+            persistNow(currentContent.current);
         }, SAVE_DEBOUNCE_MS);
     }
 
@@ -75,10 +114,27 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
             if (saveTimeout.current) {
                 clearTimeout(saveTimeout.current);
                 saveTimeout.current = null;
+                persistNow(currentContent.current);
             }
-            flushPendingSave();
         };
-    }, []);
+    }, [filePath]);
+
+    function handleKeepCurrent() {
+        persistNow(currentContent.current);
+        setExternalContent(null);
+    }
+
+    function handleLoadNew() {
+        const view = viewRef.current;
+        if (view && externalContent !== null) {
+            view.dispatch({
+                changes: { from: 0, to: view.state.doc.length, insert: externalContent },
+            });
+
+            // No need to touch lastPersistedContent since autosave gets triggered automatically
+        }
+        setExternalContent(null);
+    }
 
     const extensions = useMemo(
         () => [
@@ -122,6 +178,9 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
             }),
             stylizedCodeBlocks,
             extraCallouts,
+            setupViewListener((view) => { // hot reload
+                viewRef.current = view;
+            }),
         ],
         [filePath, fileTree]
     );
@@ -135,14 +194,49 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
     }
 
     return (
-        <div className="h-full">
-            <AtomicCodeMirrorEditor
-                key={filePath}
-                markdownSource={initialContent}
-                onMarkdownChange={handleChange}
-                extensions={extensions}
-                codeLanguages={ATOMIC_CODE_LANGUAGES}
-            />
+        <div className="h-full flex flex-col">
+            {externalContent !== null && (
+                <div className="flex items-center justify-between px-4 py-2" style={{ background: "var(--color-warning)", color: "#1a1a1e" }}>
+                    <span style={{ fontSize: 13 }}>This file changed its contents outside of the editor.</span>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleKeepCurrent}
+                            className="cursor-pointer border-none"
+                            style={{
+                                padding: "4px 10px",
+                                borderRadius: 4,
+                                fontSize: 12,
+                                background: "rgba(0,0,0,0.15)",
+                            }}
+                        >
+                            Keep this version
+                        </button>
+
+                        <button
+                            onClick={handleLoadNew}
+                            className="cursor-pointer border-none"
+                            style={{
+                                padding: "4px 10px",
+                                borderRadius: 4,
+                                fontSize: 12,
+                                background: "rgba(0,0,0,0.15)",
+                            }}
+                        >
+                            Load the new version
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex-1 overflow-hidden">
+                <AtomicCodeMirrorEditor
+                    key={filePath}
+                    markdownSource={initialContent}
+                    onMarkdownChange={handleChange}
+                    extensions={extensions}
+                    codeLanguages={ATOMIC_CODE_LANGUAGES}
+                />
+            </div>
         </div>
     );
 }

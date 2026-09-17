@@ -8,6 +8,7 @@ import { markdownAdapter } from "../../lib/tools/adapters";
 import { buildFileTree, generateUniqueName, getChildrenAt, displayName, remapPath, type MarkdownFileNode } from "../../lib/tools/markdown/markdownFileTree";
 import { FileTreeToolbar } from "./markdown/fileTreeToolbar";
 import { FileTree } from "./markdown/FileTree";
+import { watchFileTree } from "../../lib/tools/markdown/fileTreeWatcher";
 import type { ToolInstance } from "../../types";
 
 import { ArrowRightToLine as ExpandIcon } from "lucide-react";
@@ -29,8 +30,8 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     const [isSidebarCollapsed, setIsSidebarCollapsed]   = useState(false);
     const [lastClickedPath, setLastClickedPath]         = useState<string | null>(null);
     const [session, setSession]                         = useToolSession<MarkdownSession>(instance.id, { openFilePath: null });
-    const [renamingPath, setRenamingPath] = useState<string | null>(null);
-    const [contextMenu, setContextMenu] = useState<{ node: MarkdownFileNode; x: number; y: number } | null>(null);
+    const [renamingPath, setRenamingPath]               = useState<string | null>(null);
+    const [contextMenu, setContextMenu]                 = useState<{ node: MarkdownFileNode; x: number; y: number } | null>(null);
 
     // Create or resolve tool data
     useEffect(() => {
@@ -49,6 +50,21 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                 setNodes(await buildFileTree(root));
             });
     }, [flame?.id, space?.id, instance.id]);
+
+    // Watcher to file tree
+    useEffect(() => {
+        if (!rootPath) return;
+
+        let unwatch: (() => void) | undefined;
+
+        watchFileTree(rootPath, () => refreshTree(rootPath)).then((fn) => {
+            unwatch = fn;
+        });
+
+        return () => {
+            unwatch?.();
+        };
+    }, [rootPath]);
 
     async function refreshTree(root: string) {
         setNodes(await buildFileTree(root));
@@ -232,8 +248,9 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                 {session.openFilePath ? (
                     <>
                         <EditorHeader filePath={session.openFilePath} />
-                        <div className="flex-1 overflow-hidden">
+                        <div className="flex-1 overflow-hidden py-1.5">
                             <MarkdownEditor
+                                key={session.openFilePath}
                                 filePath={session.openFilePath}
                                 fileTree={nodes}
                                 onOpenFile={(path) => {
