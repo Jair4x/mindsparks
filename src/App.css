@@ -43,7 +43,7 @@
   --atomic-editor-link: var(--color-accent-light);
   --atomic-editor-link-hover: var(--color-accent-light);
 
-  --atomic-editor-body-leading: 2.5;
+  --atomic-editor-body-leading: 1.75;
 }
 
 [data-theme="light"] {
