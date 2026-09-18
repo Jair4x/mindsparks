@@ -1,3 +1,8 @@
+//
+// The markdown tool itself, unifying both the File Tree and the editor
+//
+//
+
 import { useEffect, useState } from "react";
 import { writeTextFile, mkdir, stat, rename, remove } from "@tauri-apps/plugin-fs";
 import { confirm } from "@tauri-apps/plugin-dialog";
@@ -5,7 +10,15 @@ import { join } from "@tauri-apps/api/path";
 import { useFlameStore, useSpaceStore } from "../../store";
 import { useToolSession } from "../../hooks";
 import { markdownAdapter } from "../../lib/tools/adapters";
-import { buildFileTree, generateUniqueName, getChildrenAt, displayName, remapPath, type MarkdownFileNode } from "../../lib/tools/markdown/markdownFileTree";
+import {
+    buildFileTree,
+    generateUniqueName,
+    getChildrenAt,
+    displayName,
+    remapPath,
+    getAncestorFolderPaths,
+    type MarkdownFileNode,
+} from "../../lib/tools/markdown/markdownFileTree";
 import { FileTreeToolbar } from "./markdown/fileTreeToolbar";
 import { FileTree } from "./markdown/FileTree";
 import { watchFileTree } from "../../lib/tools/markdown/fileTreeWatcher";
@@ -189,9 +202,14 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                             key={session.openFilePath}
                             filePath={session.openFilePath}
                             fileTree={nodes}
-                            onOpenFile={(path) => {
+                            onOpenFile={async (path) => {
                                 setSession({ openFilePath: path });
                                 setLastClickedPath(path);
+
+                                if (rootPath) {
+                                    const ancestors = await getAncestorFolderPaths(rootPath, path);
+                                    setExpandedPaths((prev) => new Set([...prev, ...ancestors]));
+                                }
                             }}
                         />
                     </div>

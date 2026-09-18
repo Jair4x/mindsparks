@@ -1,5 +1,6 @@
 import { readDir } from "@tauri-apps/plugin-fs";
 import { join } from "@tauri-apps/api/path";
+import { toRelativePath } from "./relativePath";
 
 export interface MarkdownFileNode {
     name: string;
@@ -109,4 +110,19 @@ export function flattenFiles(nodes: MarkdownFileNode[]): { path: string; name: s
 
         return [];
     });
+}
+
+export async function getAncestorFolderPaths(rootPath: string, targetPath: string): Promise<string[]> {
+    const relative = toRelativePath(rootPath, targetPath); // e.g. "folder1/folder2/notes.md"
+    const segments = relative.split("/").slice(0, -1); // ["folder1", "folder2"]
+
+    const ancestors: string[] = [];
+    let current = rootPath;
+
+    for (const segment of segments) {
+        current = await join(current, segment);
+        ancestors.push(current);
+    }
+
+    return ancestors;
 }
