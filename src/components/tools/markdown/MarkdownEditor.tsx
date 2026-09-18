@@ -173,6 +173,8 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
                     const withExt       = target.endsWith(".md") ? target : `${target}.md`;
                     const absolutePath  = await join(currentDir, withExt);
                     
+                    if (!(await exists(absolutePath))) return; // broken wikilink, file doesn't exist
+                    
                     onOpenFile(absolutePath);
                 },
             }),
