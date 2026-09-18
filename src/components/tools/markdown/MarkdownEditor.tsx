@@ -31,6 +31,7 @@ const SAVE_DEBOUNCE_MS = 500;
 export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEditorProps) {
     const [initialContent, setInitialContent]   = useState<string | null>(null);
     const [externalContent, setExternalContent] = useState<string | null>(null);
+    const [loadError, setLoadError]             = useState<string | null>(null);
 
     const viewRef                               = useRef<EditorView | null>(null);
     const currentContent                        = useRef(""); // what's on the editor right now
@@ -41,14 +42,19 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
         let cancelled = false;
         setInitialContent(null);
         setExternalContent(null);
+        setLoadError(null);
 
-        readTextFile(filePath).then((content) => {
-            if (cancelled) return;
+        readTextFile(filePath)
+            .then((content) => {
+                if (cancelled) return;
 
-            currentContent.current = content;
-            lastPersistedContent.current = content;
-            setInitialContent(content);
-        });
+                currentContent.current = content;
+                lastPersistedContent.current = content;
+                setInitialContent(content);
+            })
+            .catch((e) => {
+                if (!cancelled) setLoadError(String(e));
+            });
 
         return () => {
             cancelled = true;
@@ -187,9 +193,19 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
         [filePath, fileTree]
     );
 
+    if (loadError) {
+        return (
+            <div className="h-full flex items-center justify-center py-2" style={{ color: "var(--color-danger)" }}>
+                Could not open this file:
+                <br />
+                {loadError}
+            </div>
+        );
+    }
+
     if (initialContent === null) {
         return (
-            <div className="h-full flex items-center justify-center" style={{ color: "var(--color-text-muted)" }}>
+            <div className="h-full flex items-center justify-center py-2" style={{ color: "var(--color-text-muted)" }}>
                 Loading...
             </div>
         );
