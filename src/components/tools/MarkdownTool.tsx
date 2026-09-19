@@ -17,6 +17,7 @@ import {
     displayName,
     remapPath,
     getAncestorFolderPaths,
+    flattenFiles,
     type MarkdownFileNode,
 } from "../../lib/tools/markdown/markdownFileTree";
 import { FileTreeToolbar } from "./markdown/fileTreeToolbar";
@@ -24,6 +25,9 @@ import { FileTree } from "./markdown/FileTree";
 import { watchFileTree } from "../../lib/tools/markdown/fileTreeWatcher";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import type { ToolInstance } from "../../types";
+
+import { computeWikiLinkRename, applyWikiLinkRenameChanges, type WikiLinkRenameChange } from "../../lib/tools/markdown/wikiLinkRename";
+import { WikiLinkRenameConfirm } from "./markdown/WikiLinkRenameConfirm";
 
 import { ArrowRightToLine as ExpandIcon } from "lucide-react";
 import { MarkdownEditor } from "./markdown/MarkdownEditor";
@@ -46,6 +50,13 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     const [session, setSession]                         = useToolSession<MarkdownSession>(instance.id, { openFilePath: null });
     const [renamingPath, setRenamingPath]               = useState<string | null>(null);
     const [contextMenu, setContextMenu]                 = useState<{ node: MarkdownFileNode; x: number; y: number } | null>(null);
+    
+    // editor reloading
+    const [reloadNonce, setReloadNonce]                 = useState(0);
+
+    // WikiLink
+    const [rememberedWLChoice, setRememberedWLChoice]   = useState<"apply" | "skip" | null>(null);
+    const [pendingWLRename, setPendingWLRename]         = useState<{ changes: WikiLinkRenameChange[]; finishRename: () => Promise<void>; } | null>(null);
 
     // Create or resolve tool data
     useEffect(() => {
@@ -119,6 +130,25 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         }
     }
 
+    async function finishRenameBookkeping(oldPath: string, newPath: string) {
+        setExpandedPaths((prev) => new Set([...prev].map((p) => remapPath(p, oldPath, newPath))));
+        setSelectedFolderPath((prev) => (prev ? remapPath(prev, oldPath, newPath) : prev));
+        setLastClickedPath((prev) => (prev ? remapPath(prev, oldPath, newPath) : prev));
+        setSession({
+            openFilePath: session.openFilePath ? remapPath(session.openFilePath, oldPath, newPath) : null,
+        });
+
+        if (rootPath) await refreshTree(rootPath);
+    }
+
+    async function applyWikiLinkChangesAndReloadIfOpen(changes: WikiLinkRenameChange[]) {
+        await applyWikiLinkRenameChanges(changes);
+
+        if (changes.some((c) => c.path === session.openFilePath)) {
+            setReloadNonce((n) => n + 1);
+        }
+    }
+
     async function handleConfirmRename(node: MarkdownFileNode, parentDir: string, newName: string) {
         setRenamingPath(null);
 
@@ -148,16 +178,33 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         if (finalName === node.name) return;
 
         const newPath = await join(parentDir, finalName);
+        const oldPath = node.path;
+
         await rename(node.path, newPath);
 
-        setExpandedPaths((prev) => new Set([...prev].map((p) => remapPath(p, node.path, newPath))));
-        setSelectedFolderPath((prev) => (prev ? remapPath(prev, node.path, newPath) : prev));
-        setLastClickedPath((prev) => (prev ? remapPath(prev, node.path, newPath) : prev));
-        setSession({
-            openFilePath: session.openFilePath ? remapPath(session.openFilePath, node.path, newPath) : null,
-        });
+        const allFilePaths = flattenFiles(nodes).map((f) => f.path);
+        const changes = await computeWikiLinkRename(allFilePaths, oldPath, newPath);
 
-        await refreshTree(rootPath);
+        if (changes.length === 0) {
+            await finishRenameBookkeping(oldPath, newPath);
+            return;
+        }
+
+        if (rememberedWLChoice === "apply") {
+            await applyWikiLinkChangesAndReloadIfOpen(changes);
+            await finishRenameBookkeping(oldPath, newPath);
+            return;
+        }
+
+        if (rememberedWLChoice === "skip") {
+            await finishRenameBookkeping(oldPath, newPath);
+            return;
+        }
+
+        setPendingWLRename({
+            changes,
+            finishRename: () => finishRenameBookkeping(oldPath, newPath),
+        });
     }
 
     async function handleDelete(node: MarkdownFileNode) {
@@ -199,7 +246,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                     <EditorHeader filePath={session.openFilePath} />
                     <div className="flex-1 overflow-hidden py-1.5">
                         <MarkdownEditor
-                            key={session.openFilePath}
+                            key={`${session.openFilePath}-${reloadNonce}`}
                             filePath={session.openFilePath}
                             fileTree={nodes}
                             onOpenFile={async (path) => {
@@ -323,6 +370,24 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                         setContextMenu(null);
                     }}
                     onClose={() => setContextMenu(null)}
+                />
+            )}
+
+            {pendingWLRename && (
+                <WikiLinkRenameConfirm
+                    referenceCount={pendingWLRename.changes.reduce((sum, c) => sum + c.count, 0)}
+                    fileCount={pendingWLRename.changes.length}
+                    onConfirm={async (rememberChoice) => {
+                        if (rememberChoice) setRememberedWLChoice("apply");
+                        await applyWikiLinkChangesAndReloadIfOpen(pendingWLRename.changes);
+                        await pendingWLRename.finishRename();
+                        setPendingWLRename(null);
+                    }}
+                    onCancel={async (rememberChoice) => {
+                        if (rememberChoice) setRememberedWLChoice("skip");
+                        await pendingWLRename.finishRename();
+                        setPendingWLRename(null);
+                    }}
                 />
             )}
         </div>
