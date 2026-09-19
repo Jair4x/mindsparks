@@ -4,7 +4,7 @@
 //
 
 import { useEffect, useState } from "react";
-import { writeTextFile, mkdir, stat, rename, remove } from "@tauri-apps/plugin-fs";
+import { writeTextFile, mkdir, stat, rename, remove, watch } from "@tauri-apps/plugin-fs";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { join } from "@tauri-apps/api/path";
 import { useFlameStore, useSpaceStore } from "../../store";
@@ -18,6 +18,7 @@ import {
     remapPath,
     getAncestorFolderPaths,
     flattenFiles,
+    findNodeByPath,
     type MarkdownFileNode,
 } from "../../lib/tools/markdown/markdownFileTree";
 import { FileTreeToolbar } from "./markdown/fileTreeToolbar";
@@ -243,7 +244,13 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         <div className="flex-1 flex flex-col">
             {session.openFilePath ? (
                 <>
-                    <EditorHeader filePath={session.openFilePath} />
+                    <EditorHeader
+                        filePath={session.openFilePath}
+                        node={findNodeByPath(nodes, session.openFilePath)}
+                        parentDir={session.openFilePath.replace(/[\\/][^\\/]*$/, "")}
+                        onConfirmRename={handleConfirmRename}
+                    />
+
                     <div className="flex-1 overflow-hidden py-1.5">
                         <MarkdownEditor
                             key={`${session.openFilePath}-${reloadNonce}`}
@@ -397,22 +404,58 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
 // Visible header in editor with filename and last modification text
 // I'm probably gonna hate when a bug for this gets reported, Date objects are cursed
 // regex because path is string btw
-function EditorHeader({ filePath }: { filePath: string }) {
+function EditorHeader({
+    filePath,
+    node,
+    parentDir,
+    onConfirmRename
+}: {
+    filePath: string;
+    node: MarkdownFileNode | null;
+    parentDir: string;
+    onConfirmRename: (node: MarkdownFileNode, parentDir: string, newName: string) => void;
+}) {
     const [modifiedAt, setModifiedAt] = useState<Date | null>(null);
+    const [isRenaming, setIsRenaming] = useState(false);
+
+    const fileName = displayName(filePath.split(/[\\/]/).pop() ?? filePath);
+    const [draftName, setDraftName] = useState(fileName);
 
     useEffect(() => {
         let cancelled = false;
+        let unwatch: (() => void) | null = null;
 
-        stat(filePath).then((info) => {
-            if (!cancelled) setModifiedAt(info.mtime);
+        function refreshStat() {
+            stat(filePath).then((info) => {
+                if (!cancelled) setModifiedAt(info.mtime);
+            });
+        }
+
+        refreshStat();
+
+        watch(filePath, () => refreshStat(), { delayMs: 300 }).then((fn) => {
+            if (cancelled) {
+                fn();
+            } else {
+                unwatch = fn;
+            }
         });
 
         return () => {
             cancelled = true;
+            unwatch?.();
         };
     }, [filePath]);
 
-    const fileName = displayName(filePath.split(/[\\/]/).pop() ?? filePath);
+    useEffect(() => {
+        setIsRenaming(false);
+        setDraftName(fileName);
+    }, [filePath]);
+
+    function confirmRename() {
+        setIsRenaming(false);
+        if (node) onConfirmRename(node, parentDir, draftName);
+    }
 
     return (
         <div
@@ -423,7 +466,39 @@ function EditorHeader({ filePath }: { filePath: string }) {
                 fontSize: 13,
             }}
         >
-            <span style={{ color: "var(--color-text)" }}>{fileName}</span>
+            {isRenaming ? (
+                <input
+                    autoFocus
+                    value={draftName}
+                    onChange={(e) => setDraftName(e.target.value)}
+                    onBlur={confirmRename}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            confirmRename();
+                        } else if (e.key === "Escape") {
+                            e.preventDefault();
+                            setIsRenaming(false);
+                            setDraftName(fileName);
+                        }
+                    }}
+                    style={{
+                        background: "var(--color-bg)",
+                        border: "1px solid var(--color-accent)",
+                        borderRadius: 3,
+                        color: "var(--color-text)",
+                        fontSize: "inherit",
+                        fontFamily: "inherit",
+                        textAlign: "center",
+                        padding: "0 4px",
+                        width: 220,
+                    }}
+                />
+            ): (
+                <span onDoubleClick={() => node && setIsRenaming(true)} style={{ color: "var(--color-text)", cursor: node ? "text" : "default" }}>
+                    {fileName}
+                </span>
+            )}
 
             {modifiedAt && (
                 <span

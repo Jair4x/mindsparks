@@ -126,3 +126,16 @@ export async function getAncestorFolderPaths(rootPath: string, targetPath: strin
 
     return ancestors;
 }
+
+export function findNodeByPath(nodes: MarkdownFileNode[], targetPath: string): MarkdownFileNode | null {
+    for (const node of nodes) {
+        if (node.path === targetPath) return node;
+
+        if (node.kind === "folder" && node.children) {
+            const found = findNodeByPath(node.children, targetPath);
+            if (found) return found;
+        }
+    }
+
+    return null;
+}
