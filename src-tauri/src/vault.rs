@@ -80,6 +80,7 @@ pub fn set_vault_path(app: AppHandle, path: String) -> Result<(), String> {
         .map_err(|e| format!("Could not write vault config: {e}"))?;
 
     grant_vault_scope(&app, &vault_path)?;
+    crate::db::open_connection(&app, &vault_path)?;
 
     Ok(())
 }

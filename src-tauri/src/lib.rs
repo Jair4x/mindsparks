@@ -1,5 +1,6 @@
 mod folders;
 mod vault;
+mod db;
 
 use tauri::{Manager, Emitter};
 use tauri_plugin_global_shortcut::ShortcutState;
@@ -36,6 +37,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
+        .manage(db::DbState::default())
         .setup(|app| {
             #[cfg(desktop)]
             {
@@ -81,6 +83,8 @@ pub fn run() {
             vault::get_vault_state,
             vault::set_vault_path,
             folders::resolve_flame_folder,
+            db::db_select,
+            db::db_execute,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
