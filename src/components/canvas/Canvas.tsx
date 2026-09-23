@@ -72,11 +72,10 @@ export interface CanvasHandle {
 
 export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
-    const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom, getNodes } = useReactFlow();
+    const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom, getNodes, setViewport } = useReactFlow();
 
     const setZoom = useUIStore((s) => s.setZoom);
-    const setCanvasViewport = useUIStore((s) => s.setCanvasViewport);
-    const canvasViewport = useUIStore((s) => s.canvasViewport);
+    const updateSpaceViewport = useSpaceStore((s) => s.updateSpaceViewport);
 
     const pendingRepulsion = useUIStore((s) => s.pendingRepulsion);
     const clearPendingRepulsion = useUIStore((s) => s.clearPendingRepulsion);
@@ -532,6 +531,17 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
         return () => document.removeEventListener("mouseup", handleMouseUp);
     }, [isSelecting, selectionBox, getNodesInBox, replaceSelection, endSelectionBox]);
 
+    // --------------------------
+    // Canvas Viewport
+    // --------------------------
+
+    useEffect(() => {
+        const space = useSpaceStore.getState().spaces.find((s) => s.id === activeSpaceId);
+        if (space) {
+            setViewport(space.canvasViewport);
+        }
+    }, [activeSpaceId, setViewport]);
+
     return (
         <div
             className="w-full h-full"
@@ -564,12 +574,12 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
                 nodeDragThreshold={1}
                 minZoom={MIN_ZOOM}
                 maxZoom={MAX_ZOOM}
-                defaultViewport={canvasViewport}
+                defaultViewport={useSpaceStore.getState().getActiveSpace().canvasViewport}
                 zoomOnPinch={false}
                 zoomOnScroll={false}
                 onMoveEnd={(_, viewport) => {
                     setZoom(viewport.zoom);
-                    setCanvasViewport(viewport);
+                    updateSpaceViewport(activeSpaceId, viewport);
                 }}
             >
                 <Background

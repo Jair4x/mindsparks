@@ -118,8 +118,6 @@ interface UIStore {
     closeContextMenu: () => void;
 
     // --- Actions: canvas ---
-
-    setCanvasViewport: (viewport: { x: number; y: number; zoom: number }) => void;
     setZoom: (zoom: number) => void;
 
     selectNode: (id: string, nodeType: SelectedNodeType) => void;
@@ -153,7 +151,6 @@ export const useUIStore = create<UIStore>((set, get) => ({
     activeModalNodeId: null,
     contextMenu: null,
     zoom: DEFAULT_ZOOM,
-    canvasViewport: { x: 0, y: 0, zoom: 1 },
     selection: { type: "none" },
     selectionBox: null,
     isSelecting: false,
@@ -185,11 +182,6 @@ export const useUIStore = create<UIStore>((set, get) => ({
     },
 
     // --- Canvas ---
-
-    setCanvasViewport: (viewport) => {
-        set({ canvasViewport: viewport });
-    },
-
     setZoom: (zoom) => {
         // Apply the limits so the zoom doesn't get out the allowed range.
         const clampedZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, zoom));

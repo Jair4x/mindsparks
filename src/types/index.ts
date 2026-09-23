@@ -131,16 +131,25 @@ export interface Connection {
 }
 
 // --------------------------
+// CanvasPos
+//  Canvas Position (duh), used by spaces to save the last position the canvas was opened on in a specific Space.
+//      Differs from Position because it includes zoom
+//      and because this is for the "camera view" on the canvas, not to position something a node or something.
+// --------------------------
+export type CanvasPos = { x: number; y: number; zoom: number };
+
+// --------------------------
 // Space
 //  A canvas with its own context. The personal Space is the default
 //  and cannot be deleted. Additional Spaces can be private or shared (shared comes on Phase 3).
 // --------------------------
 export interface Space {
-    id:         string;
-    name:       string;
-    icon?:      string;     // emoji or icon identifier
-    color?:     string;     // identifier color, hex
-    isDefault:  boolean;    // only true for the personal Space
-    createdAt:  string;
-    updatedAt:  string;
+    id:             string;
+    name:           string;
+    icon?:          string;     // emoji or icon identifier
+    color?:         string;     // identifier color, hex
+    isDefault:      boolean;    // only true for the personal Space
+    canvasViewport: CanvasPos;  // last pan/zoom position on this space's canvas
+    createdAt:      string;
+    updatedAt:      string;
 }

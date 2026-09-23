@@ -12,9 +12,15 @@
 //
 
 import { create } from "zustand";
-import { Space } from "../types";
+import { Space, CanvasPos } from "../types";
 import { generateId, now } from "../lib/utils";
 import { deleteSpaceCascade } from "./cascade";
+
+// --------------------------
+// Constants
+// --------------------------
+
+const DEFAULT_VIEWPORT: CanvasPos = { x: 0, y: 0, zoom: 0 };
 
 // --------------------------
 // Store types
@@ -46,6 +52,8 @@ interface SpaceStore {
 
     updateSpaceColor: (id: string, color: string) => void;
 
+    updateSpaceViewport: (id: string, viewport: CanvasPos) => void;
+
     // Delete an additional Space.
     // The default space (isDefault: true) cannot be deleted.
     // If the current Space is the one deleted, change it to the default Space.
@@ -71,6 +79,7 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
             id: generateId(),
             name: "Personal",
             isDefault: true,
+            canvasViewport: DEFAULT_VIEWPORT,
             createdAt: now(),
             updatedAt: now(),
         };
@@ -92,6 +101,7 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
             icon,
             color,
             isDefault: false,
+            canvasViewport: DEFAULT_VIEWPORT,
             createdAt: now(),
             updatedAt: now(),
         };
@@ -126,6 +136,16 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
             spaces: state.spaces.map((space) =>
                 space.id === id
                     ? { ...space, color, updatedAt: now() }
+                    : space
+            )
+        }));
+    },
+
+    updateSpaceViewport: (id, viewport) => {
+        set((state) => ({
+            spaces: state.spaces.map((space) => 
+                space.id === id
+                    ? { ...space, canvasViewport: viewport }
                     : space
             )
         }));
