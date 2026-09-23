@@ -20,7 +20,7 @@ import { deleteSpaceCascade } from "./cascade";
 // Constants
 // --------------------------
 
-const DEFAULT_VIEWPORT: CanvasPos = { x: 0, y: 0, zoom: 0 };
+const DEFAULT_VIEWPORT: CanvasPos = { x: 0, y: 0, zoom: 1 };
 
 // --------------------------
 // Store types
