@@ -6,10 +6,6 @@ import { QuickCaptureApp } from "./quick-capture/QuickCaptureApp";
 
 const isQuickCapture = new URLSearchParams(window.location.search).get("window") === "quick-capture";
 
-if (!isQuickCapture) {
-  useSpaceStore.getState().initializeDefaultSpace();
-}
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     {isQuickCapture ? <QuickCaptureApp /> : <App />}

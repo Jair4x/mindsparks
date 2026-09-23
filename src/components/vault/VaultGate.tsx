@@ -5,24 +5,51 @@
 //  - Not yet known (initial checking in-progress)      -> nothing is rendered
 //  - "not_set" (first time)                            -> onboarding
 //  - "missing" (already set up, but not there anymore) -> error screen
-//  - "ready"                                           -> Renders the rest of the app
+//  - "ready", Spaces still loading                     -> nothing is rendered (briefly)
+//  - "ready", Spaces failed to load                    -> error screen, Retry
+//  - "ready", Spaces loaded                            -> Renders the rest of the app
 //
 
-import { FolderOpen, FolderX } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FolderOpen, FolderX, AlertTriangle } from "lucide-react";
 import { useVaultState } from "../../hooks";
+import { useSpaceStore } from "../../store";
 
 export function VaultGate({ children }: { children: React.ReactNode }) {
     const { state, isChoosing, error, chooseFolder } = useVaultState();
+
+    const [spacesLoaded, setSpacesLoaded] = useState(false);
+    const [spacesError, setSpacesError]   = useState<string | null>(null);
+    
+    useEffect(() => {
+        if (state?.status !== "ready") return;
+
+        useSpaceStore.getState().loadSpaces()
+            .then(() => setSpacesLoaded(true))
+            .catch((e) => setSpacesError(String(e)));
+    }, [state?.status]);
+
+    const retryLoadSpaces = () => {
+        setSpacesError(null);
+        useSpaceStore.getState().loadSpaces()
+            .then(() => setSpacesLoaded(true))
+            .catch((e) => setSpacesError(String(e)));
+    };
 
     if (state === null) {
         return null; // prevents the onboarding flashing while resolving the initial checks
     }
 
-    if (state.status === "ready") {
+    if (state.status === "ready" && spacesLoaded) {
         return <>{children}</>;
     }
 
+    if (state.status === "ready" && !spacesError) {
+        return null; // spaces are loading, should be brief enough to not need a spinner
+    }
+
     const isMissing = state.status === "missing";
+    const isSpacesError = state.status === "ready" && spacesError !== null;
 
     return (
         <div
@@ -34,17 +61,21 @@ export function VaultGate({ children }: { children: React.ReactNode }) {
                 style={{ maxWidth: 360 }}
             >
                 <span style={{ color: "var(--color-accent)" }}>
-                    {isMissing ? <FolderX size={32} /> : <FolderOpen size={32} />}
+                    {isSpacesError
+                        ? <AlertTriangle size={32} />
+                        : isMissing ? <FolderX size={32} /> : <FolderOpen size={32} />}
                 </span>
 
                 <div>
                     <h1 style={{ fontSize: 16, color: "var(--color-text)" }}>
-                        {isMissing ? "Vault not found" : "Welcome to MindSparks"}
+                        {isSpacesError ? "Couldn't load your data" : isMissing ? "Vault not found" : "Welcome to MindSparks"}
                     </h1>
                     <p style={{ fontSize: 13, color: "var(--color-text-muted)", marginTop: 4 }}>
-                        {isMissing
-                            ? "The folder MindSparks last used isn't there anymore."
-                            : "Choose a folder where MindSparks will keep your sparks, flames and files."}
+                        {isSpacesError
+                            ? spacesError
+                            : isMissing
+                                ? "The folder MindSparks last used isn't there anymore."
+                                : "Choose a folder where MindSparks will keep your sparks, flames and files."}
                     </p>
 
                     {isMissing && (
@@ -63,7 +94,7 @@ export function VaultGate({ children }: { children: React.ReactNode }) {
                 </div>
 
                 <button
-                    onClick={chooseFolder}
+                    onClick={isSpacesError ? retryLoadSpaces : chooseFolder}
                     disabled={isChoosing}
                     className="cursor-pointer border-none"
                     style={{
@@ -76,7 +107,7 @@ export function VaultGate({ children }: { children: React.ReactNode }) {
                         opacity: isChoosing ? 0.6 : 1,
                     }}
                 >
-                    {isChoosing ? "Choosing..." : "Choose folder"}
+                    {isSpacesError ? "Retry" : isChoosing ? "Choosing..." : "Choose folder"}
                 </button>
 
                 {error && (
