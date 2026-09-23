@@ -54,7 +54,9 @@ pub fn run() {
             }
 
             if let Ok(vault::VaultState::Ready { path }) = vault::get_vault_state(app.handle().clone()) {
-                let _ = vault::grant_vault_scope(app.handle(), &std::path::PathBuf::from(path));
+                let vault_path = &std::path::PathBuf::from(path);
+                let _ = vault::grant_vault_scope(app.handle(), &vault_path);
+                let _ = db::open_connection(app.handle(), &vault_path);
             }
 
             // Okay, so, sometimes Windows screws things up and window transparency is nonexistent.
