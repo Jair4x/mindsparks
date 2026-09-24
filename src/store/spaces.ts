@@ -208,7 +208,7 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
         }));
 
         dbExecute(
-            "UPDATE spaces SET icon = ?1, update_at = ?2 WHERE id = ?3",
+            "UPDATE spaces SET icon = ?1, updated_at = ?2 WHERE id = ?3",
             [icon, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Space Icon: ", e));
     },
