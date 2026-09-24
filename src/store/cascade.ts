@@ -3,12 +3,14 @@
 //
 // Some deletions need to clean up dependent data that lives in other stores
 // (e.g. deleting a Space should also remove every Spark/Flame/Category/Connection that belongs to it).
-// 
-// Centralizing that here keeps the cascade logic in one place instead of duplicating or half-implementing logic 
+//
+// Centralizing that here keeps the cascade logic in one place instead of duplicating or half-implementing logic
 //  across individual store files.
 //
-// ! Note to future self: Once SQLite gets used, this will become mostly redundant with ON DELETE CASCADE foreign keys.
-// !                      Let's keep it this simple until then.
+// * Response to past self (check "fix(stores): space deletion now cascades onto sibling stores"):
+// *    Nope, you were wrong. I'll still be using this because I decided for SQLite to be I/O for
+// *    persistence instead of saving everything there. Zustand keeps being the source of truth
+// *    for in-memory, and SQLite now acts as debounced, saved data. L bozo
 //
 
 import { useSparkStore } from "./sparks";

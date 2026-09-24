@@ -1,10 +1,11 @@
 import "./App.css";
 import { AppLayout } from "./components/layout/AppLayout";
 import { VaultGate } from "./components/vault/VaultGate";
-import { useQuickCaptureBridge } from "./hooks";
+import { useQuickCaptureBridge, useFlushPositionsOnClose } from "./hooks";
 
 function App() {
   useQuickCaptureBridge();
+  useFlushPositionsOnClose();
 
   return (
     <VaultGate>

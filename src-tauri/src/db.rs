@@ -24,6 +24,7 @@ pub type DbState = Mutex<Option<Connection>>;
 // Never edit an already-shipped entry, only append new ones.
 const MIGRATIONS: &[(i64, &str)] = &[
     (1, include_str!("../migrations/001_create_spaces.sql")),
+    (2, include_str!("../migrations/002_create_sparks_flames_&_categories.sql")),
 ];
 
 fn run_migrations(conn: &mut Connection) -> Result<(), String> {
@@ -75,6 +76,9 @@ pub fn open_connection(app: &AppHandle, vault_path: &Path) -> Result<(), String>
     let db_path = vault_path.join(DB_FILE_NAME);
     let mut conn = Connection::open(&db_path)
         .map_err(|e| format!("Couldn't open database at {} : {e}", db_path.display()))?;
+
+    conn.execute("PRAGMA foreign_keys = ON", ())
+        .map_err(|e| format!("Couldn't enable foreign keys: {e}"))?;
 
     run_migrations(&mut conn)?;
 

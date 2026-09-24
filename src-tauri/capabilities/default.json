@@ -16,6 +16,7 @@
     "fs:allow-rename",
     "fs:allow-remove",
     "dialog:allow-confirm",
-    "fs:allow-watch"
+    "fs:allow-watch",
+    "core:window:allow-destroy"
   ]
 }

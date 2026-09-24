@@ -1,14 +1,46 @@
-//
-//  For future me: I'm resolving the category deletion on memory by notifying the sparks' store.
-//                 When you reach SQLite, remember to resolve this on a database level.
-//                 Details on useCategoryStore -> deleteCategory.
-//
-
 import { create } from "zustand";
 import { Category } from "../types";
 import { useSparkStore } from "./sparks";
 import { useFlameStore } from "./flames";
 import { generateId, now } from "../lib/utils";
+import { dbSelect, dbExecute } from "../lib/db";
+
+// --------------------------
+// DB stuff
+// --------------------------
+
+// Shape of a row as it comes back from the categories table
+interface CategoryRow {
+    id:         string;
+    name:       string;
+    color:      string;
+    space_id:   string;
+    created_at: string;
+}
+
+function rowToCategory(row: CategoryRow): Category {
+    return {
+        id: row.id,
+        name: row.name,
+        color: row.color,
+        spaceId: row.space_id,
+        createdAt: row.created_at,
+    };
+}
+
+function insertCategorySql(category: Category) {
+    return dbExecute(
+        `INSERT INTO categories (id, name, color, space_id, created_at)
+        VALUES (?1, ?2, ?3, ?4, ?5)`,
+        [
+            category.id,
+            category.name,
+            category.color,
+            category.spaceId,
+            category.createdAt,
+        ]
+    );
+}
 
 // --------------------------
 // Store types
@@ -26,6 +58,8 @@ interface CategoryStore {
         color:      string;
         spaceId:    string;
     }) => Category;
+
+    loadCategories: () => Promise<void>;
 
     renameCategory: (id: string, name: string) => void;
 
@@ -56,8 +90,14 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
         };
 
         set((state) => ({ categories: [...state.categories, newCategory] }));
+        insertCategorySql(newCategory).catch((e) => console.error("Couldn't persist new Category: ", e));
 
         return newCategory;
+    },
+
+    loadCategories: async () => {
+        const rows = await dbSelect<CategoryRow>("SELECT * FROM categories");
+        set({ categories: rows.map(rowToCategory) });
     },
 
     renameCategory: (id, name) => {
@@ -68,6 +108,11 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
                     : category
             ),
         }));
+
+        dbExecute(
+            "UPDATE categories SET name = ?1 WHERE id = ?2",
+            [name, id]
+        ).catch((e) => console.error("Couldn't persist Category renaming: ", e));
     },
 
     updateCategoryColor: (id, color) => {
@@ -78,33 +123,41 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
                     : category
             ),
         }));
+
+        dbExecute(
+            "UPDATE categories SET color = ?1 WHERE id = ?2",
+            [color, id]
+        ).catch((e) => console.error("Couldn't persist Category recoloring: ", e));
     },
 
     deleteCategory: (id) => {
-        // Before deleting the category, we unlink all the sparks that had it assigned.
-        // We access directly the sparks store to do this in a single operation.
-        //
-        // !Note to future self: This only works on memory. When you implement SQLite, this logic has to be
-        // !                     managed on a database level with a foreign key set as ON DELETE SET NULL,
-        // !                     to do exactly this but more efficiently and automatically.
-        //
-        const { sparks } = useSparkStore.getState();
-        const affectedSparks = sparks.filter((spark) => spark.categoryId === id);
-
-        const { flames } = useFlameStore.getState();
-        const affectedFlames = flames.filter((flame) => flame.categoryId === id);
-
-        affectedSparks.forEach((spark) => {
-            useSparkStore.getState().assignCategory(spark.id, undefined);
-        });
-
-        affectedFlames.forEach((flame) => {
-            useFlameStore.getState().assignCategory(flame.id, undefined);
-        });
+        // SQLite handles ON DELETE SET NULL for sparks and flames.
+        // Keep the in-memory stores in sync with that result.
 
         set((state) => ({
             categories: state.categories.filter((category) => category.id !== id),
         }));
+
+        useSparkStore.setState((state) => ({
+            sparks: state.sparks.map((spark) =>
+                spark.categoryId === id
+                    ? { ...spark, categoryId: undefined }
+                    : spark
+            ),
+        }));
+
+        useFlameStore.setState((state) => ({
+            flames: state.flames.map((flame) =>
+                flame.categoryId === id
+                    ? { ...flame, categoryId: undefined }
+                    : flame
+            ),
+        }));
+
+        dbExecute(
+            "DELETE FROM categories WHERE id = ?1",
+            [id]
+        ).catch((e) => console.error("Couldn't persist Category deletion: ", e));
     },
     
     getCategoriesBySpace: (spaceId) => {
