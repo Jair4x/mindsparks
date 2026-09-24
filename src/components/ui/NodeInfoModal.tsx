@@ -132,10 +132,10 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     };
 
     const handleFamilyClick = (node: Spark | Flame) => {
-        if ("sparkId" in node) {
-            setPendingFlameNav(node);
-        } else {
+        if ("text" in node) {
             openModal("node-detail", node.id);
+        } else {
+            setPendingFlameNav(node);
         }
     };
 
