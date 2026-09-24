@@ -80,8 +80,6 @@ interface UIStore {
     // Constants are up
     zoom: number;
 
-    canvasViewport: { x: number; y: number; zoom: number };
-
     selection: Selection;
 
     selectionBox: SelectionBox | null;
