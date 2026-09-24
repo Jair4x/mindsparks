@@ -13,7 +13,7 @@
 import { useEffect, useState } from "react";
 import { FolderOpen, FolderX, AlertTriangle } from "lucide-react";
 import { useVaultState } from "../../hooks";
-import { useCategoryStore, useFlameStore, useSpaceStore, useSparkStore } from "../../store";
+import { useCategoryStore, useConnectionStore, useFlameStore, useSpaceStore, useSparkStore } from "../../store";
 
 export function VaultGate({ children }: { children: React.ReactNode }) {
     const { state, isChoosing, error, chooseFolder } = useVaultState();
@@ -36,6 +36,9 @@ export function VaultGate({ children }: { children: React.ReactNode }) {
         
         useCategoryStore.getState().loadCategories()
             .catch((e) => console.error("Couldn't load Categories: ", e));
+        
+        useConnectionStore.getState().loadConnections()
+            .catch((e) => console.error("Couldn't load Connections: ", e));
     }, [state?.status]);
 
     const retryLoadSpaces = () => {

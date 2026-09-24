@@ -12,6 +12,47 @@
 import { create } from "zustand";
 import { Connection, ConnectionType } from "../types";
 import { generateId, now } from "../lib/utils";
+import { dbSelect, dbExecute } from "../lib/db";
+
+// --------------------------
+// DB stuff
+// --------------------------
+
+// Shape of a row as it comes back from the connections table
+interface ConnectionRow {
+    id:         string;
+    source_id:  string;
+    target_id:  string;
+    type:       string;
+    space_id:   string;
+    created_at: string;
+}
+
+function rowToConnection(row: ConnectionRow): Connection {
+    return {
+        id: row.id,
+        sourceId: row.source_id,
+        targetId: row.target_id,
+        type: row.type as ConnectionType,
+        spaceId: row.space_id,
+        createdAt: row.created_at,
+    };
+}
+
+function insertConnectionSql(conn: Connection) {
+    return dbExecute(
+        `INSERT INTO connections (id, source_id, target_id, type, space_id, created_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
+        [
+            conn.id,
+            conn.sourceId,
+            conn.targetId,
+            conn.type,
+            conn.spaceId,
+            conn.createdAt
+        ]
+    );
+}
 
 // --------------------------
 // Store types
@@ -39,6 +80,8 @@ interface ConnectionStore {
         targetId:   string;
         spaceId:    string;
     }) => Connection;
+
+    loadConnections: () => Promise<void>;
 
     // Automatically gets executed if the source spark or flame is archived.
     // The "related" type connections can be deleted manually by the user.
@@ -93,19 +136,35 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
     createLineageConnection: ({ sourceId, targetId, spaceId }) => {
         const connection = buildConnection(sourceId, targetId, "lineage", spaceId);
         set((state) => ({ connections: [...state.connections, connection] }));
+
+        insertConnectionSql(connection).catch((e) => console.error("Couldn't persist new Lineage Connection: ", e));
+
         return connection;
     },
 
     createRelatedConnection: ({ sourceId, targetId, spaceId }) => {
         const connection = buildConnection(sourceId, targetId, "related", spaceId);
         set((state) => ({ connections: [...state.connections, connection] }));
+
+        insertConnectionSql(connection).catch((e) => console.error("Couldn't persist new Related Connection: ", e));
+
         return connection;
+    },
+
+    loadConnections: async () => {
+        const rows = await dbSelect<ConnectionRow>("SELECT * FROM connections");
+        set({ connections: rows.map(rowToConnection) });
     },
 
     deleteConnection: (id) => {
         set((state) => ({
             connections: state.connections.filter((connection) => connection.id !== id),
         }));
+
+        dbExecute(
+            "DELETE FROM connections WHERE id = ?1",
+            [id]
+        ).catch((e) => console.error("Couldn't persist Connection deletion: ", e));
     },
 
     deleteConnectionsByNode: (nodeId) => {
@@ -113,6 +172,11 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
             connections: state.connections.filter(
                 (connection) => connection.sourceId !== nodeId && connection.targetId !== nodeId),
         }));
+
+        dbExecute(
+            "DELETE FROM connections WHERE source_id = ?1 OR target_id = ?1",
+            [nodeId]
+        ).catch((e) => console.error("Couldn't persist Connection cleanup: ", e));
     },
 
     deleteConnectionsBySpace: (spaceId) => {
@@ -141,5 +205,13 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
                 targetId: c.targetId === oldId ? newId : c.targetId,
             })),
         }));
+
+        dbExecute(
+            `UPDATE connections
+            SET source_id = CASE WHEN source_id = ?1 THEN ?2 ELSE source_id END,
+            target_id = CASE WHEN target_id = ?1 THEN ?2 ELSE target_id END
+            WHERE source_id = ?1 OR target_id = ?1`,
+            [oldId, newId]
+        ).catch((e) => console.error("Couldn't persist Connection repoint: ", e));
     },
 }));
