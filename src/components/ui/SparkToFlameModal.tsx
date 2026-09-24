@@ -45,14 +45,14 @@ export function SparkToFlameModal() {
             <ModalContent
                 mode="convert"
                 title="Convert to Flame"
-                subtitle={spark.text}
+                subtitle={spark.name}
                 initialTools={[]}
                 onClose={closeModal}
                 onConfirm={(schemaName, selectedTools) => {
                     convertSpark(spark.id);
                     const newFlame = convertSparkToFlame({
                         sparkId: spark.id,
-                        name: spark.text,
+                        name: spark.name,
                         position: spark.position,
                         spaceId: spark.spaceId,
                         schema: schemaName,

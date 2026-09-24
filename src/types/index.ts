@@ -74,7 +74,7 @@ export interface Schema {
 // --------------------------
 export interface Spark {
     id:                 string;
-    text:               string;     // title of the idea
+    name:               string;     // title of the idea
     description?:       string;     // short description of the idea (100 chars max, optional)
     position:           Position;   // where is it in the canvas
     spaceId:            string;     // to which Space it belongs
@@ -94,7 +94,7 @@ export interface Spark {
 // --------------------------
 export interface Flame {
     id:             string;
-    name:           string;         // inherits the original spark's text, editable
+    name:           string;         // inherits the original spark's name, editable
     sparkId:        string;         // pointer to the spark it came from
     position:       Position;       // where is it in the canvas
     spaceId:        string;

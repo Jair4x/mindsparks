@@ -49,7 +49,7 @@ interface NodeCardShellProps {
 
     contentStyle?: React.CSSProperties;
 
-    // The card's main line-clamped text (spark.text / flame.name).
+    // The card's main line-clamped text (spark.name / flame.name).
     children: React.ReactNode;
 }
 

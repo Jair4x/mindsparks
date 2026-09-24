@@ -26,8 +26,7 @@ type NodeTarget =
 // --------------------------
 
 function nodeLabel(node: Spark | Flame): string {
-    const name = "text" in node ? node.text : node.name;
-    return node.isArchived ? `${name} (archived)` : name;
+    return node.isArchived ? `${node.name} (archived)` : node.name;
 }
 
 // --------------------------
@@ -91,7 +90,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const nowMs         = useNow();
     const overlayRef    = useRef<HTMLDivElement>(null);
     
-    const initialName = isFlame ? target.node.name : target.node.text;
+    const initialName = target.node.name;
 
     const [name, setName]                                   = useState(initialName);
     const [description, setDescription]                     = useState(!isFlame ? (target.node.description ?? "") : "");

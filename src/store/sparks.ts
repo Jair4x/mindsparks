@@ -20,16 +20,15 @@ interface SparkStore {
     // --- Actions ---
 
     // Creates a new spark in a specific position in the canvas.
-    // Receives text and position (x, y) where user double clicked.
     createSpark: (params: {
-        text:           string;
+        name:           string;
         position:       Position;
         spaceId:        string;
         categoryId?:    string;
         parentId?:      string;
     }) => Spark;
 
-    updateSparkText: (id: string, text: string) => void;
+    updateSparkName: (id: string, name: string) => void;
 
     updateSparkDescription: (id: string, description: string) => void;
 
@@ -72,10 +71,10 @@ interface SparkStore {
 export const useSparkStore = create<SparkStore>((set, get) => ({
     sparks: [],
 
-    createSpark: ({ text, position, spaceId, categoryId, parentId }) => {
+    createSpark: ({ name, position, spaceId, categoryId, parentId }) => {
         const newSpark: Spark = {
             id: generateId(),
-            text,
+            name,
             position,
             spaceId,
             categoryId,
@@ -92,11 +91,11 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
         return newSpark;
     },
 
-    updateSparkText: (id, text) => {
+    updateSparkName: (id, name) => {
         set((state) => ({
             sparks: state.sparks.map((spark) =>
                 spark.id === id
-                    ? { ...spark, text, updatedAt: now() }
+                    ? { ...spark, name, updatedAt: now() }
                     : spark
             ),
         }));

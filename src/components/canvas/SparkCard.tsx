@@ -53,7 +53,7 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
             now={nowMs}
             onDoubleClick={() => openModal("node-detail", spark.id)}
         >
-            {spark.text}
+            {spark.name}
         </NodeCardShell>
     );
 }
