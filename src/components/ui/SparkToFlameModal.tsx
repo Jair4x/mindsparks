@@ -10,7 +10,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Flame, Check, Wrench } from "lucide-react";
 import { useUIStore, useSparkStore, useFlameStore } from "../../store";
 import { tools, schemas } from "../../lib/constants";
-import { getToolIcon } from "../../lib/toolConfig";
+import { getToolIcon } from "../../lib/tools/toolConfig";
 import { reparentNode } from "../../store/cascade";
 import type { Schema, Tool } from "../../types";
 import { generateId, now } from "../../lib/utils";

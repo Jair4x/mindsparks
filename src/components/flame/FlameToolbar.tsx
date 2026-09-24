@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import { tools } from "../../lib/constants";
-import { getToolIcon } from "../../lib/toolConfig";
+import { getToolIcon } from "../../lib/tools/toolConfig";
 import type { ToolInstance } from "../../types";
 
 // --------------------------

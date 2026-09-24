@@ -4,7 +4,7 @@
 
 import { X } from "lucide-react";
 import { tools } from "../../lib/constants";
-import { getToolIcon } from "../../lib/toolConfig";
+import { getToolIcon } from "../../lib/tools/toolConfig";
 import type { ToolInstance } from "../../types";
 
 import { MarkdownTool } from "../tools/MarkdownTool";

@@ -7,7 +7,7 @@ import type { NodeProps } from "@xyflow/react";
 import { Flame } from "lucide-react";
 import { useUIStore, useCategoryStore } from "../../store";
 import { useNow } from "../../lib/utils";
-import { getToolIcon } from "../../lib/toolConfig";
+import { getToolIcon } from "../../lib/tools/toolConfig";
 import { NodeCardShell } from "./NodeCardShell";
 import { FlameNode } from "../../lib/flowTransforms";
 import { tools } from "../../lib/constants";
