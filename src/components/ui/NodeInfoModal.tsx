@@ -68,7 +68,7 @@ export function NodeInfoModal() {
 function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose: () => void }) {
     const isFlame = target.type === "flame";
 
-    const updateSparkText        = useSparkStore((s) => s.updateSparkText);
+    const updateSparkName        = useSparkStore((s) => s.updateSparkName);
     const updateSparkDescription = useSparkStore((s) => s.updateSparkDescription);
     const restoreSpark           = useSparkStore((s) => s.restoreSpark);
     
@@ -115,7 +115,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
         if (!trimmed || trimmed === initialName) return;
 
         if (isFlame) updateFlameName(target.node.id, trimmed);
-        else updateSparkText(target.node.id, trimmed);
+        else updateSparkName(target.node.id, trimmed);
     };
 
     // Save description when unfocused

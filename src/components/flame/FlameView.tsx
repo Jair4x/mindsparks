@@ -56,7 +56,7 @@ function FlameViewContent({
     const goBack                = useUIStore((s) => s.goBack);
     const openModal             = useUIStore((s) => s.openModal);
     const updateFlameName       = useFlameStore((s) => s.updateFlameName);
-    const updateSparkName       = useSparkStore((s) => s.updateSparkText);
+    const updateSparkName       = useSparkStore((s) => s.updateSparkName);
 
     const [isEditing, setIsEditing]     = useState(false);
     const [editName, setEditName]       = useState("");
