@@ -173,7 +173,7 @@ function ContextMenuContent({
                 if (!flame) return;
 
                 const tempSpark = createSpark({
-                    text: flame.name,
+                    name: flame.name,
                     position: { x: flame.position.x + 20, y: flame.position.y + 20 },
                     spaceId: flame.spaceId,
                     categoryId: flame.categoryId,

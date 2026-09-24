@@ -43,7 +43,7 @@ export function useQuickCaptureBridge() {
             const { text, position, spaceId, parentId } = event.payload;
 
             const newSpark = useSparkStore.getState().createSpark({
-                text,
+                name: text,
                 position,
                 spaceId,
                 parentId,
