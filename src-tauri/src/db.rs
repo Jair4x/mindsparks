@@ -25,6 +25,7 @@ pub type DbState = Mutex<Option<Connection>>;
 const MIGRATIONS: &[(i64, &str)] = &[
     (1, include_str!("../migrations/001_create_spaces.sql")),
     (2, include_str!("../migrations/002_create_sparks_flames_&_categories.sql")),
+    (3, include_str!("../migrations/003_create_connections.sql")),
 ];
 
 fn run_migrations(conn: &mut Connection) -> Result<(), String> {
