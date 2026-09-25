@@ -28,6 +28,7 @@ export type ModalType =
     | "manage-tools"        // spark-to-flame, but inside a flame to manage tools
     | "manage-category"     // Modal to create or edit a category
     | "assign-category"     // Modal to assign or create a category
+    | "manage-space"        // Modal to create or edit a Space
     | null;                 // No modal open
 
 // Type of nodes that can be selected in the canvas

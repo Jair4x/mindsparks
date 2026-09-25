@@ -7,8 +7,7 @@
 
 import { useRef } from "react";
 import { ReactFlowProvider } from "@xyflow/react";
-import { Layers, ChevronDown } from "lucide-react";
-import { useUIStore, useSpaceStore } from "../../store";
+import { useUIStore } from "../../store";
 
 import { SidePanel } from "../panel/SidePanel";
 import { Canvas, type CanvasHandle } from "../canvas/Canvas";
@@ -20,6 +19,9 @@ import { CategoryModal } from "../ui/CategoryModal";
 
 import { HEADER_HEIGHT } from "../../lib/constants";
 
+import { SpaceSelector } from "./SpaceSelector";
+import { SpaceModal } from "../ui/SpaceModal";
+
 // --------------------------
 // Components
 // --------------------------
@@ -30,7 +32,6 @@ export function AppLayout() {
     
     const canvasRef         = useRef<CanvasHandle>(null);
 
-    const activeSpace       = useSpaceStore((s) => s.getActiveSpace());
     const activeView        = useUIStore((s) => s.activeView);
     
     const showPanel         = !isPanelCollapsed && !isZenModeActive;
@@ -56,26 +57,7 @@ export function AppLayout() {
                                 borderBottom: "0.5px solid var(--color-border-subtle)",
                             }}
                         >
-                            {/* 
-                                Spaces dropdown. 
-                                For now just show the name of the active space.
-                                The open/closing logic for the dropdown will be here when I make a SpaceSelector component
-                            */}
-
-                            <button
-                                className="flex items-center gap-1.5 text-sm cursor-pointer"
-                                style={{
-                                    background: "var(--color-surface)",
-                                    border: "0.5px solid var(--color-accent-muted)",
-                                    borderRadius: 8,
-                                    padding: "5px 10px",
-                                    color: "var(--color-text)",
-                                }}
-                            >
-                                <Layers size={14} color="var(--color-accent)" />
-                                {activeSpace?.name ?? "Personal"}
-                                <ChevronDown size={12} color="var(--color-accent-light)" />
-                            </button>
+                            <SpaceSelector />
                         </header>
 
                         {/*
@@ -95,6 +77,7 @@ export function AppLayout() {
                         <NodeInfoModal />
                         <SparkToFlameModal />
                         <CategoryModal />
+                        <SpaceModal />
                     </>
             )}
         </div>

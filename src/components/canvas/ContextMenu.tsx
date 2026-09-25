@@ -99,10 +99,6 @@ function ContextMenuContent({
     // For repulsion calculation on new child or duplication
     const requestRepulsion  = useUIStore((s) => s.requestRepulsion);
 
-    // For when we create a new space
-    const createSpace       = useSpaceStore((s) => s.createSpace);
-    const setActiveSpace    = useSpaceStore((s) => s.setActiveSpace);
-
     // Whether this menu is anchored to a node (single or multi) or to an empty side of canvas.
     const isNodeContext = contextMenu.nodeType !== null;
 
@@ -329,7 +325,7 @@ function ContextMenuContent({
     }
 
     const handleCreateSpace = () => {        
-        // TODO: Logic for this when space management gets implemented.
+        openModal("manage-space", null);
         onClose();
     };
 
@@ -393,7 +389,6 @@ function ContextMenuContent({
                                 label="Create New Space"
                                 onClick={handleCreateSpace}
                                 onMouseEnter={() => setOpenSubmenu(null)}
-                                disabled
                             />
                         </>
                     )}
