@@ -551,7 +551,7 @@ function ActionButton({
 
 function FamilyEntry({ node, onClick }: { node: Spark | Flame; onClick: () => void; }) {
     const [hovered, setHovered] = useState(false);
-    const isFlame = !("text" in node);
+    const isFlame = "sparkId" in node;
 
     return (
         <button
