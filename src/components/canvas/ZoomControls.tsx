@@ -86,7 +86,7 @@ export function ZoomControls() {
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: 12,
-                    color: "var(--color-text-muted)",
+                    color: "var(--color-text)",
                     cursor: "default",
                     userSelect: "none",
                 }}

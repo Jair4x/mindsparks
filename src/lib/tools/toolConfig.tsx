@@ -4,16 +4,16 @@
 import { FileText, SquareKanban, SquareChartGantt, Presentation, BookOpen, Library, Code, Database, FolderGit2, BookMarked } from "lucide-react";
 
 const iconMap: Record<string, React.ReactNode> = {
-    FileText: <FileText size={13} />,
-    SquareKanban: <SquareKanban size={13} />,
-    SquareChartGantt: <SquareChartGantt size={13} />,
-    Presentation: <Presentation size={13} />,
-    BookOpen: <BookOpen size={13} />,
-    Library: <Library size={13} />,
-    Code: <Code size={13} />,
-    Database: <Database size={13} />,
-    FolderGit2: <FolderGit2 size={13} />,
-    BookMarked: <BookMarked size={13} />,
+    FileText: <FileText size={14} />,
+    SquareKanban: <SquareKanban size={14} />,
+    SquareChartGantt: <SquareChartGantt size={14} />,
+    Presentation: <Presentation size={14} />,
+    BookOpen: <BookOpen size={14} />,
+    Library: <Library size={14} />,
+    Code: <Code size={14} />,
+    Database: <Database size={14} />,
+    FolderGit2: <FolderGit2 size={14} />,
+    BookMarked: <BookMarked size={14} />,
 };
 
 export function getToolIcon(iconName: string): React.ReactNode {

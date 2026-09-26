@@ -370,6 +370,7 @@ function ContextMenuContent({
                         padding: "4px 0",
                         zIndex: 200,
                         boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+                        userSelect: "none",
                     }}
                 >
                     {/* Nothing selected: Right click on empty part of canvas */}
@@ -570,14 +571,16 @@ function MenuItem({
             title={disabled ? "Coming soon..." : undefined}
             className="flex items-center gap-2 w-full cursor-pointer"
             style={{
-                background: !disabled && hovered ? "var(--color-surface-raised)" : "transparent",
+                background: !disabled && hovered
+                    ? danger ? "var(--color-danger-surface)" : "var(--color-surface-raised)"
+                    : "transparent",
                 border: "none",
                 padding: "6px 12px",
                 fontSize: 13,
                 fontFamily: "inherit",
                 cursor: disabled ? "not-allowed" : "pointer",
                 opacity: disabled ? 0.5 : 1,
-                color: danger ? "var(--color-danger)" : "var(--color-text)",
+                color: "var(--color-text)",
             }}
         >
             <span style={{ color: danger ? "var(--color-danger)" : "var(--color-text-muted)", flexShrink: 0 }}>

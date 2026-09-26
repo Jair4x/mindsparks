@@ -35,7 +35,6 @@ function ToolbarButton({ icon, title, onClick }: { icon: React.ReactNode; title:
             style={{
                 width: 22,
                 height: 22,
-                borderRadius: 4,
                 color: isHovered ? "var(--color-text)" : "var(--color-text-muted)",
                 transition: "color 0.15s",
             }}

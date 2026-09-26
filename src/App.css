@@ -18,10 +18,10 @@
   ------------------*/
 
   --color-surface:
-    color-mix(in oklab, var(--color-bg) 88%, var(--color-soft-accent));
+    color-mix(in oklab, var(--color-bg) 85%, var(--color-soft-accent));
 
-  --color-surface-raised: 
-    color-mix(in oklab, var(--color-bg) 78%, var(--color-soft-accent));
+  --color-surface-raised:
+    color-mix(in oklab, var(--color-bg) 75%, var(--color-soft-accent));
 
 
   /* -----------------
@@ -29,7 +29,7 @@
   ------------------*/
 
   --color-border: 
-    color-mix(in oklab, var(--color-surface) 75%, var(--color-warm-neutral));
+    color-mix(in oklab, var(--color-surface) 70%, var(--color-warm-neutral));
 
   --color-border-subtle: 
     color-mix(in oklab, var(--color-surface) 90%, var(--color-warm-neutral));
@@ -60,7 +60,7 @@
     color-mix(in oklab, white 82%, var(--color-warm-neutral));
 
   --color-text-muted: 
-    color-mix(in oklab, var(--color-warm-neutral) 55%, var(--color-bg));
+    color-mix(in oklab, var(--color-warm-neutral) 60%, var(--color-bg));
 
 
   /* -----------------
@@ -94,7 +94,7 @@
     color-mix(in oklab, var(--color-danger) 40%, white);
 
   --color-danger-surface:
-    color-mix(in oklab, var(--color-bg) 88%, var(--color-danger));
+    color-mix(in oklab, var(--color-bg) 85%, var(--color-danger));
 
 
   --color-success-dark:
@@ -104,7 +104,7 @@
     color-mix(in oklab, var(--color-success) 40%, white);
 
   --color-success-surface:
-    color-mix(in oklab, var(--color-bg) 88%, var(--color-success));
+    color-mix(in oklab, var(--color-bg) 85%, var(--color-success));
 
   
   --color-info-dark:
@@ -114,7 +114,7 @@
     color-mix(in oklab, var(--color-info) 40%, white);
 
   --color-info-surface:
-    color-mix(in oklab, var(--color-bg) 88%, var(--color-info));
+    color-mix(in oklab, var(--color-bg) 85%, var(--color-info));
 
 
   --color-warning-dark:
@@ -124,7 +124,7 @@
     color-mix(in oklab, var(--color-warning) 40%, white);
 
   --color-warning-surface:
-    color-mix(in oklab, var(--color-bg) 88%, var(--color-warning));
+    color-mix(in oklab, var(--color-bg) 80%, var(--color-warning));
 
   --color-warning-contrast: #1A1A1E; /* This was only added for content on top of --color-warning. not derived so it stays legible */
 

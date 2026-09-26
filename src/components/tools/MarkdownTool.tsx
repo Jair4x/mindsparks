@@ -298,7 +298,6 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                     <Panel defaultSize={"200px"} minSize={"200px"} maxSize={"40%"}>
                         <div
                             className="flex flex-col h-full"
-                            style={{ borderRight: "1px solid var(--color-border)" }}
                         >
                             <FileTreeToolbar
                                 onNewFile={handleNewFile}

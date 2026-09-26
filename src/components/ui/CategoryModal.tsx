@@ -258,7 +258,7 @@ function CategoryModalContent({
             ref={overlayRef}
             onClick={handleOverlayClick}
             className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ background: "var(--color-overlay)"}}
+            style={{ background: "var(--color-overlay)" }}
         >
             <div
                 className="flex flex-col overflow-hidden"

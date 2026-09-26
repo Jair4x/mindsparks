@@ -37,7 +37,7 @@ export function AppLayout() {
     const showPanel         = !isPanelCollapsed && !isZenModeActive;
 
     return (
-        <div className="relative w-screen h-screen overflow-hidden" style={{ background: "var(--color-bg)" }}>
+        <div className="relative w-screen h-screen overflow-hidden select-none" style={{ background: "var(--color-bg)" }}>
             {activeView === "flame" ? (
                 <>
                     <FlameView />

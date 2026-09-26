@@ -64,8 +64,10 @@ function MenuItem({ label, onClick, danger }: { label: string; onClick: () => vo
                 borderRadius: 4,
                 fontSize: 13,
                 fontFamily: "inherit",
-                color: danger ? "var(--color-danger)" : "var(--color-text)",
-                background: isHovered ? "var(--color-surface-raised)" : "transparent",
+                color: danger ? "var(--color-danger-light)" : "var(--color-text)",
+                background: isHovered
+                    ? danger ? "var(--color-danger-surface)" : "var(--color-surface-raised)"
+                    : "transparent",
             }}
         >
             {label}

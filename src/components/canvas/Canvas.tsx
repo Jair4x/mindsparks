@@ -582,6 +582,30 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
                     updateSpaceViewport(activeSpaceId, viewport);
                 }}
             >
+                {sparks.length === 0 && flames.length === 0 && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            pointerEvents: "none",
+                            borderLeft: "3px solid var(--color-info-light)",
+                            background: "var(--color-info-surface)",
+                            borderRadius: "0 8px 8px 0",
+                            padding: "10px 14px",
+                            fontSize: 13,
+                            color: "var(--color-text)",
+                            maxWidth: 300,
+                            textAlign: "left",
+                        }}
+                    >
+                        Double-click anywhere on this canvas to create your first Spark.
+                        <br />
+                        Or press the + icon on the sidebar in the left side of your screen.
+                    </div>
+                )}
+
                 <Background
                     variant={BackgroundVariant.Dots}
                     gap={24}

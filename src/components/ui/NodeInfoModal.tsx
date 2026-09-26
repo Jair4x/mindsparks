@@ -22,14 +22,6 @@ type NodeTarget =
     | { type: "flame"; node: Flame };
 
 // --------------------------
-// Helper functions
-// --------------------------
-
-function nodeLabel(node: Spark | Flame): string {
-    return node.isArchived ? `${node.name} (archived)` : node.name;
-}
-
-// --------------------------
 // NodeInfoModal
 //  Previously SparkModal, now generalized to include both types of nodes data.
 // --------------------------
@@ -385,7 +377,6 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                     icon={<ArchiveRestore size={13} />}
                                     label="Restore"
                                     onClick={() => { restoreFlame(target.node.id); onClose(); }}
-                                    accent
                                 />
                             ) : target.node.isCompleted ? (
                                     <ActionButton
@@ -398,7 +389,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                     icon={<CheckCircle size={13} />}
                                     label="Mark as completed"
                                     onClick={() => completeFlame(target.node.id)}
-                                    accent
+                                    tone="success"
                                 />
                             )
                         ) : target.node.isConvertedToFlame ? (
@@ -410,14 +401,13 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                 icon={<ArchiveRestore size={13} />}
                                 label="Restore"
                                 onClick={() => { restoreSpark(target.node.id); onClose(); }}
-                                accent
                             />
                         ) : (
                             <ActionButton
                                 icon={<FlameIcon size={13} />}
                                 label="Convert into flame"
                                 onClick={() => openModal("spark-to-flame", target.node.id)}
-                                accent
+                                tone="accent"
                             />
                         )}
                     </div>
@@ -478,7 +468,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                     icon={<Tag size={13} />}
                                     label={"Node info"}
                                     onClick={handleViewFlameInfo}
-                                    accent
+                                    tone="accent"
                                 />
                                 <ActionButton
                                     icon={<FlameIcon size={13} />}
@@ -503,14 +493,32 @@ function ActionButton({
     icon,
     label,
     onClick,
-    accent = false,
+    tone = "neutral"
 }: {
     icon: React.ReactNode;
     label: string;
     onClick: () => void;
-    accent?: boolean;
+    tone?: "accent" | "success" | "neutral";
 }) {
     const [hovered, setHovered] = useState(false);
+
+    const background = tone === "accent"
+        ? hovered ? "var(--color-accent-dark)" : "var(--color-accent)"
+        : tone === "success"
+            ? hovered ? "color-mix(in oklab, var(--color-bg) 78%, var(--color-success)" : "var(--color-success-surface)"
+            : hovered ? "var(--color-border)" : "var(--color-surface-raised)";
+
+    const color = tone === "accent"
+        ? "white"
+        : tone === "success"
+            ? hovered ? "var(--color-success)" : "var(--color-success-dark)"
+            : hovered ? "var(--color-text)" : "var(--color-text-muted)";
+    
+    const iconHoverColor = tone === "neutral"
+        ? "var(--color-accent)"
+        : tone === "success"
+            ? "var(--color-success)"
+            : "inherit";
 
     return (
         <button
@@ -520,18 +528,15 @@ function ActionButton({
             onMouseLeave={() => setHovered(false)}
             className="flex items-center gap-1.5 border-none text-xs cursor-pointer"
             style={{
-                background: accent
-                    ? hovered ? "var(--color-accent-dark)" : "var(--color-accent)"
-                    : hovered ? "var(--color-border)" : "var(--color-surface-raised)",
+                background,
                 borderRadius: 6,
                 padding: "6px 10px",
-                color: accent
-                    ? "#fff"
-                    : hovered ? "var(--color-text)" : "var(--color-text-muted)",
+                color,
                 fontFamily: "inherit",
+                transition: "background 0.15s, color 0.15s"
             }}
         >
-            <span style={{ color: hovered && !accent ? "var(--color-accent)" : "inherit" }}>
+            <span style={{ color: hovered ? iconHoverColor : "inherit" }}>
                 {icon}
             </span>
             {label}
@@ -561,11 +566,26 @@ function FamilyEntry({ node, onClick }: { node: Spark | Flame; onClick: () => vo
                     fontSize: 13,
                     color: hovered ? "var(--color-accent)" : "var(--color-text)",
                     textAlign: "right",
+                    lineHeight: 2,
                     transition: "color 0.15s",
                 }}
             >
-                {nodeLabel(node)}
+                {node.name}
             </span>
+            {node.isArchived && (
+                <span
+                    style={{
+                        fontSize: 10,
+                        padding: "3px 6px",
+                        borderRadius: 999,
+                        lineHeight: 1.5,
+                        color: "var(--color-warning)",
+                        background: "var(--color-warning-surface)",
+                    }}
+                >
+                    Archived
+                </span>
+            )}
             {isFlame
                 ? <FlameIcon size={10} fill="var(--color-flame)" color="var(--color-flame)" />
                 : <Circle size={6} fill="var(--color-text-muted)" color="var(--color-text-muted)" />

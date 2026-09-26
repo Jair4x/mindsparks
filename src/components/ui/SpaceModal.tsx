@@ -110,7 +110,7 @@ function SpaceModalContent({
             style={{ background: "var(--color-overlay)" }}
         >
             <div
-                className="flex flex-col overflow-hidden select-none"
+                className="flex flex-col overflow-hidden"
                 style={{
                     background: "var(--color-surface)",
                     border: "0.5px solid var(--color-border)",

@@ -154,6 +154,10 @@ function PanelButton({
     onClick?: () => void;
     disabled?: boolean;
 }) {
+    const [hovered, setHovered] = useState(false);
+
+    const showHoverStyle = hovered && !isActive && !disabled;
+
     return (
         <button
             aria-label={label}
@@ -165,27 +169,19 @@ function PanelButton({
                 height: 32,
                 borderRadius: 6,
                 border: "none",
-                background: isActive ? "var(--color-surface-raised)" : "transparent",
+                background: isActive || showHoverStyle ? "var(--color-surface-raised)" : "transparent",
                 color: disabled
                     ? "var(--color-text-muted)"
                     : isActive
                         ? "var(--color-accent)"
-                        : "var(--color-accent-light)",
+                        : showHoverStyle
+                            ? "var(--color-text)"
+                            : "var(--color-accent-light)",
                 cursor: disabled ? "not-allowed" : "pointer",
                 margin: "2px 0",
             }}
-            onMouseEnter={(e) => {
-                if (!isActive && !disabled) {
-                    (e.currentTarget as HTMLButtonElement).style.background = "var(--color-surface-raised)";
-                    (e.currentTarget as HTMLButtonElement).style.color      = "var(--color-text)";
-                }
-            }}
-            onMouseLeave={(e) => {
-                if (!isActive && !disabled) {
-                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                    (e.currentTarget as HTMLButtonElement).style.color      = "var(--color-accent-light)";
-                }
-            }}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
         >
             {icon}
         </button>
