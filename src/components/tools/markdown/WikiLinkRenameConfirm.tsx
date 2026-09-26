@@ -21,7 +21,7 @@ export function WikiLinkRenameConfirm({ referenceCount, fileCount, onConfirm, on
         <div
             onClick={() => onCancel(false)}
             className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ background: "rgba(0,0,0,0.5)" }}
+            style={{ background: "var(--color-overlay)" }}
         >
             <div
                 onClick={(e) => e.stopPropagation()}

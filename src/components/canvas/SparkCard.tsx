@@ -41,7 +41,7 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
             : "var(--color-border)";
     
     const boxShadow =
-        category && !selected ? `0 0 10px ${category.color}22` : undefined;
+        category && !selected ? `0 0 10px color-mix(in srgb, ${category.color} 75%, transparent)` : undefined;
     
     return (
         <NodeCardShell

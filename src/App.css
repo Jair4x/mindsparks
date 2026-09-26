@@ -126,6 +126,15 @@
   --color-warning-surface:
     color-mix(in oklab, var(--color-bg) 88%, var(--color-warning));
 
+  --color-warning-contrast: #1A1A1E; /* This was only added for content on top of --color-warning. not derived so it stays legible */
+
+  /* -----------------
+        Overlays
+  ------------------*/
+
+  --color-overlay: rgba(0,0,0,0.5);
+  --color-shadow:  rgba(0,0,0,0.4);
+
   /* -----------------
     Markdown editor
   ------------------*/

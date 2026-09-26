@@ -157,7 +157,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
             ref={overlayRef}
             onClick={handleOverlayClick}
             className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ background: "rgba(0,0,0,0.5)" }}
+            style={{ background: "var(--color-overlay" }}
         >
             <div
                 className="flex flex-col"
@@ -167,7 +167,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                     borderRadius:   16,
                     width:          480,
                     maxHeight:      "80vh",
-                    boxShadow:      category ? `0 0 24px ${category.color}22` : "0 8px 32px rgba(0,0,0,0.4)",
+                    boxShadow:      category ? `0 0 24px color-mix(in srgb, ${category.color} 75%, transparent)` : "0 8px 32px var(--color-shadow)",
                 }}
             >
                 {/*------------------------------------------
@@ -454,7 +454,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                 {pendingFlameNav && (
                     <div
                         className="fixed inset-0 flex items-center justify-center"
-                        style={{ background: "rgba(0,0,0,0.5)", zIndex: 60 }}
+                        style={{ background: "var(--color-overlay)", zIndex: 60 }}
                         onClick={(e) => { if (e.target === e.currentTarget) setPendingFlameNav(null); }}
                     >
                         <div

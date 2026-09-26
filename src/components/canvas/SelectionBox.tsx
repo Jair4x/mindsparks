@@ -45,7 +45,7 @@ export function SelectionBox({ nodeCount }: SelectionBoxProps) {
                 top,
                 width,
                 height,
-                background: "var(--color-accent-muted)",
+                background: "var(--color-accent-glow)",
                 border: "1px solid var(--color-accent)",
                 borderRadius: 4,
                 pointerEvents: "none",

@@ -41,7 +41,7 @@ export function FileTreeContextMenu({ x, y, onRename, onDelete, onClose }: FileT
                 borderRadius: 6,
                 padding: 4,
                 minWidth: 120,
-                boxShadow: "0 4px 16px rgba(0,0,0,0.4)",
+                boxShadow: "0 4px 16px var(--color-shadow)",
             }}
         >
             <MenuItem label="Rename" onClick={onRename} />

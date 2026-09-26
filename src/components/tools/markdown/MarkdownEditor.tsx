@@ -214,7 +214,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
     return (
         <div className="h-full flex flex-col">
             {externalContent !== null && (
-                <div className="flex items-center justify-between px-4 py-2" style={{ background: "var(--color-warning)", color: "#1a1a1e" }}>
+                <div className="flex items-center justify-between px-4 py-2" style={{ background: "var(--color-warning)", color: "var(--color-warning-contrast)" }}>
                     <span style={{ fontSize: 13 }}>This file changed its contents outside of the editor.</span>
                     <div className="flex gap-2">
                         <button
@@ -224,7 +224,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
                                 padding: "4px 10px",
                                 borderRadius: 4,
                                 fontSize: 12,
-                                background: "rgba(0,0,0,0.15)",
+                                background: "var(--color-warning-dark)",
                             }}
                         >
                             Keep this version
@@ -237,7 +237,7 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
                                 padding: "4px 10px",
                                 borderRadius: 4,
                                 fontSize: 12,
-                                background: "rgba(0,0,0,0.15)",
+                                background: "var(--color-warning-dark)",
                             }}
                         >
                             Load the new version

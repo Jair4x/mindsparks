@@ -186,7 +186,7 @@ function DropZone({
                 [side]: 0,
                 background: isOver
                     ? "var(--color-accent-muted)"
-                    : "rgba(127, 82, 233, 0.05)", // #7f52e9, you can't set 0.05 opacity if not.
+                    : "var(--color-accent-glow)",
                 border: `1px dashed ${isOver ? "var(--color-accent)" : "var(--color-border-accent)"}`,
                 transition: "background 0.15s, border-color 0.15s",
                 pointerEvents: "all",

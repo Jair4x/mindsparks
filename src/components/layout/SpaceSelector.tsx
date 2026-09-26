@@ -51,7 +51,7 @@ export function SpaceSelector() {
                 className="flex items-center gap-1.5 text-sm cursor-pointer"
                 style={{
                     background: "var(--color-surface)",
-                    border: "0.5px solid var(--color-accent-muted)",
+                    border: "0.5px solid var(--color-border-accent)",
                     borderRadius: 8,
                     padding: "5px 10px",
                     color: "var(--color-text)",

@@ -167,7 +167,7 @@ function ModalContent({
             ref={overlayRef}
             onClick={handleOverlayClick}
             className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ background: "rgba(0,0,0,0.5)" }}
+            style={{ background: "var(--color-overlay)" }}
         >
             <div
                 className="flex flex-col overflow-hidden"
@@ -176,7 +176,7 @@ function ModalContent({
                     border: "0.5px solid var(--color-border)",
                     borderRadius: 16,
                     width: 440,
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                    boxShadow: "0 8px 32px var(--color-shadow)",
                 }}
             >
                 {/* Header */}

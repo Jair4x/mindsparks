@@ -107,7 +107,7 @@ function SpaceModalContent({
             onMouseDown={handleOverlayMouseDown}
             onMouseUp={handleOverlayMouseUp}
             className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ background: "rgba(0,0,0,0.5)" }}
+            style={{ background: "var(--color-overlay)" }}
         >
             <div
                 className="flex flex-col overflow-hidden select-none"
@@ -117,7 +117,7 @@ function SpaceModalContent({
                     borderRadius: 16,
                     width: 360,
                     maxHeight: "80vh",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                    boxShadow: "0 8px 32px var(--color-shadow)",
                 }}
             >
                 {/* Header */}
@@ -267,7 +267,7 @@ function SpaceForm({
                                 height: 36,
                                 borderRadius: 10,
                                 background: "var(--color-surface-raised)",
-                                border: "2px solid rgba(255,255,255,0.15)",
+                                border: "2px solid var(--color-border-accent)",
                             }}
                         >
                             <PreviewIcon size={18} color={color} />
@@ -314,7 +314,7 @@ function SpaceForm({
                                 borderRadius: "50%",
                                 background: color,
                                 flexShrink: 0,
-                                border: "2px solid rgba(255,255,255,0.15)",
+                                border: "2px solid var(--color-border-accent)",
                             }}
                         />
 
@@ -333,7 +333,7 @@ function SpaceForm({
                                         borderRadius: "50%",
                                         background: preset,
                                         border: color === preset && !isCustomColor
-                                            ? "2px solid white"
+                                            ? "2px solid var(--color-accent)"
                                             : "2px solid transparent",
                                         cursor: "pointer",
                                         transition: "border-color 0.15s",
@@ -349,7 +349,7 @@ function SpaceForm({
                                     height: 24,
                                     borderRadius: "50%",
                                     background: isCustomColor ? color : "var(--color-surface-raised)",
-                                    border: isCustomColor ? "2px solid white" : "2px solid var(--color-border)",
+                                    border: isCustomColor ? "2px solid var(--color-accent)" : "2px solid var(--color-border)",
                                     color: "var(--color-text-muted)",
                                 }}
                             >

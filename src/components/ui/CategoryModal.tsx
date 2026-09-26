@@ -258,7 +258,7 @@ function CategoryModalContent({
             ref={overlayRef}
             onClick={handleOverlayClick}
             className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ background: "rgba(0,0,0,0.5)"}}
+            style={{ background: "var(--color-overlay)"}}
         >
             <div
                 className="flex flex-col overflow-hidden"
@@ -268,7 +268,7 @@ function CategoryModalContent({
                     borderRadius: 16,
                     width: 360,
                     maxHeight: "80vh",
-                    boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+                    boxShadow: "0 8px 32px var(--color-shadow)",
                 }}
             >
                 {/* Header */}
@@ -623,7 +623,7 @@ function CategoryForm({
                                 borderRadius: "50%",
                                 background: color,
                                 flexShrink: 0,
-                                border: "2px solid rgba(255,255,255,0.15)",
+                                border: "2px solid var(--color-border-accent)",
                             }}
                         />
  
@@ -649,7 +649,7 @@ function CategoryForm({
                                         borderRadius: "50%",
                                         background: preset,
                                         border: color === preset && !isCustom
-                                            ? "2px solid #fff"
+                                            ? "2px solid var(--color-accent)"
                                             : "2px solid transparent",
                                         cursor: "pointer",
                                         transition: "border-color 0.15s",
@@ -666,7 +666,7 @@ function CategoryForm({
                                     height: 24,
                                     borderRadius: "50%",
                                     background: isCustom ? color : "var(--color-surface-raised)",
-                                    border: isCustom ? "2px solid #fff" : "2px solid var(--color-border)",
+                                    border: isCustom ? "2px solid var(--color-accent)" : "2px solid var(--color-border)",
                                     color: "var(--color-text-muted)",
                                     transition: "border-color 0.15s",
                                 }}
