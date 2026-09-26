@@ -4,7 +4,7 @@
 //
 
 import type { NodeProps } from "@xyflow/react";
-import { Flame } from "lucide-react";
+import { Flame, CheckCircle } from "lucide-react";
 import { useUIStore, useCategoryStore } from "../../store";
 import { useNow } from "../../lib/utils";
 import { getToolIcon } from "../../lib/tools/toolConfig";
@@ -31,11 +31,11 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
         ? "var(--color-accent)"
         : category
             ? category.color
-            : "var(--color-border)";
+            : "color-mix(in srgb, var(--color-flame) 70%, transparent)";
     
     const boxShadow = category
-        ? `0 0 10px ${category.color}22`
-        : `0 0 8px var(--color-accent-muted)`;
+        ? `0 0 10px color-mix(in srgb, ${category.color} 75%, transparent)`
+        : `0 0 10px color-mix(in srgb, var(--color-flame) 75%, transparent)`;
 
     // Get the Tool objects for the active tools in this flame
     const activeTools = flame.tools
@@ -49,7 +49,6 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
         <NodeCardShell
             borderColor={borderColor}
             boxShadow={boxShadow}
-            opacity={flame.isCompleted ? 0.5 : 1}
             relativePosition
             category={category}
             selected={selected}
@@ -58,7 +57,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
             onDoubleClick={() => openFlame(flame.id)}
             contentStyle={{ paddingRight: 16 }}
             cornerBadge={(isHovered) => (
-                    <div
+                <div
                     style={{
                         position: "absolute",
                         top: "25%",
@@ -67,7 +66,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
                         height: 20,
                         borderRadius: "50%",
                         background: "var(--color-surface-raised)",
-                        color: "var(--color-flame)",
+                        color: flame.isCompleted ? "var(--color-success)" : "var(--color-flame)",
                         opacity: isHovered ? 0 : 1,
                         transform: isHovered ? "scale(0.5)" : "scale(1)",
                         transition: "opacity 0.15s, transform 0.15s",
@@ -76,7 +75,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
                         justifyContent: "center",
                     }}
                 >
-                    <Flame size={12} />
+                    {flame.isCompleted ? <CheckCircle size={12} /> : <Flame size={12} />}
                 </div>
             )}
             footer={activeTools.length > 0 && (
@@ -100,7 +99,9 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
                 </div>
             )}
         >
-            {flame.name}
+            <span style={{ textDecoration: flame.isCompleted ? "line-through" : "none" }}>
+                {flame.name}
+            </span>
         </NodeCardShell>
     );
 }
