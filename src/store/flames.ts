@@ -320,7 +320,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         }));
 
         dbExecute(
-            "UPDATE flames SET is_completed = 1, updated_at = ?1 WHERE id = ?2",
+            "UPDATE flames SET is_archived = 1, updated_at = ?1 WHERE id = ?2",
             [updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame archiving: ", e));
     },
