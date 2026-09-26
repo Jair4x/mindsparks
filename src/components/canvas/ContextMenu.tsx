@@ -80,6 +80,7 @@ function ContextMenuContent({
 
     const sparks        = useSparkStore((s) => s.sparks);
     const createSpark   = useSparkStore((s) => s.createSpark);
+    const convertSpark  = useSparkStore((s) => s.convertSparkToFlame);
     const archiveSpark  = useSparkStore((s) => s.archiveSpark);
 
     const flames        = useFlameStore((s) => s.flames);
@@ -175,6 +176,8 @@ function ContextMenuContent({
                     categoryId: flame.categoryId,
                     parentId: flame.parentId,
                 });
+
+                convertSpark(tempSpark.id);
 
                 const newFlame = createFlame({
                     sparkId: tempSpark.id,
