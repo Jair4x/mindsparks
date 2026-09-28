@@ -348,15 +348,9 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     useEffect(() => {
         if (pendingRepulsion.length === 0) return;
 
-        /* A bit of a tangent on this:
+        // Solution proposed by AI, I still don't get how can duplicated nodes be "one render behind", but eh, it works.
+        // Replacing the big tangent added in "feat: add repulsion to duplication and child creation"
 
-            I have to be honest, my junior mind would probably NEVER create this displayNodePositions logic
-            on its own. Copilot gave me this solution, and I REALLY dislike what I don't fully get,
-            but every explanation it gave me ended with me just understanding that displayNodes is
-            somehow "one render behind" when we create a new node via duplication or child nodes, and
-            that we need to map it for a lookup table in order to get the updated nodes positions and
-            calculate repulsion correctly and render it.
-        */
         // Lookup table
         const displayNodePositions = new Map(
             displayNodes.map((n) => [n.id, n.position])
