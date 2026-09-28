@@ -14,9 +14,11 @@ import { useEffect, useState } from "react";
 import { FolderOpen, FolderX, AlertTriangle } from "lucide-react";
 import { useVaultState } from "../../hooks";
 import { useCategoryStore, useConnectionStore, useFlameStore, useSpaceStore, useSparkStore } from "../../store";
+import { useTranslation } from "react-i18next";
 
 export function VaultGate({ children }: { children: React.ReactNode }) {
-    const { state, isChoosing, error, chooseFolder } = useVaultState();
+    const { state, isChoosing, error, chooseFolder }    = useVaultState();
+    const { t }                                         = useTranslation("vault");
 
     const [spacesLoaded, setSpacesLoaded] = useState(false);
     const [spacesError, setSpacesError]   = useState<string | null>(null);
@@ -80,14 +82,14 @@ export function VaultGate({ children }: { children: React.ReactNode }) {
 
                 <div>
                     <h1 style={{ fontSize: 16, color: "var(--color-text)" }}>
-                        {isSpacesError ? "Couldn't load your data" : isMissing ? "Vault not found" : "Welcome to MindSparks"}
+                        {isSpacesError ? t("loadError.title") : isMissing ? t("missing.title") : t("welcome.title")}
                     </h1>
                     <p style={{ fontSize: 13, color: "var(--color-text-muted)", marginTop: 4 }}>
                         {isSpacesError
                             ? spacesError
                             : isMissing
-                                ? "The folder MindSparks last used isn't there anymore."
-                                : "Choose a folder where MindSparks will keep your sparks, flames and files."}
+                                ? t("missing.description")
+                                : t("welcome.description")}
                     </p>
 
                     {isMissing && (
@@ -119,7 +121,7 @@ export function VaultGate({ children }: { children: React.ReactNode }) {
                         opacity: isChoosing ? 0.6 : 1,
                     }}
                 >
-                    {isSpacesError ? "Retry" : isChoosing ? "Choosing..." : "Choose folder"}
+                    {isSpacesError ? t("retry") : isChoosing ? t("choosing") : t("chooseFolder")}
                 </button>
 
                 {error && (

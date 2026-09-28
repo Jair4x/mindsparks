@@ -9,6 +9,7 @@ import { X, ArrowLeft } from "lucide-react";
 import { useUIStore, useSpaceStore } from "../../store";
 import type { Space } from "../../types";
 import { SPACE_ICONS, getSpaceIcon } from "../../lib/spaceIcons";
+import { useTranslation, Trans } from "react-i18next";
 
 const PRESET_COLORS = [
     // Light colors
@@ -54,7 +55,8 @@ function SpaceModalContent({
     const [isCloseHovered, setIsCloseHovered]   = useState(false);
     const overlayRef                            = useRef <HTMLDivElement>(null);
     const mouseDownOnOverlay                    = useRef(false);
-    
+    const { t }                                 = useTranslation(["spaces", "common"]);
+
     const createSpace       = useSpaceStore((s) => s.createSpace);
     const renameSpace       = useSpaceStore((s) => s.renameSpace);
     const updateSpaceIcon   = useSpaceStore((s) => s.updateSpaceIcon);
@@ -98,8 +100,8 @@ function SpaceModalContent({
     }
 
     const headerTitle = view === "confirm-delete"
-        ? "Delete Space"
-        : space ? "Edit Space" : "New Space";
+        ? t("modal.title.delete")
+        : space ? t("modal.title.edit") : t("modal.title.new");
     
     return (
         <div
@@ -133,7 +135,7 @@ function SpaceModalContent({
                         {view === "confirm-delete" && (
                             <button
                                 onClick={() => setView("form")}
-                                aria-label="Back to Space"
+                                aria-label={t("modal.backAria")}
                                 className="flex items-center justify-center cursor-pointer bg-transparent border-none"
                                 style={{ color: "var(--color-text-muted)", borderRadius: 6, padding: 2 }}
                             >
@@ -146,7 +148,7 @@ function SpaceModalContent({
                     </div>
                     <button
                         onClick={onClose}
-                        aria-label="Close modal"
+                        aria-label={t("common:closeModal")}
                         className="flex items-center justify-center cursor-pointer bg-transparent border-none"
                         style={{
                             color: isCloseHovered ? "var(--color-text)" : "var(--color-text-muted)",
@@ -216,6 +218,7 @@ function SpaceForm({
     const [isConfirmHovered, setIsConfirmHovered]   = useState(false);
     const [isDeleteHovered, setIsDeleteHovered]     = useState(false);
     const nameInputRef                              = useRef<HTMLInputElement>(null);
+    const { t }                                     = useTranslation(["spaces", "common"]);
 
     useEffect(() => {
         nameInputRef.current?.focus();
@@ -231,7 +234,7 @@ function SpaceForm({
                 {/* Name field */}
                 <div className="flex flex-col gap-1.5">
                     <label htmlFor="space-name" style={{ fontSize: 12, color: "var(--color-text-muted)"}}>
-                        NAME
+                        {t("modal.fields.name")}
                     </label>
 
                     <input
@@ -239,7 +242,7 @@ function SpaceForm({
                         ref={nameInputRef}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Cool space name..."
+                        placeholder={t("modal.fields.namePlaceholder")}
                         style={{
                             background: "var(--color-surface-raised)",
                             border: "0.5px solid var(--color-border)",
@@ -257,7 +260,7 @@ function SpaceForm({
                 {/* Icon picker */}
                 <div className="flex flex-col gap-1.5">
                     <label style={{ fontSize: 12, color: "var(--color-text-muted)"}}>
-                        ICON
+                        {t("modal.fields.icon")}
                     </label>
                     <div className="flex items-center gap-3">
                         <div
@@ -304,7 +307,7 @@ function SpaceForm({
                 {/* Color picker */}
                 <div className="flex flex-col gap-1.5">
                     <label style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
-                        COLOR
+                        {t("modal.fields.color")}
                     </label>
                     <div className="flex items-center gap-3">
                         <div
@@ -342,7 +345,7 @@ function SpaceForm({
                             ))}
 
                             <label
-                                title="Custom color"
+                                title={t("modal.fields.customColor")}
                                 className="flex cursor-pointer items-center justify-center"
                                 style={{
                                     width: 24,
@@ -380,7 +383,7 @@ function SpaceForm({
                         onMouseEnter={() => setIsDeleteHovered(true)}
                         onMouseLeave={() => setIsDeleteHovered(false)}
                     >
-                        Delete this Space
+                        {t("modal.deleteLink")}
                     </button>
                 )}
             </div>
@@ -402,7 +405,7 @@ function SpaceForm({
                     onMouseEnter={() => setIsCancelHovered(true)}
                     onMouseLeave={() => setIsCancelHovered(false)}
                 >
-                    Cancel
+                    {t("common:cancel")}
                 </button>
 
                 <button
@@ -425,7 +428,7 @@ function SpaceForm({
                     onMouseEnter={() => setIsConfirmHovered(true)}
                     onMouseLeave={() => setIsConfirmHovered(false)}
                 >
-                    {isEditing ? "Save" : "Create"}
+                    {isEditing ? t("common:save") : t("common:create")}
                 </button>
             </div>
         </>
@@ -451,13 +454,14 @@ function SpaceDeleteConfirm({
     const [typedName, setTypedName]                 = useState("");
     const [isCancelHovered, setIsCancelHovered]     = useState(false);
     const [isConfirmHovered, setIsConfirmHovered]   = useState(false);
-
+    const { t }                                     = useTranslation(["spaces", "common"]);
+    
     const nameMatches = typedName === space.name;
 
     const buttonLabels = {
-        1: "Yes",
-        2: "I know",
-        3: "Come on, delete it already.",
+        1: t("delete.buttons.step1"),
+        2: t("delete.buttons.step2"),
+        3: t("delete.buttons.step3"),
     }
 
     return (
@@ -465,28 +469,33 @@ function SpaceDeleteConfirm({
             <div className="px-5 py-4 flex flex-col gap-3 select-none">
                 {step === 1 && (
                     <div style={{ fontSize: 13, color: "var(--color-text)", lineHeight: 1.5 }}>
-                        Are you sure you want to delete this Space?
+                        {t("delete.step1")}
                     </div>
                 )}
 
                 {step === 2 && (
                     <div style={{ fontSize: 13, color: "var(--color-text)", lineHeight: 1.5 }}>
-                        This Space might contain data that will be permanently lost.
+                        {t("delete.step2")}
                         <br />
                         <br />
-                        Once gone, it can't be recovered.
+                        {t("delete.step2b")}
                     </div>
                 )}
 
                 {step === 3 && (
                     <div className="flex flex-col gap-2">
                         <div style={{ fontSize: 13, color: "var(--color-text)", lineHeight: 1.5 }}>
-                            Are you <b>REALLY</b> sure you want to delete <b>THIS</b> Space?
+                            <Trans t={t} i18nKey="delete.step3" components={{ b: <b /> }} />
                             <br />
-                            Type <b style={{ color: "var(--color-accent)" }}>{space.name}</b> to confirm.
+                            <Trans
+                                t={t}
+                                i18nKey="delete.step3Type"
+                                values={{ name: space.name }}
+                                components={{ accent: <b style={{ color: "var(--color-accent)" }} /> }}
+                            />
                             <br />
                             <br />
-                            <i style={{ color: "var(--color-danger)"}}>This action can't be undone.</i>
+                            <i style={{ color: "var(--color-danger)" }}>{t("delete.step3Warning")}</i>
                         </div>
 
                         <input
@@ -527,7 +536,7 @@ function SpaceDeleteConfirm({
                     onMouseEnter={() => setIsCancelHovered(true)}
                     onMouseLeave={() => setIsCancelHovered(false)}
                 >
-                    Cancel
+                    {t("common:cancel")}
                 </button>
 
                 <button

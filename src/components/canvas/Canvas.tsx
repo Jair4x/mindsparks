@@ -38,6 +38,8 @@ import { ContextMenu } from "./ContextMenu";
 
 import { openQuickCapture } from "../../lib/quickCaptureEvents";
 
+import { useTranslation } from "react-i18next";
+
 import {
     MIN_ZOOM     as MIN_ZOOM,
     MAX_ZOOM     as MAX_ZOOM,
@@ -73,6 +75,7 @@ export interface CanvasHandle {
 export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
     const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom, getNodes, setViewport } = useReactFlow();
+    const { t } = useTranslation("canvas");
 
     const setZoom = useUIStore((s) => s.setZoom);
     const updateSpaceViewport = useSpaceStore((s) => s.updateSpaceViewport);
@@ -600,9 +603,9 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
                             textAlign: "left",
                         }}
                     >
-                        Double-click anywhere on this canvas to create your first Spark.
+                        {t("emptyHint")}
                         <br />
-                        Or press the + icon on the sidebar in the left side of your screen.
+                        {t("emptyHintB")}
                     </div>
                 )}
 

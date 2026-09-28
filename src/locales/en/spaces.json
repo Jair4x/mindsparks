@@ -1,0 +1,36 @@
+{
+    "defaultName": "Personal",
+    "selector": {
+        "newSpace": "New Space",
+        "editAria": "Edit {{name}}"
+    },
+    "modal": {
+        "title": {
+            "new": "New Space",
+            "edit": "Edit Space",
+            "delete": "Delete Space"
+        },
+        "backAria": "Back to Space",
+        "fields": {
+            "name": "NAME",
+            "namePlaceholder": "Cool space name...",
+            "icon": "ICON",
+            "color": "COLOR",
+            "customColor": "Custom color"
+        },
+        "deleteLink": "Delete this Space"
+    },
+    "delete": {
+        "step1": "Are you sure you want to delete this Space?",
+        "step2": "This Space might contain data that will be permanently lost.",
+        "step2b": "And once gone, it can't be recovered.",
+        "step3": "Are you <b>REALLY</b> sure you want to delete <b>THIS</b> Space?",
+        "step3Type": "Type <accent>{{name}}</accent> to confirm.",
+        "step3Warning": "This action can't be undone.",
+        "buttons": {
+            "step1": "Yes",
+            "step2": "I know",
+            "step3": "Come on, delete it already."
+        }
+    }
+}

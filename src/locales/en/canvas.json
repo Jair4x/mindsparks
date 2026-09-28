@@ -1,0 +1,28 @@
+{
+    "emptyHint": "Double-click anywhere on the canvas to create your first Spark",
+    "emptyHintB": "or press the + icon on the sidebar in the left side of your screen.",
+    "contextMenu": {
+        "createSpark": "Create Spark",
+        "createCategory": "Create Category",
+        "createSpace": "Create a New Space",
+        "duplicate": "Duplicate",
+        "convertToFlame": "Convert into a Flame",
+        "convertToSpark": "Convert back to Spark (NOT IMPLEMENTED YET)",
+        "assignCategory": "Assign a category",
+        "archive": "Archive",
+        "createChild": "Create a Child Spark",
+        "linkBetweenTwo": "Link these nodes",
+        "createLink": "Create a link",
+        "linkToNode": "To this node",
+        "linkBetweenAll": "Between all selected nodes",
+        "createNewCategory": "Create a new Category",
+        "manageCategories": "Manage categories",
+        "comingSoon": "Coming soon..."
+    },
+    "zoom": {
+        "reset": "Reset to initial position/zoom",
+        "fullscreen": "Toggle Fullscreen",
+        "out": "Zoom out",
+        "in": "Zoom in"
+    }
+}

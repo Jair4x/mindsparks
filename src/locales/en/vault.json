@@ -1,0 +1,17 @@
+{
+    "pickerTitle": "Choose your MindSparks Vault",
+    "welcome": {
+        "title": "Welcome to MindSparks!",
+        "description": "Choose the folder where MindSparks will keep your data."
+    },
+    "missing": {
+        "title": "Oops! Couldn't find your Vault.",
+        "description": "It seems the folder you set as the Vault before isn't there anymore."
+    },
+    "loadError": {
+        "title": "Couldn't load your data"
+    },
+    "chooseFolder": "Choose folder",
+    "choosing": "Choosing...",
+    "retry": "Retry"
+}

@@ -19,6 +19,7 @@ import { Space, CanvasPos } from "../types";
 import { generateId, now } from "../lib/utils";
 import { deleteSpaceCascade } from "./cascade";
 import { dbSelect, dbExecute } from "../lib/db";
+import i18n from "i18next";
 
 // --------------------------
 // Constants
@@ -133,7 +134,7 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
             if (rows.length === 0) {
                 const defaultSpace: Space = {
                     id: generateId(),
-                    name: "Personal",
+                    name: i18n.t("spaces:defaultName"),
                     isDefault: true,
                     canvasViewport: DEFAULT_VIEWPORT,
                     createdAt: now(),

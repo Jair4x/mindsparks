@@ -13,6 +13,7 @@ import {
     ZOOM_STEP    as ZOOM_STEP,
     DEFAULT_ZOOM
 } from "../../lib/constants";
+import { useTranslation } from "react-i18next";
 
 // Handling scroll zoom on canvas instead of React Flow
 export function handleScroll(
@@ -29,9 +30,10 @@ export function handleScroll(
 }
 
 export function ZoomControls() {
-    const { zoomTo, setViewport } = useReactFlow();
-    const zoom = useUIStore((s) => s.zoom);
-    const setZoom = useUIStore((s) => s.setZoom);
+    const { zoomTo, setViewport }   = useReactFlow();
+    const zoom                      = useUIStore((s) => s.zoom);
+    const setZoom                   = useUIStore((s) => s.setZoom);
+    const { t }                     = useTranslation("canvas");
 
     // Sync React Flow's zoom with UI Store
     const handleZoomIn = useCallback(() => {
@@ -56,20 +58,18 @@ export function ZoomControls() {
 
     return (
         <div className="absolute bottom-3.5 right-3.5 z-20 flex items-center gap-1">
-            {/* Reset button */}
             <ZoomButton
                 icon={<Home size={13} />}
-                label="Reset view"
+                label={t("zoom.reset")}
                 onClick={() => {
                     setViewport({ x: 0, y: 0, zoom: DEFAULT_ZOOM }, { duration: 200 });
                     setZoom(DEFAULT_ZOOM);
                 }}
             />
 
-            {/* Full screen */}
             <ZoomButton
                 icon={<Maximize2 size={13} />}
-                label="Toggle fullscreen"
+                label={t("zoom.fullscreen")}
                 onClick={handleFullscreen}
             />
 
@@ -94,18 +94,16 @@ export function ZoomControls() {
                 {Math.round(zoom * 100)}%
             </div>
 
-            {/* Zoom out */}
             <ZoomButton
                 icon={<Minus size={13} />}
-                label="Zoom out"
+                label={t("zoom.out")}
                 onClick={handleZoomOut}
                 disabled={zoom <= MIN_ZOOM}
             />
 
-            {/* Zoom in */}
             <ZoomButton
                 icon={<Plus size={13} />}
-                label="Zoom in"
+                label={t("zoom.in")}
                 onClick={handleZoomIn}
                 disabled={zoom >= MAX_ZOOM}
             />

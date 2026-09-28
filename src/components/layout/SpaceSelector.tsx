@@ -9,11 +9,13 @@ import { useEffect, useRef, useState } from "react";
 import { Plus, Pencil, Check, ChevronDown } from "lucide-react";
 import { useSpaceStore, useUIStore } from "../../store";
 import { getSpaceIcon } from "../../lib/spaceIcons";
+import { useTranslation } from "react-i18next";
 
 export function SpaceSelector() {
     const [isOpen, setIsOpen]                       = useState(false);
     const [isConfirmHovered, setIsConfirmHovered]   = useState(false);
     const anchorRef                                 = useRef<HTMLDivElement>(null);
+    const { t }                                     = useTranslation("spaces");
 
     const spaces            = useSpaceStore((s) => s.spaces);
     const activeSpaceId     = useSpaceStore((s) => s.activeSpaceId);
@@ -58,7 +60,7 @@ export function SpaceSelector() {
                 }}
             >
                 <ActiveIcon size={14} color={activeSpace?.color ?? "var(--color-accent)"} />
-                {activeSpace?.name ?? "Personal"}
+                {activeSpace?.name ?? t("defaultName")}
                 <ChevronDown
                     size={12}
                     color="var(--color-accent-light)"
@@ -122,7 +124,7 @@ export function SpaceSelector() {
                         onMouseLeave={() => setIsConfirmHovered(false)}
                     >
                         <Plus size={15} color={isConfirmHovered ? "var(--color-accent)" : "var(--color-text-muted)"} />
-                        New Space
+                        {t("selector.newSpace")}
                     </button>
                 </div>
             )}
@@ -144,6 +146,7 @@ function SpaceRow({
     const [hovered, setHovered]             = useState(false);
     const [isEditHovered, setIsEditHovered] = useState(false);
     const Icon                              = getSpaceIcon(space.icon);
+    const { t }                             = useTranslation("spaces");
 
     return (
         <div
@@ -170,7 +173,7 @@ function SpaceRow({
             {hovered && (
                 <button
                     onClick={onEdit}
-                    aria-label={`Edit ${space.name}`}
+                    aria-label={t("selector.editAria", { name: space.name })}
                     className="flex items-center justify-center cursor-pointer bg-transparent border-none"
                     style={{
                         color: isEditHovered ? "var(--color-text)" : "var(--color-text-muted)",

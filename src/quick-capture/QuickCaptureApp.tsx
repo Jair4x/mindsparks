@@ -19,6 +19,7 @@ import {
     type QuickCaptureOpenPayload,
     type QuickCaptureMode,
 } from "../lib/quickCaptureEvents";
+import { useTranslation } from "react-i18next";
 import type { Space, Position } from "../types";
 
 const GLOBAL_MODE_SIZE = { width: 480, height: 195 }; // Because it has the header and stuff
@@ -32,6 +33,7 @@ export function QuickCaptureApp() {
     const [parentId, setParentId]           = useState<string | undefined>();
     const [text, setText]                   = useState("");
     const inputRef                          = useRef<HTMLInputElement>(null);
+    const { t }                             = useTranslation("quickCapture");
 
     // Spaces.
     // Only used on "global" mode, but it doesn't hurt to always have them ready.
@@ -116,14 +118,11 @@ export function QuickCaptureApp() {
     }
 
     return (
-        <div
-            className="w-screen h-screen flex flex-col items-center justify-center p-2"
-            style={{ background: "transparent" }}
-        >
+        <div className="w-screen h-screen flex flex-col items-center justify-center p-2 select-none bg-transparent">
             {mode === "global" && (
                 <span
                     style={{
-                        fontSize: 16,
+                        fontSize: 20,
                         fontWeight: 600,
                         color: "var(--color-accent-light)",
                     }}
@@ -147,7 +146,7 @@ export function QuickCaptureApp() {
                             htmlFor="quick-capture-space"
                             style={{ fontSize: 12, color: "var(--color-text-muted)" }}
                         >
-                            Space to send this idea to:
+                            {t("ideaTo")}
                         </label>
                         <div style={{ position: "relative" }}>
                             <select
@@ -193,7 +192,7 @@ export function QuickCaptureApp() {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="What's the idea?"
+                    placeholder={t("ideaPlaceholder")}
                     style={{
                         background: "transparent",
                         border: "none",
@@ -217,7 +216,7 @@ export function QuickCaptureApp() {
                             opacity: !text.trim() || !spaceId ? 0.5 : 1,
                         }}
                     >
-                        Capture
+                        {t("capture")}
                     </button>
                 </div>
             </form>

@@ -1,6 +1,7 @@
 mod folders;
 mod vault;
 mod db;
+mod config;
 
 use tauri::{Manager, Emitter};
 use tauri_plugin_global_shortcut::ShortcutState;
@@ -87,6 +88,8 @@ pub fn run() {
             folders::resolve_flame_folder,
             db::db_select,
             db::db_execute,
+            config::get_locale,
+            config::set_locale,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

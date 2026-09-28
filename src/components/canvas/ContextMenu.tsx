@@ -38,6 +38,7 @@ import { centerNodeOnPoint } from "../../lib/utils";
 import { openQuickCapture } from "../../lib/quickCaptureEvents";
 import { AssignCategoryModal } from "../ui/CategoryModal";
 import { useAssignCategory } from "../../hooks";
+import { useTranslation } from "react-i18next";
 
 // --------------------------
 // ContextMenu
@@ -71,6 +72,7 @@ function ContextMenuContent({
 }) {
     const menuRef = useRef<HTMLDivElement>(null);
     const [openSubmenu, setOpenSubmenu] = useState<"category" | "relation" | null>(null);
+    const { t } = useTranslation("canvas");
 
     const { screenToFlowPosition } = useReactFlow();
 
@@ -378,19 +380,19 @@ function ContextMenuContent({
                         <>
                             <MenuItem
                                 icon={<Sparkles size={14} />}
-                                label="Create Spark"
+                                label={t("contextMenu.createSpark")}
                                 onClick={handleCreateSparkHere}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                             />
                             <MenuItem
                                 icon={<Tag size={14} />}
-                                label="Create Category"
+                                label={t("contextMenu.createCategory")}
                                 onClick={handleOpenManageCategoryPanel}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                             />
                             <MenuItem
                                 icon={<Layers size={14} />}
-                                label="Create New Space"
+                                label={t("contextMenu.createSpace")}
                                 onClick={handleCreateSpace}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                             />
@@ -402,7 +404,7 @@ function ContextMenuContent({
                         <>
                             <MenuItem
                                 icon={<GitBranch size={14} />}
-                                label="Create child Spark"
+                                label={t("contextMenu.createChild")}
                                 onClick={handleCreateChild}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                             />
@@ -411,13 +413,13 @@ function ContextMenuContent({
                             
                             <MenuItem
                                 icon={<Copy size={14} />}
-                                label="Duplicate"
+                                label={t("contextMenu.duplicate")}
                                 onClick={handleDuplicate}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                             />
                             <MenuItem
                                 icon={<FlameIcon size={14} />}
-                                label={contextMenu.nodeType === "spark" ? "Convert into Flame" : "Convert back to Spark"}
+                                label={contextMenu.nodeType === "spark" ? t("contextMenu.convertToFlame") : t("contextMenu.convertToSpark")}
                                 onClick={handleConvert}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                                 disabled={contextMenu.nodeType === "flame"}
@@ -425,7 +427,7 @@ function ContextMenuContent({
                             
                             <SubmenuItem
                                 icon={<Tag size={14} />}
-                                label="Assign category"
+                                label={t("contextMenu.assignCategory")}
                                 isOpen={openSubmenu === "category"}
                                 onOpen={() => setOpenSubmenu("category")}
                                 flipLeft={flipSubmenuLeft}
@@ -442,7 +444,7 @@ function ContextMenuContent({
 
                             <MenuItem
                                 icon={<Archive size={14} />}
-                                label="Archive"
+                                label={t("contextMenu.archive")}
                                 onClick={handleArchive}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                                 danger
@@ -456,25 +458,25 @@ function ContextMenuContent({
                             {selection.type === "multi" && selection.nodes.length === 2 ? (
                                 <MenuItem
                                     icon={<Link size={14} />}
-                                    label="Create relation"
-                                    onClick={handleCreateRelationBetweenAll} // Use between all relation logic because it doesn't depend on which of the two nodes was right-clicked.
+                                    label={t("contextMenu.linkBetweenTwo")}
+                                    onClick={handleCreateRelationBetweenAll} // Use between all relation logic because it doesn't matter what node was right-clicked.
                                 />
                             ) : (
                                 <SubmenuItem
                                     icon={<Link size={14} />}
-                                    label="Create relation"
+                                    label={t("contextMenu.createLink")}
                                     isOpen={openSubmenu === "relation"}
                                     onOpen={() => setOpenSubmenu("relation")}
                                     flipLeft={flipSubmenuLeft}
                                 >
                                     <MenuItem
                                         icon={<ArrowRight size={14} />}
-                                        label="To this node"
+                                        label={t("contextMenu.linkToNode")}
                                         onClick={handleCreateRelationToNode}
                                     />
                                     <MenuItem
                                         icon={<Share2 size={14} />}
-                                        label="Between all selected nodes"
+                                        label={t("contextMenu.linkBetweenAll")}
                                         onClick={handleCreateRelationBetweenAll}
                                     />
                                 </SubmenuItem>
@@ -484,13 +486,13 @@ function ContextMenuContent({
 
                             <MenuItem
                                 icon={<Copy size={14} />}
-                                label="Duplicate"
+                                label={t("contextMenu.duplicate")}
                                 onClick={handleDuplicate}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                             />
                             <SubmenuItem
                                 icon={<Tag size={14} />}
-                                label="Assign category"
+                                label={t("contextMenu.assignCategory")}
                                 isOpen={openSubmenu === "category"}
                                 onOpen={() => setOpenSubmenu("category")}
                                 flipLeft={flipSubmenuLeft}
@@ -507,7 +509,7 @@ function ContextMenuContent({
 
                             <MenuItem
                                 icon={<Archive size={14} />}
-                                label="Archive"
+                                label={t("contextMenu.archive")}
                                 onClick={handleArchive}
                                 onMouseEnter={() => setOpenSubmenu(null)}
                                 danger
@@ -558,6 +560,7 @@ function MenuItem({
     disabled?: boolean;
 }) {
     const [hovered, setHovered] = useState(false);
+    const { t } = useTranslation("canvas");
 
     return (
         <button
@@ -568,7 +571,7 @@ function MenuItem({
             }}
             onMouseLeave={() => setHovered(false)}
             disabled={disabled}
-            title={disabled ? "Coming soon..." : undefined}
+            title={disabled ? t("contextMenu.comingSoon") : undefined}
             className="flex items-center gap-2 w-full cursor-pointer"
             style={{
                 background: !disabled && hovered
@@ -671,6 +674,8 @@ function CategorySubmenuContent({
     onCreateNew:    () => void;
     onManage:       () => void;
 }) {
+    const { t } = useTranslation("canvas");
+
     return (
         <>
             {categories.map((category) => (
@@ -697,12 +702,12 @@ function CategorySubmenuContent({
             {categories.length > 0 && <MenuSeparator />}
             <MenuItem
                 icon={<Plus size={14} />}
-                label="Create new Category"
+                label={t("contextMenu.createCategory")}
                 onClick={onCreateNew}
             />
             <MenuItem
                 icon={<Pencil size={14} />}
-                label="Manage categories"
+                label={t("contextMenu.manageCategories")}
                 onClick={onManage}
             />
         </>
