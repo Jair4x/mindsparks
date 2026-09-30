@@ -5,7 +5,7 @@
 //
 
 import React, { useState } from "react";
-import { tools } from "../../lib/constants";
+import { useTools } from "../../hooks";
 import { getToolIcon } from "../../lib/tools/toolConfig";
 import type { ToolInstance } from "../../types";
 
@@ -60,11 +60,12 @@ function ToolTab({
     isActive: boolean;
     onClick: () => void;
 }) {
-    const [isDragging, setIsDragging] = useState(false);
+    const [isDragging, setIsDragging]   = useState(false);
+    const tools                         = useTools();
     
-    const toolDef = tools.find((t) => t.name === instance.type);
-    const label = instance.label ?? toolDef?.label ?? instance.type;
-    const icon = toolDef ? getToolIcon(toolDef.icon) : null;
+    const toolDef   = tools.find((t) => t.name === instance.type);
+    const label     = instance.label ?? toolDef?.label ?? instance.type;
+    const icon      = toolDef ? getToolIcon(toolDef.icon) : null;
 
     const handleDragStart = (e: React.DragEvent) => {
         // Save the ID of the tool so FlameWorkspace knows which tool is being dragged

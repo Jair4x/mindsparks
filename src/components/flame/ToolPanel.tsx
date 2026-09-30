@@ -3,9 +3,10 @@
 //
 
 import { X } from "lucide-react";
-import { tools } from "../../lib/constants";
+import { useTools } from "../../hooks";
 import { getToolIcon } from "../../lib/tools/toolConfig";
 import type { ToolInstance } from "../../types";
+import { useTranslation } from "react-i18next";
 
 import { MarkdownTool } from "../tools/MarkdownTool";
 
@@ -24,9 +25,11 @@ interface ToolPanelProps {
 // --------------------------
 
 export function ToolPanel({ flameId, instance, onClose }: ToolPanelProps) {
+    const tools     = useTools();
     const toolDef   = tools.find((t) => t.name === instance.type);
     const label     = instance.label ?? toolDef?.label ?? instance.type;
     const icon      = toolDef ? getToolIcon(toolDef.icon) : null;
+    const { t }     = useTranslation("common");
 
     return (
         <div
@@ -105,7 +108,7 @@ function ToolContent({ flameId, instance }: { flameId: string; instance: ToolIns
                     className="flex items-center justify-center h-full text-white"
                     style={{ color: "var(--color-border)", fontSize: 13 }}
                 >
-                    Kanban board coming soon
+                    -----------
                 </div>
             );
         

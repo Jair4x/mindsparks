@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Flame, Check, Wrench } from "lucide-react";
 import { useUIStore, useSparkStore, useFlameStore } from "../../store";
-import { tools, schemas } from "../../lib/constants";
+import { useTools, useSchemas } from "../../hooks";
 import { getToolIcon } from "../../lib/tools/toolConfig";
 import { reparentNode } from "../../store/cascade";
 import type { Schema, Tool } from "../../types";
@@ -121,13 +121,16 @@ function ModalContent({
     onClose: () => void;
     onConfirm: (schema: string, tools: string[]) => void;
 }) {
+    const tools     = useTools();
+    const schemas   = useSchemas();
+
     const defaultSchema = schemas.find((s) => s.name === "general") || schemas[0];
-    const defaultTools = mode === "convert"
+    const defaultTools  = mode === "convert"
         ? defaultSchema.tools.filter((t) => tools.find((tool) => tool.name === t)?.enabled)
         : initialTools;
 
     const [selectedTools, setSelectedTools]     = useState<string[]>(defaultTools);
-    const selectedSchema                        = useMemo(() => deriveSchemaFromTools(selectedTools), [selectedTools]);
+    const selectedSchema                        = useMemo(() => deriveSchemaFromTools(selectedTools, tools, schemas), [selectedTools, tools, schemas]);
     const overlayRef                            = useRef<HTMLDivElement>(null);
     const { t }                                 = useTranslation(["nodes", "common"]);
 
@@ -301,8 +304,12 @@ function ModalContent({
 // Finds the schema whose preset exactly matches the given tool set.
 //
 // Returns "custom" if no schema's preset matches.
+//
+// ? Relevant: As of now (pre-MVP), "Development" points to "General" on purpose since the only available tools are Markdown and Kanban.
+// ?           Shouldn't happen after I implement more tools and adjust schemas, but for now, take note of that.
+// ?           If I forget to delete this comment when I do, tell me kindly that I forgot to edit this :)
 // --------------------------
-function deriveSchemaFromTools(selectedTools: string[]): string {
+function deriveSchemaFromTools(selectedTools: string[], tools: Tool[], schemas: Schema[]): string {
     const sorted = [...selectedTools].sort();
 
     const match = schemas.find((schema) => {

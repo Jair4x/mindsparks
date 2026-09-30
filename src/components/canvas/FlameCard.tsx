@@ -10,7 +10,7 @@ import { useNow } from "../../lib/utils";
 import { getToolIcon } from "../../lib/tools/toolConfig";
 import { NodeCardShell } from "./NodeCardShell";
 import { FlameNode } from "../../lib/flowTransforms";
-import { tools } from "../../lib/constants";
+import { useTools } from "../../hooks";
 
 // --------------------------
 // Component
@@ -18,8 +18,9 @@ import { tools } from "../../lib/constants";
 
 export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     const { flame } = data;
-    const nowMs = useNow();
+    const nowMs     = useNow();
     const openFlame = useUIStore((s) => s.openFlame);
+    const tools     = useTools();
 
     const category = useCategoryStore((s) =>
         flame.categoryId
