@@ -15,6 +15,8 @@ import {
     List,
     Settings,
 } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 // --------------------------
 // Types
@@ -25,12 +27,12 @@ import {
 type GroupMode = "none" | "category" | "hierarchy";
 
 // --------------------------
-// Local state
+// SidePanel
 // --------------------------
-import { useState } from "react";
 
 export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
     const [groupMode, setGroupMode] = useState<GroupMode>("none");
+    const { t }                     = useTranslation("nodes");
 
     return (
         <aside
@@ -57,7 +59,7 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
                 
                 No logic for now, so disabled.
             */}
-            <PanelButton icon={<Search size={17} />} label="Search Spark/Flame" disabled />
+            <PanelButton icon={<Search size={17} />} label={t("sidePanel.search")} disabled />
 
             {/*
                 Grouping buttons
@@ -68,21 +70,21 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
             */}
             <PanelButton
                 icon={<LayoutGrid size={17} />}
-                label="No grouping"
+                label={t("sidePanel.noGrouping")}
                 //isActive={groupMode === "none"}
                 onClick={() => setGroupMode("none")}
                 disabled
             />
             <PanelButton
                 icon={<Tags size={17} />}
-                label="Group by Category"
+                label={t("sidePanel.groupByCategory")}
                 isActive={groupMode === "category"}
                 onClick={() => setGroupMode("category")}
                 disabled
             />
             <PanelButton
                 icon={<Network size={17} />}
-                label="Group by Hierarchy"
+                label={t("sidePanel.groupByHierarchy")}
                 isActive={groupMode === "hierarchy"}
                 onClick={() => setGroupMode("hierarchy")}
                 disabled
@@ -95,9 +97,9 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 
                 No logic for now, so they're disabled.
             */}
-            <PanelButton icon={<Filter size={17} />}    label="Filter"      disabled />
-            <PanelButton icon={<List size={17} />}      label="List view"   disabled />
-            <PanelButton icon={<Settings size={17} />}  label="Config"      disabled />
+            <PanelButton icon={<Filter size={17} />}    label={t("sidePanel.filter")}      disabled />
+            <PanelButton icon={<List size={17} />}      label={t("sidePanel.listView")}   disabled />
+            <PanelButton icon={<Settings size={17} />}  label={t("sidePanel.config")}      disabled />
         </aside>
     );
 }
@@ -111,6 +113,7 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 // --------------------------
 function PanelCreateButton({ onClick }: { onClick: () => void }) {
     const [isHovered, setIsHovered] = useState(false);
+    const { t }                     = useTranslation;
 
     return (
         <button

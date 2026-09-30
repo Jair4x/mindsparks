@@ -1,0 +1,64 @@
+{
+    "info": {
+        "changeCategoryAria": "Change category",
+        "namePlaceholder": "Your idea...",
+        "descriptionPlaceholder": "Add a short description...",
+        "created": "Created {{when}}",
+        "archivedBadge": "Archived",
+        "family": {
+            "title": "Family",
+            "parent": "Parent",
+            "children": "Children",
+            "related": "Related to",
+            "empty": "No family"
+        },
+        "actions": {
+            "restore": "Restore",
+            "reopen": "Reopen",
+            "markCompleted": "Mark as completed",
+            "convertedNote": "This node was converted into a Flame.",
+            "convertIntoFlame": "Turn into a Flame"
+        },
+        "notes": "Notes",
+        "flameNav": {
+            "question": "What do you want to see?",
+            "nodeInfo": "Node info",
+            "openWorkspace": "Open Workspace"
+        }
+    },
+    "convert": {
+        "title": "Converting into a Flame",
+        "schemaLabel": "SCHEMA",
+        "toolsLabel": "TOOLS",
+        "confirm": "Convert",
+        "apply": "Apply",
+        "soon": "Soon..."
+    },
+    "manage": {
+        "title": "Manage Tools",
+        "currentSchemaLabel": "Current Schema:"
+    },
+    "sidePanel": {
+        "createSpark": "Create Spark",
+        "search": "Search Spark/Flame",
+        "noGrouping": "No grouping",
+        "groupByCategory": "Group by Category",
+        "groupByHierarchy": "Group by Hierarchy",
+        "filter": "Filter",
+        "listView": "List view",
+        "config": "Config"
+    },
+    "flameView": {
+        "previousFlame": "Previous Flame",
+        "canvas": "Canvas",
+        "manageTools": "Manage Tools",
+        "sparkInfo": "Spark info",
+        "appSettings": "App Settings",
+        "moreOptions": "More options"
+    },
+    "workspace": {
+        "emptyHint": "Select a tool from the toolbar to get started",
+        "dropLeft": "← Drop here",
+        "dropRight": "Drop here →"
+    }
+}

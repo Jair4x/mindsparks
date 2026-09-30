@@ -14,6 +14,7 @@ import { getToolIcon } from "../../lib/tools/toolConfig";
 import { reparentNode } from "../../store/cascade";
 import type { Schema, Tool } from "../../types";
 import { generateId, now } from "../../lib/utils";
+import { useTranslation } from "react-i18next";
 
 // --------------------------
 // SparkToFlameModal
@@ -25,6 +26,7 @@ export function SparkToFlameModal() {
     const closeModal            = useUIStore((s) => s.closeModal);
     const openFlame             = useUIStore((s) => s.openFlame);
     const activeFlameId         = useUIStore((s) => s.activeFlameId);
+    const { t }                 = useTranslation("nodes");
     
     const spark = useSparkStore((s) =>
         s.sparks.find((sp) => sp.id === activeModalNodeId)
@@ -44,7 +46,7 @@ export function SparkToFlameModal() {
         return (
             <ModalContent
                 mode="convert"
-                title="Convert to Flame"
+                title={t("convert.title")}
                 subtitle={spark.name}
                 initialTools={[]}
                 onClose={closeModal}
@@ -76,7 +78,7 @@ export function SparkToFlameModal() {
         return (
             <ModalContent
                 mode="manage"
-                title="Manage Tools"
+                title={t("manage.title")}
                 subtitle={flame.name}
                 initialTools={flame.tools.map((instance) => instance.type)}
                 onClose={closeModal}
@@ -127,6 +129,7 @@ function ModalContent({
     const [selectedTools, setSelectedTools]     = useState<string[]>(defaultTools);
     const selectedSchema                        = useMemo(() => deriveSchemaFromTools(selectedTools), [selectedTools]);
     const overlayRef                            = useRef<HTMLDivElement>(null);
+    const { t }                                 = useTranslation(["nodes", "common"]);
 
     const handleSchemaChange = (schemaName: string) => {
         const schema        = schemas.find((s) => s.name === schemaName);
@@ -205,7 +208,7 @@ function ModalContent({
                 {mode === "convert" && (
                     <div className="px-5 pt-4 pb-3">
                         <div style={{ fontSize: 11, color: "var(--color-text-muted)", marginBottom: 8 }}>
-                            SCHEMA
+                            {t("convert.schemaLabel")}
                         </div>
                         <div className="flex flex-col gap-2">
                             {schemas.map((schema) => (
@@ -223,7 +226,7 @@ function ModalContent({
                 {/* Current schema (manage mode only) */}
                 {mode === "manage" && (
                     <div className="px-5 pt-4" style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-                        Schema:{" "}
+                        {t("manage.currentSchemaLabel") + " "}
                         <span style={{ color: "var(--color-text)" }}>
                             {schemas.find((s) => s.name === selectedSchema)?.label ?? selectedSchema}
                         </span>
@@ -236,7 +239,7 @@ function ModalContent({
                     style={{ borderTop: mode === "convert" ? "0.5px solid var(--color-border)" : "none" }}
                 >
                     <div style={{ fontSize: 11, color: "var(--color-text-muted)", marginBottom: 8 }}>
-                        TOOLS
+                        {t("convert.toolsLabel")}
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {tools.map((tool) => (
@@ -267,7 +270,7 @@ function ModalContent({
                             fontFamily: "inherit",
                         }}
                     >
-                        Cancel
+                        {t("common:cancel")}
                     </button>
 
                     <button
@@ -284,7 +287,7 @@ function ModalContent({
                         }}
                     >
                         {mode === "convert" ? <Flame size={13} /> : <Wrench size={13} />}
-                        {mode === "convert" ? "Convert" : "Apply"}
+                        {mode === "convert" ? t("convert.confirm") : t("convert.apply")}
                     </button>
                 </div>
             </div>
@@ -387,6 +390,8 @@ function ToolToggle({
     isSelected: boolean;
     onClick: () => void;
 }) {
+    const { t } = useTranslation("nodes");
+
     return (
         <button
             onClick={onClick}
@@ -411,7 +416,7 @@ function ToolToggle({
             {tool.label}
             {!tool.enabled && (
                 <span style={{ fontSize: 10, color: "var(--color-text-muted)", marginLeft: 4 }}>
-                    Soon...
+                    {t("convert.soon")}
                 </span>
             )}
         </button>

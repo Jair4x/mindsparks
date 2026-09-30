@@ -11,6 +11,7 @@ import { useState, useCallback } from "react";
 import { Panel, Group, Separator } from "react-resizable-panels";
 import { ToolPanel } from "./ToolPanel";
 import type { ToolInstance } from "../../types";
+import { useTranslation } from "react-i18next";
 
 // --------------------------
 // Props
@@ -37,9 +38,10 @@ export function FlameWorkspace({
     onToolDrop,
     onCloseTool,
 }: FlameWorkspaceProps) {
-    const activeInstance    = toolInstances.find((t) => t.id === activeTool) ?? null;
-    const splitInstance     = toolInstances.find((t) => t.id === splitTool) ?? null;
-    const [isDraggingOver, setIsDraggingOver] = useState(false);
+    const activeInstance                        = toolInstances.find((t) => t.id === activeTool) ?? null;
+    const splitInstance                         = toolInstances.find((t) => t.id === splitTool) ?? null;
+    const [isDraggingOver, setIsDraggingOver]   = useState(false);
+    const { t }                                 = useTranslation("nodes");
 
     const handleDragEnter = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -76,7 +78,7 @@ export function FlameWorkspace({
                 onDrop={(e) => handleDrop(e, "left")}
             >
                 <span style={{ fontSize: 13 }}>
-                    Select a tool from the toolbar to get started
+                    {t("workspace.emptyHint")}
                 </span>
             </div>
         );
@@ -174,7 +176,8 @@ function DropZone({
     side: "left" | "right";
     onDrop: (e: React.DragEvent) => void;
 }) {
-    const [isOver, setIsOver] = useState(false);
+    const [isOver, setIsOver]   = useState(false);
+    const { t }                 = useTranslation("nodes");
 
     return (
         <div
@@ -197,7 +200,7 @@ function DropZone({
                 color: isOver ? "var(--color-accent)" : "var(--color-text-muted)",
                 transition: "color 0.15s",
             }}>
-                {side === "left" ? "← Drop here" : "Drop here →" /* Arrows are just ascii */} 
+                {side === "left" ? t("workspace.dropLeft") : t("workspace.dropRight")} 
             </span>
         </div>
     );

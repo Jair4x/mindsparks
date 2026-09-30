@@ -560,7 +560,7 @@ function MenuItem({
     disabled?: boolean;
 }) {
     const [hovered, setHovered] = useState(false);
-    const { t } = useTranslation("canvas");
+    const { t } = useTranslation(["canvas", "common"]);
 
     return (
         <button
@@ -571,7 +571,7 @@ function MenuItem({
             }}
             onMouseLeave={() => setHovered(false)}
             disabled={disabled}
-            title={disabled ? t("contextMenu.comingSoon") : undefined}
+            title={disabled ? t("common:comingSoon") : undefined}
             className="flex items-center gap-2 w-full cursor-pointer"
             style={{
                 background: !disabled && hovered

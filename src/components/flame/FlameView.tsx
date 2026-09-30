@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { ArrowLeft, Info, Settings, MoreHorizontal, LayoutGrid } from "lucide-react";
 import { useUIStore, useFlameStore, useSparkStore } from "../../store";
+import { useTranslation } from "react-i18next";
 
 import { FlameToolbar } from "./FlameToolbar";
 import { FlameWorkspace } from "./FlameWorkspace";
@@ -21,7 +22,7 @@ import { Flame, Spark } from "../../types";
 // --------------------------
 
 export function FlameView() {
-    const activeFlameId         = useUIStore((s) => s.activeFlameId);
+    const activeFlameId = useUIStore((s) => s.activeFlameId);
     
     const flame = useFlameStore((s) =>
         s.flames.find((f) => f.id === activeFlameId)
@@ -57,6 +58,7 @@ function FlameViewContent({
     const openModal             = useUIStore((s) => s.openModal);
     const updateFlameName       = useFlameStore((s) => s.updateFlameName);
     const updateSparkName       = useSparkStore((s) => s.updateSparkName);
+    const { t }                 = useTranslation("nodes");
 
     const [isEditing, setIsEditing]     = useState(false);
     const [editName, setEditName]       = useState("");
@@ -101,7 +103,7 @@ function FlameViewContent({
         }
     };
 
-    const backLabel = navigationStack.length > 0 ? "Previous Flame" : "Canvas";
+    const backLabel = navigationStack.length > 0 ? t("flameView.previousFlame") : t("flameView.canvas");
 
     // Handles dropping a tool into the workspace.
     // If there's NOT an active tool in the workspace, it activates it.
@@ -207,7 +209,7 @@ function FlameViewContent({
                     
                     <HeaderButton
                         icon={<LayoutGrid size={14} />}
-                        label="Manage Tools"
+                        label={t("flameView.manageTools")}
                         onClick={() => openModal("manage-tools", flame.id)}
                     />
                 </div>
@@ -216,17 +218,17 @@ function FlameViewContent({
                 <div className="flex items-center gap-1 shrink-0">
                     <HeaderButton
                         icon={<Info size={14} />}
-                        label="Spark info"
+                        label={t("flameView.sparkInfo")}
                         onClick={() => openModal("node-detail", flame.id)}
                     />
                     <HeaderButton
                         icon={<Settings size={14} />}
-                        label="App Settings"
+                        label={t("flameView.appSettings")}
                         onClick={() => {}} // TODO: Implement this
                     />
                     <HeaderButton
                         icon={<MoreHorizontal size={14} />}
-                        label="More options"
+                        label={t("flameView.moreOptions")}
                         onClick={() => {}} // TODO: Implement this
                     />
                 </div>

@@ -10,6 +10,7 @@ import { useNow, formatRelativeDate } from "../../lib/utils";
 import { useChildren, useParent, useRelated } from "../../lib/nodeRelations";
 import { Spark, Flame } from "../../types";
 import { SPARK_DESC_MAX_LENGTH as DESC_MAX_LENGTH } from "../../lib/constants";
+import { useTranslation } from "react-i18next";
 
 // --------------------------
 // NodeTarget
@@ -58,6 +59,7 @@ export function NodeInfoModal() {
 // --------------------------
 
 function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose: () => void }) {
+    const { t } = useTranslation(["nodes", "common"]);
     const isFlame = target.type === "flame";
 
     const updateSparkName        = useSparkStore((s) => s.updateSparkName);
@@ -179,7 +181,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => openModal("assign-category", target.node.id) }
-                                aria-label="Change category"
+                                aria-label={t("info.changeCategoryAria")}
                                 className="flex items-center justify-center cursor-pointer"
                                 style={{
                                     width:          24,
@@ -217,7 +219,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                         {/* Right: Close button */}
                         <button
                             onClick={onClose}
-                            aria-label="Close modal"
+                            aria-label={t("common:closeModal")}
                             className="bg-transparent border-none cursor-pointer flex items-center p-0.5 shrink-0"
                             style={{
                                 color: "var(--color-text-muted)",
@@ -233,7 +235,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                     <div className="flex items-start gap-2">
                         <input
                             value={name}
-                            placeholder="Your idea..."
+                            placeholder={t("nodes:info.namePlaceholder")}
                             onChange={(e) => setName(e.target.value)}
                             onBlur={handleNameBlur}
                             className="flex flex-1 bg-transparent border-none outline-none"
@@ -256,7 +258,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value.slice(0, DESC_MAX_LENGTH))}
                                 onBlur={handleDescriptionBlur}
-                                placeholder="Add a short description..."
+                                placeholder={t("nodes:info.descriptionPlaceholder")}
                                 className="w-full bg-transparent border-none outline-none mt-1"
                                 style={{
                                     fontSize:   13,
@@ -282,7 +284,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                 Creation Date
                             */}
                             <div style={{ fontSize: 12, color: "var(--color-text-muted)"}}>
-                                Created {formatRelativeDate(target.node.createdAt, nowMs)}
+                                {t("info.created", { when: formatRelativeDate(target.node.createdAt, nowMs) })}
                             </div>
 
                             {/*
@@ -296,7 +298,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                     color: "var(--color-text-muted)",
                                 }}
                             >
-                                Family
+                                {t("info.family.title")}
                                 <ChevronRight
                                     size={12}
                                     style={{
@@ -320,7 +322,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                     {parent && (
                                         <>
                                             <div style={{ fontSize: 11, color: "var(--color-text-muted)", textAlign: "right", marginBottom: 2 }}>
-                                                Parent
+                                                {t("info.family.parent")}
                                             </div>
                                             <FamilyEntry node={parent} onClick={() => handleFamilyClick(parent)} />
                                         </>
@@ -329,7 +331,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                     {children.length > 0 && (
                                         <>
                                             <div style={{ fontSize: 11, color: "var(--color-text-muted)", textAlign: "right", marginBottom: 2 }}>
-                                                Children
+                                                {t("info.family.children")}
                                             </div>
                                             {children.map((child) => (
                                                 <FamilyEntry key={child.id} node={child} onClick={() => handleFamilyClick(child)} />
@@ -348,7 +350,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                                     textAlign:      "right",
                                                 }}
                                             >
-                                                Related
+                                                {t("info.family.related")}
                                             </div>
                                             {related.map(({ connectionId, node}) => (
                                                 <FamilyEntry key={connectionId} node={node} onClick={() => handleFamilyClick(node) } />
@@ -358,7 +360,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
 
                                     {!hasFamily && (
                                         <div style={{ fontSize: 12, color: "var(--color-text)", textAlign: "right" }}>
-                                            No family yet
+                                            {t("info.family.empty")}
                                         </div>
                                     )}
                                 </div>
@@ -375,37 +377,37 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                             target.node.isArchived ? (
                                 <ActionButton
                                     icon={<ArchiveRestore size={13} />}
-                                    label="Restore"
+                                    label={t("info.actions.restore")}
                                     onClick={() => { restoreFlame(target.node.id); onClose(); }}
                                 />
                             ) : target.node.isCompleted ? (
                                     <ActionButton
                                         icon={<RotateCcw size={13} />}
-                                        label="Reopen"
+                                        label={t("info.actions.reopen")}
                                         onClick={() => reopenFlame(target.node.id)}
                                     />
                             ) : (
                                 <ActionButton
                                     icon={<CheckCircle size={13} />}
-                                    label="Mark as completed"
+                                    label={t("info.actions.markCompleted")}
                                     onClick={() => completeFlame(target.node.id)}
                                     tone="success"
                                 />
                             )
                         ) : target.node.isConvertedToFlame ? (
                             <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
-                                This node was converted into a Flame.
+                                {t("info.actions.convertedNote")}
                             </div>
                         ) : target.node.isArchived ? (
                             <ActionButton
                                 icon={<ArchiveRestore size={13} />}
-                                label="Restore"
+                                label={t("info.actions.restore")}
                                 onClick={() => { restoreSpark(target.node.id); onClose(); }}
                             />
                         ) : (
                             <ActionButton
                                 icon={<FlameIcon size={13} />}
-                                label="Convert into flame"
+                                label={t("info.actions.convertIntoFlame")}
                                 onClick={() => openModal("spark-to-flame", target.node.id)}
                                 tone="accent"
                             />
@@ -418,11 +420,11 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                 ---------------------------------------------*/}
                 <div className="p-4 flex flex-col overflow-auto">
                     <div className="text-xs mb-2" style={{ color: "var(--color-text-muted)" }}>
-                        Notes
+                        {t("info.notes")}
                     </div>
                     {/* Disabled this since it's not implemented yet. */}
                     <textarea
-                        placeholder="Coming soon..."
+                        placeholder={t("common:comingSoon")}
                         disabled
                         className="w-full min-h-30 max-h-60 leading-5 outline-none resize-none overflow-y-auto"
                         style={{
@@ -460,19 +462,19 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                 {pendingFlameNav.name}
                             </div>
                             <div style={{ fontSize: 13, color: "var(--color-text-muted)", marginBottom: 14 }}>
-                                What do you want to see?
+                                {t("info.flameNav.question")}
                             </div>
 
                             <div className="flex flex-col gap-2">
                                 <ActionButton
                                     icon={<Tag size={13} />}
-                                    label={"Node info"}
+                                    label={t("info.flameNav.nodeInfo")}
                                     onClick={handleViewFlameInfo}
                                     tone="accent"
                                 />
                                 <ActionButton
                                     icon={<FlameIcon size={13} />}
-                                    label="Open Workspace"
+                                    label={t("info.flameNav.openWorkspace")}
                                     onClick={handleOpenFlameWorkspace}
                                 />
                             </div>
@@ -552,6 +554,7 @@ function ActionButton({
 function FamilyEntry({ node, onClick }: { node: Spark | Flame; onClick: () => void; }) {
     const [hovered, setHovered] = useState(false);
     const isFlame = "sparkId" in node;
+    const { t } = useTranslation("nodes");
 
     return (
         <button
@@ -583,7 +586,7 @@ function FamilyEntry({ node, onClick }: { node: Spark | Flame; onClick: () => vo
                         background: "var(--color-warning-surface)",
                     }}
                 >
-                    Archived
+                    {t("info.archivedBadge")}
                 </span>
             )}
             {isFlame

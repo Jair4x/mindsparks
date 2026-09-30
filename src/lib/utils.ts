@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react";
 import type { Position } from "../types";
 import { SAFE_ZONE_MARGIN, DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH } from "./constants";
+import i18n from "i18next";
 
 // Generate a random ID
 export function generateId(): string {
@@ -28,11 +29,11 @@ export function formatRelativeDate(isoDate: string, nowMs = Date.now()): string 
     const days = Math.floor(diff / 86400000);
     const weeks = Math.floor(days / 7);
 
-    if (seconds < 60) return `${seconds}s ago`;
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return `${weeks}w ago`;
+    if (seconds < 60) return i18n.t("common:relativeTime.seconds", { value: seconds });
+    if (minutes < 60) return i18n.t("common:relativeTime.minutes", { value: minutes });
+    if (hours < 24) return i18n.t("common:relativeTime.hours", { value: hours });
+    if (days < 7) return i18n.t("common:relativeTime.days", { value: days });
+    return i18n.t("common:relativeTime.weeks", { value: weeks });
 }
 
 // Safe zones

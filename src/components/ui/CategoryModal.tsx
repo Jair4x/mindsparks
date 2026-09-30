@@ -20,6 +20,7 @@ import { useUIStore, useCategoryStore, useSpaceStore, useSparkStore, useFlameSto
 import type { Category } from "../../types";
 import type { SelectedNode } from "../../store";
 import { useAssignCategory } from "../../hooks/useAssignCategory";
+import { useTranslation } from "react-i18next";
 
 // --------------------------
 // Color pallete
@@ -191,6 +192,7 @@ function CategoryModalContent({
     const [editingCategory, setEditingCategory]     = useState<Category | null>(null);
     const [deletingCategory, setDeletingCategory]   = useState<Category | null>(null);
     const overlayRef                                = useRef<HTMLDivElement>(null);
+    const { t }                                     = useTranslation(["categories", "common"]);
 
     const backToList = () => {
         setView("list");
@@ -248,10 +250,10 @@ function CategoryModalContent({
     };
 
     const headerTitle = view === "list"
-        ? (mode === "assign" ? "Assign category" : "Manage categories")
+        ? (mode === "assign" ? t("title.assign") : t("title.manage"))
         : view === "form"
-            ? (editingCategory ? "Edit category" : "New category")
-            : "Delete category";
+            ? (editingCategory ? t("title.edit") : t("title.new"))
+            : t("title.delete");
 
     return (
         <div
@@ -284,7 +286,7 @@ function CategoryModalContent({
                         {(view === "form" || view === "confirm-delete") && (
                             <button
                                 onClick={backToList}
-                                aria-label="Back to categories"
+                                aria-label={t("categories:backAria")}
                                 className="flex items-center justify-center cursor-pointer bg-transparent border-none"
                                 style={{
                                     color: "var(--color-text-muted)",
@@ -307,7 +309,7 @@ function CategoryModalContent({
                     </div>
                     <button
                         onClick={onClose}
-                        aria-label="Close modal"
+                        aria-label={t("common:closeModal")}
                         className="flex items-center justify-center cursor-pointer bg-transparent border-none"
                         style={{
                             color: "var(--color-text-muted)",
@@ -375,10 +377,12 @@ function CategoryListView({
     onCreateNew:        () => void;
     onDeleteCategory?:  (category: Category) => void;
 }) {
+    const { t } = useTranslation("categories");
+
     return (
         <div className="px-5 py-4 flex flex-col gap-3 overflow-auto">
             <div style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-                {mode === "assign" ? "CATEGORIES" : "YOUR CATEGORIES"}
+                {mode === "assign" ? t("list.assignHeader") : t("list.manageHeader")}
             </div>
 
             {mode === "assign" && (
@@ -403,14 +407,14 @@ function CategoryListView({
                         }}
                     />
                     <span style={{ fontSize: 13, color: "var(--color-text-muted)", flex: 1 }}>
-                        No category
+                        {t("list.none")}
                     </span>
                 </button>
             )}
             
             {categories.length === 0 ? (
                 <div style={{ fontSize: 12, color: "var(--color-text-muted)", padding: "4px 0 8px" }}>
-                    No categories yet
+                    {t("list.empty")}
                 </div>
             ) : (
                 <div className="flex flex-col gap-1.5" style={{ maxHeight: 260, overflowY: "auto" }}>
@@ -444,7 +448,7 @@ function CategoryListView({
                 }}
             >
                 <Plus size={14} />
-                New
+                {t("list.new")}
             </button>
         </div>
     );
@@ -470,6 +474,7 @@ function CategoryListItem({
     const [hovered, setHovered]             = useState(false);
     const [editHovered, setEditHovered]     = useState(false);
     const [trashHovered, setTrashHovered]   = useState(false);
+    const { t }                             = useTranslation("categories");
 
     return (
         <button
@@ -520,7 +525,7 @@ function CategoryListItem({
                     {onDelete && (
                         <span
                             role="button"
-                            aria-label={`Delete ${category.name}`}
+                            aria-label={t("list.deleteAria", { name: category.name })}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onDelete();
@@ -567,7 +572,8 @@ function CategoryForm({
     const [isCustom, setIsCustom]                       = useState(!PRESET_COLORS.includes(initialColor));
     const [isCancelBtnHovered, setIsCancelBtnHovered]   = useState(false);
     const nameInputRef                                  = useRef<HTMLInputElement>(null);
- 
+    const { t }                                         = useTranslation(["categories", "common"]);
+
     // Autofocus name field
     useEffect(() => {
         nameInputRef.current?.focus();
@@ -585,14 +591,14 @@ function CategoryForm({
                         htmlFor="category-name"
                         style={{ fontSize: 11, color: "var(--color-text-muted)" }}
                     >
-                        NAME
+                        {t("form.name")}
                     </label>
                     <input
                         id="category-name"
                         ref={nameInputRef}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Category name..."
+                        placeholder={t("form.namePlaceholder")}
                         style={{
                             background: "var(--color-surface-raised)",
                             border: "0.5px solid var(--color-border)",
@@ -610,7 +616,7 @@ function CategoryForm({
                 {/* Color picker */}
                 <div className="flex flex-col gap-1.5">
                     <label style={{ fontSize: 11, color: "var(--color-text-muted)" }}>
-                        COLOR
+                        {t("form.color")}
                     </label>
  
                     {/* Preview + palette */}
@@ -659,7 +665,7 @@ function CategoryForm({
  
                             {/* Custom color button */}
                             <label
-                                title="Custom color"
+                                title={t("form.customColor")}
                                 className="flex cursor-pointer items-center justify-center"
                                 style={{
                                     width: 24,
@@ -713,7 +719,7 @@ function CategoryForm({
                     onMouseEnter={() => setIsCancelBtnHovered(true)}
                     onMouseLeave={() => setIsCancelBtnHovered(false)}
                 >
-                    Cancel
+                    {t("common:cancel")}
                 </button>
  
                 <button
@@ -729,7 +735,7 @@ function CategoryForm({
                         cursor: !canConfirm ? "not-allowed" : "pointer",
                     }}
                 >
-                    {isEditing ? "Save" : "Create"}
+                    {isEditing ? t("common:save") : t("common:create")}
                 </button>
             </div>
         </>
@@ -751,6 +757,7 @@ function CategoryDeleteConfirm({
 }) {
     const [isConfirmHovered, setIsConfirmHovered]   = useState(false);
     const [isCancelHovered, setIsCancelHovered]     = useState(false);
+    const { t }                                     = useTranslation(["categories", "common"]);
 
     return (
         <>
@@ -773,12 +780,12 @@ function CategoryDeleteConfirm({
                 <div style={{ fontSize: 13, color: "var(--color-text-muted)", lineHeight: 1.5 }}>
                     {/* Plain HTML, I'll 100% change it later, probably, maybe. */}
 
-                    <b>Are you sure you want to delete this category?</b>
+                    <b>{t("delete.question")}</b>
                     <br />
                     <br />
-                    The sparks and flames that have it assigned are gonna lose it.
+                    {t("delete.consequence")}
                     <br />
-                    <i>(This action can't be reverted)</i>
+                    <i>{t("delete.warning")}</i>
                 </div>
             </div>
 
@@ -801,7 +808,7 @@ function CategoryDeleteConfirm({
                     onMouseEnter={() => setIsCancelHovered(true)}
                     onMouseLeave={() => setIsCancelHovered(false)}
                 >
-                    Cancel
+                    {t("common:cancel")}
                 </button>
 
                 <button
@@ -818,7 +825,7 @@ function CategoryDeleteConfirm({
                         transition: "background 0.15s",
                     }}
                 >
-                    Delete
+                    {t("common:delete")}
                 </button>
             </div>
         </>

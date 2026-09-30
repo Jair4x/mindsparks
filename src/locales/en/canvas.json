@@ -16,8 +16,7 @@
         "linkToNode": "To this node",
         "linkBetweenAll": "Between all selected nodes",
         "createNewCategory": "Create a new Category",
-        "manageCategories": "Manage categories",
-        "comingSoon": "Coming soon..."
+        "manageCategories": "Manage categories"
     },
     "zoom": {
         "reset": "Reset to initial position/zoom",
