@@ -16,8 +16,8 @@ export function useTools(): Tool[] {
     return useMemo(
         () => toolDefinitions.map((def) => ({
             ...def,
-            label:          t(`tools.${def.name}.label`),
-            description:    t(`tools.${def.name}.description`),
+            label:          t(`tools.${def.name}.label`, { defaultValue: def.name }),
+            description:    t(`tools.${def.name}.description`, { defaultValue: "" }),
         })),
         [t]
     );
@@ -29,8 +29,8 @@ export function useSchemas(): Schema[] {
     return useMemo(
         () => schemaDefinitions.map((def) => ({
             ...def,
-            label:          t(`schemas.${def.name}.label`),
-            description:    t(`schemas.${def.name}.description`),
+            label:          t(`schemas.${def.name}.label`, { defaultValue: def.name }),
+            description:    t(`schemas.${def.name}.description`, { defaultValue: "" }),
         })),
         [t]
     );
