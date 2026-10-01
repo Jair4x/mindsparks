@@ -88,7 +88,11 @@ export function QuickCaptureApp() {
 
     useEffect(() => {
         const unlisten = getCurrentWindow().onFocusChanged(({ payload: focused }) => {
-            if (focused) inputRef.current?.focus();
+            if (focused) {
+                inputRef.current?.focus();
+            } else {
+                getCurrentWindow().hide();
+            }
         });
 
         return () => {
