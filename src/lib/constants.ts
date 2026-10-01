@@ -4,7 +4,6 @@
 // Each and every magic number that appears in more than one place
 // or that's possible to change in the future goes here.
 //
-import i18n from "i18next";
 
 // --------------------------
 //            Canvas
