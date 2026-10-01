@@ -113,11 +113,11 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 // --------------------------
 function PanelCreateButton({ onClick }: { onClick: () => void }) {
     const [isHovered, setIsHovered] = useState(false);
-    const { t }                     = useTranslation;
+    const { t }                     = useTranslation("common");
 
     return (
         <button
-            aria-label="Create Spark"
+            aria-label={t("create")}
             onClick={onClick}
             className="flex items-center justify-center cursor-pointer shrink-0"
             style={{

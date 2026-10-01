@@ -58,7 +58,7 @@ export function ToolPanel({ flameId, instance, onClose }: ToolPanelProps) {
 
                 <button
                     onClick={onClose}
-                    aria-label={`${t("common:close")} ${label}`}
+                    aria-label={`${t("close")} ${label}`}
                     className="flex items-center justify-center cursor-pointer border-none"
                     style={{
                         width: 20,
