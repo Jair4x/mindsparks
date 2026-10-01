@@ -23,12 +23,12 @@ import {
 // Existent modals in the MVP.
 // More will be added as the project evolves.
 export type ModalType =
-    | "node-detail"         // Modal for the details of a node (spark/flame)
-    | "spark-to-flame"      // Spark to flame conversion modal
-    | "manage-tools"        // spark-to-flame, but inside a flame to manage tools
-    | "manage-category"     // Modal to create or edit a category
-    | "assign-category"     // Modal to assign or create a category
-    | "manage-space"        // Modal to create or edit a Space
+    | "node-detail"         // Details of a node (spark/flame)
+    | "spark-to-flame"      // Spark to flame conversion
+    | "manage-tools"        // spark-to-flame, but inside a Flame to manage tools
+    | "manage-category"     // Create or edit a category
+    | "assign-category"     // Assign or create a category
+    | "manage-space"        // Create or edit a Space
     | null;                 // No modal open
 
 // Type of nodes that can be selected in the canvas
