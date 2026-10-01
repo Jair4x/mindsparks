@@ -22,7 +22,7 @@ import {
 import { useTranslation } from "react-i18next";
 import type { Space, Position } from "../types";
 
-const GLOBAL_MODE_SIZE = { width: 480, height: 195 }; // Because it has the header and stuff
+const GLOBAL_MODE_SIZE = { width: 480, height: 200 }; // Because it has the header and stuff
 const INLINE_MODE_SIZE = { width: 480, height: 140 };
 
 export function QuickCaptureApp() {
@@ -146,7 +146,7 @@ export function QuickCaptureApp() {
                             htmlFor="quick-capture-space"
                             style={{ fontSize: 12, color: "var(--color-text-muted)" }}
                         >
-                            {t("ideaTo")}
+                            {t("sendTo")}
                         </label>
                         <div style={{ position: "relative" }}>
                             <select
