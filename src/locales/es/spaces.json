@@ -1,0 +1,36 @@
+{
+    "defaultName": "Personal",
+    "selector": {
+        "newSpace": "Nuevo Space",
+        "editAria": "Editar {{name}}"
+    },
+    "modal": {
+        "title": {
+            "new": "Nuevo Space",
+            "edit": "Editar Space",
+            "delete": "Eliminar Space"
+        },
+        "backAria": "Volver a Space",
+        "fields": {
+            "name": "NOMBRE",
+            "namePlaceholder": "Nombre genial...",
+            "icon": "ICONO",
+            "color": "COLOR",
+            "customColor": "Color personalizado"
+        },
+        "deleteLink": "Eliminar este Space"
+    },
+    "delete": {
+        "step1": "¿Seguro/a que quieres eliminar este Space?",
+        "step2": "Este Space puede contener datos que se perderán definitivamente.",
+        "step2b": "Y una vez eliminados, no hay vuelta atrás.",
+        "step3": "¿Estás <b>REALMENTE</b> seguro/a de eliminar <b>ESTE</b> Space?",
+        "step3Type": "Escribe <accent>{{name}}</accent> para confirmar.",
+        "step3Warning": "Esta acción no puede deshacerse.",
+        "buttons": {
+            "step1": "Sí.",
+            "step2": "Lo sé.",
+            "step3": "Elimínalo de una vez."
+        }
+    }
+}

@@ -1,0 +1,62 @@
+{
+    "tools": {
+        "markdown": {
+            "label": "Notas",
+            "description": "Escribe notas y documentación con soporte de texto Markdown."
+        },
+        "kanban": {
+            "label": "Tablero Kanban",
+            "description": "Maneja tareas con un tablero Kanban personalizable."
+        },
+        "gantt": {
+            "label": "Diagrama de Gantt",
+            "description": "Visualiza la línea temporal de tus tareas. Vinculable a Kanban."
+        },
+        "canvas": {
+            "label": "Canvas Libre",
+            "description": "Pizarrón infinito para pensar y diagramar visualmente."
+        },
+        "glossary": {
+            "label": "Glosario",
+            "description": "Tabla de términos y definiciones."
+        },
+        "bibliography": {
+            "label": "Bibliografía",
+            "description": "Registro de referencias con campos de autor, año y URL."
+        },
+        "openapi": {
+            "label": "OpenAPI",
+            "description": "Editor de esquemas OpenAPI importable y exportable."
+        },
+        "database": {
+            "label": "Esquema de Base de Datos",
+            "description": "Definición visual de tablas, relaciones y tipos de dato."
+        },
+        "changelog": {
+            "label": "Registro de Cambios",
+            "description": "Registro de versiones y cambios."
+        },
+        "journal": {
+            "label": "Diario de Proyecto",
+            "description": "Registro cronológico de decisiones con fecha y contexto."
+        }
+    },
+    "schemas": {
+        "general": {
+            "label": "General",
+            "description": "Un punto de inicio balanceado para tus proyectos."
+        },
+        "development": {
+            "label": "Desarrollo",
+            "description": "Para proyectos técnicos: apps, APIs, scripts."
+        },
+        "research": {
+            "label": "Investigación",
+            "description": "Para estudios, experimentos o documentación."
+        },
+        "custom": {
+            "label": "Personalizado",
+            "description": "Inicia desde cero y elige tus propias herramientas."
+        }
+    }
+}

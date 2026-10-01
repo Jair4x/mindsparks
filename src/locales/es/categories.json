@@ -1,0 +1,29 @@
+{
+    "title": {
+        "assign": "Asignar categoría",
+        "manage": "Gestionar categorías",
+        "edit": "Editar categoría",
+        "new": "Nueva categoría",
+        "delete": "Eliminar categoría"
+    },
+    "backAria": "Volver a categorías",
+    "list": {
+        "assignHeader": "CATEGORÍAS",
+        "manageHeader": "TUS CATEGORÍAS",
+        "none": "Sin categoría",
+        "empty": "Aún no hay categorías",
+        "new": "Nueva",
+        "deleteAria": "Eliminar {{name}}"
+    },
+    "form": {
+        "name": "NOMBRE",
+        "namePlaceholder": "Nombre de categoría...",
+        "color": "COLOR",
+        "customColor": "Color personalizado"
+    },
+    "delete": {
+        "question": "¿Seguro/a que quieres borrar esta categoría?",
+        "consequence": "Los sparks y flames que la tengan asignada la perderán.",
+        "warning": "Esta acción no puede ser revertida"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "create": "Crear",
+    "delete": "Eliminar",
+    "close": "Cerrar",
+    "closeModal": "Cerrar ventana",
+    "comingSoon": "Próximamente...",
+    "relativeTime": {
+        "seconds": "hace {{value}}s",
+        "minutes": "hace {{value}}m",
+        "hours": "hace {{value}}h",
+        "days": "hace {{value}}d",
+        "weeks": "hace {{value}}w"
+    }
+}

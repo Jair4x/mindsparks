@@ -1,0 +1,64 @@
+{
+    "info": {
+        "changeCategoryAria": "Cambiar categoría",
+        "namePlaceholder": "Tu idea...",
+        "descriptionPlaceholder": "Agrega una pequeña descripción...",
+        "created": "Creado {{when}}",
+        "archivedBadge": "Archivado",
+        "family": {
+            "title": "Familia",
+            "parent": "Padre",
+            "children": "Hijo(s)",
+            "related": "Relacionado con",
+            "empty": "Sin familia"
+        },
+        "actions": {
+            "restore": "Restaurar",
+            "reopen": "Reabrir",
+            "markCompleted": "Marcar como completado",
+            "convertedNote": "Este nodo fue convertido en un Flame.",
+            "convertIntoFlame": "Convertir en Flame"
+        },
+        "notes": "Notas",
+        "flameNav": {
+            "question": "¿Qué quieres ver?",
+            "nodeInfo": "Información del nodo",
+            "openWorkspace": "Abrir espacio de trabajo"
+        }
+    },
+    "convert": {
+        "title": "Convirtiendo en Flame",
+        "schemaLabel": "ESQUEMA",
+        "toolsLabel": "HERRAMIENTAS",
+        "confirm": "Convertir",
+        "apply": "Aplicar",
+        "soon": "Pronto..."
+    },
+    "manage": {
+        "title": "Gestionar Herramientas",
+        "currentSchemaLabel": "Esquema actual:"
+    },
+    "sidePanel": {
+        "createSpark": "Crear Spark",
+        "search": "Buscar Spark/Flame",
+        "noGrouping": "Sin agrupar",
+        "groupByCategory": "Agrupar por Categoría",
+        "groupByHierarchy": "Agrupar por Jerarquía",
+        "filter": "Filtrar",
+        "listView": "Vista de lista",
+        "config": "Configuración"
+    },
+    "flameView": {
+        "previousFlame": "Flame anterior",
+        "canvas": "Canvas",
+        "manageTools": "Gestionar Herramientas",
+        "nodeInfo": "Información del Nodo",
+        "appSettings": "Configuración de la App",
+        "moreOptions": "Más opciones"
+    },
+    "workspace": {
+        "emptyHint": "Haz click o arrastra una herramienta de arriba.",
+        "dropLeft": "← Soltar aquí",
+        "dropRight": "Soltar aquí →"
+    }
+}

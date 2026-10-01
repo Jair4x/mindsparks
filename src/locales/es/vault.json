@@ -1,0 +1,17 @@
+{
+    "pickerTitle": "Elige tu Bóveda para MindSparks",
+    "welcome": {
+        "title": "¡Bienvenido/a a MindSparks!",
+        "description": "Elige la carpeta donde MindSparks alojará tus datos."
+    },
+    "missing": {
+        "title": "¡Ups! No pudimos encontrar tu Bóveda de datos.",
+        "description": "Parece que la carpeta que configuraste como Bóveda anteriormente ya no está ahí."
+    },
+    "loadError": {
+        "title": "No pudimos cargar tus datos"
+    },
+    "chooseFolder": "Elegir Carpeta",
+    "choosing": "Eligiendo...",
+    "retry": "Reintentar"
+}
