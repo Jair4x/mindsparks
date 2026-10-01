@@ -218,7 +218,7 @@ function FlameViewContent({
                 <div className="flex items-center gap-1 shrink-0">
                     <HeaderButton
                         icon={<Info size={14} />}
-                        label={t("flameView.sparkInfo")}
+                        label={t("flameView.nodeInfo")}
                         onClick={() => openModal("node-detail", flame.id)}
                     />
                     <HeaderButton

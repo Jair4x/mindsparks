@@ -28,8 +28,8 @@
         "step3Type": "Type <accent>{{name}}</accent> to confirm.",
         "step3Warning": "This action can't be undone.",
         "buttons": {
-            "step1": "Yes",
-            "step2": "I know",
+            "step1": "Yes.",
+            "step2": "I know.",
             "step3": "Come on, delete it already."
         }
     }
