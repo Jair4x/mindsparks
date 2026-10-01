@@ -22,6 +22,8 @@ import { HEADER_HEIGHT } from "../../lib/constants";
 import { SpaceSelector } from "./SpaceSelector";
 import { SpaceModal } from "../ui/SpaceModal";
 
+import { SearchModal } from "../ui/SearchModal";
+
 // --------------------------
 // Components
 // --------------------------
@@ -78,6 +80,7 @@ export function AppLayout() {
                         <SparkToFlameModal />
                         <CategoryModal />
                         <SpaceModal />
+                        <SearchModal onSelectResult={(id, spaceId) => canvasRef.current?.focusNode(id, spaceId)} />
                     </>
             )}
         </div>

@@ -64,6 +64,7 @@ const edgeTypes = {
 
 export interface CanvasHandle {
     createSparkAtCenter: () => void;
+    focusNode: (id: string, spaceId: string) => void;
 }
 
 // --------------------------
@@ -74,7 +75,15 @@ export interface CanvasHandle {
 
 export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     const activeSpaceId = useSpaceStore((s) => s.activeSpaceId);
-    const { screenToFlowPosition, flowToScreenPosition, zoomTo, getZoom, getNodes, setViewport } = useReactFlow();
+    const {
+        screenToFlowPosition,
+        flowToScreenPosition,
+        zoomTo,
+        getZoom,
+        getNodes,
+        setViewport,
+        setCenter
+    } = useReactFlow();
     const { t } = useTranslation("canvas");
 
     const setZoom = useUIStore((s) => s.setZoom);
@@ -96,6 +105,8 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     const endSelectionBox = useUIStore((s) => s.endSelectionBox);
 
     const openContextMenu = useUIStore((s) => s.openContextMenu);
+
+    const setHighlightedNodeId = useUIStore((s) => s.setHighlightedNodeId);
 
     const sparks = useSparkStore(
         useShallow((s) => s.getActiveSparksBySpace(activeSpaceId))
@@ -376,6 +387,10 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     //  can ask the creation of a centered spark without duplicating the math
     //  screenToFlowPosition does or going into UI store for something that's
     //  a specific event, not a state.
+    //
+    // focusNode
+    //
+    // Also exposed via ref for Node search highlighting.
     // --------------------------
     useImperativeHandle(ref, () => ({
         createSparkAtCenter: () => {
@@ -396,6 +411,25 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
             } catch (err) {
                 console.error("screenToFlowPosition failed:", err);
             }
+        },
+        focusNode: (id, spaceId) => {
+            if (useSpaceStore.getState().activeSpaceId !== spaceId) {
+                useSpaceStore.getState().setActiveSpace(spaceId);
+            }
+
+            // Space switch re-renders with a new nodes array, wait a frame
+            // so React Flow has it before trying to center on the node.
+            requestAnimationFrame(() => {
+                const node = getNodes().find((n) => n.id === id);
+                if (!node) return;
+
+                const x = node.position.x + (node.measured?.width ?? DEFAULT_CARD_WIDTH) / 2;
+                const y = node.position.y + (node.measured?.height ?? 80) / 2;
+
+                setCenter(x, y, { zoom: Math.max(getZoom(), 1), duration: 400 });
+                setHighlightedNodeId(id);
+                setTimeout(() => setHighlightedNodeId(null), 2000);
+            });
         },
     }), [screenToFlowPosition, activeSpaceId]);
 

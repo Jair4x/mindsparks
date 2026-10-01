@@ -29,6 +29,7 @@ export type ModalType =
     | "manage-category"     // Create or edit a category
     | "assign-category"     // Assign or create a category
     | "manage-space"        // Create or edit a Space
+    | "search"              // Node search
     | null;                 // No modal open
 
 // Type of nodes that can be selected in the canvas
@@ -90,6 +91,8 @@ interface UIStore {
     // Used to show the edges of the lineage graph.
     hoveredNodeId: string | null;
 
+    highlightedNodeId: string | null;
+
     activeView: "canvas" | "flame";
 
     activeFlameId: string | null;
@@ -131,6 +134,8 @@ interface UIStore {
     requestRepulsion: (nodeIds: string[]) => void;
     clearPendingRepulsion: () => void;
 
+    setHighlightedNodeId: (id: string | null) => void;
+
     openFlame: (flameId: string) => void;
     goBack: () => void;
 
@@ -154,6 +159,7 @@ export const useUIStore = create<UIStore>((set, get) => ({
     selectionBox: null,
     isSelecting: false,
     hoveredNodeId: null,
+    highlightedNodeId: null,
     activeView: "canvas",
     activeFlameId: null,
     navigationStack: [],
@@ -280,6 +286,10 @@ export const useUIStore = create<UIStore>((set, get) => ({
 
     clearPendingRepulsion: () => {
         set({ pendingRepulsion: [] });
+    },
+
+    setHighlightedNodeId: (id) => {
+        set({ highlightedNodeId: id });
     },
 
     openFlame: (flameId) => {

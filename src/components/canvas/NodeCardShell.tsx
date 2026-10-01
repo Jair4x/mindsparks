@@ -18,13 +18,15 @@ import type { Category } from "../../types";
 import { formatRelativeDate } from "../../lib/utils";
 import {
     DEFAULT_CARD_WIDTH
- } from "../../lib/constants";
+} from "../../lib/constants";
+import { useUIStore } from "../../store";
 
 // --------------------------
 // Props
 // --------------------------
 
 interface NodeCardShellProps {
+    id:             string;
     borderColor:    string;
     boxShadow?:     string;
     opacity?:       number;
@@ -58,6 +60,7 @@ interface NodeCardShellProps {
 // --------------------------
 
 export function NodeCardShell({
+    id,
     borderColor,
     boxShadow,
     opacity = 1,
@@ -73,6 +76,7 @@ export function NodeCardShell({
     children,
 }: NodeCardShellProps) {
     const [isHovered, setIsHovered] = useState(false);
+    const isHighlighted = useUIStore((s) => s.highlightedNodeId === id);
 
     return (
         <div
@@ -87,7 +91,9 @@ export function NodeCardShell({
                 width: DEFAULT_CARD_WIDTH,
                 cursor: "pointer",
                 transition: "border-color 0.15s, border-width 0.15s",
-                boxShadow,
+                boxShadow: isHighlighted
+                    ? `0 0 3px var(--color-accent), ${boxShadow ?? "none"}`
+                    : boxShadow,
                 opacity,
                 position: (relativePosition || selected) ? "relative" : undefined,
             }}

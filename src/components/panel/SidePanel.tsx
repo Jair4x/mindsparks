@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useUIStore } from "../../store";
 
 // --------------------------
 // Types
@@ -33,6 +34,7 @@ type GroupMode = "none" | "category" | "hierarchy";
 export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
     const [groupMode, setGroupMode] = useState<GroupMode>("none");
     const { t }                     = useTranslation("nodes");
+    const openModal                 = useUIStore((s) => s.openModal);
 
     return (
         <aside
@@ -56,10 +58,12 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
 
             {/* 
                 Search
-                
-                No logic for now, so disabled.
             */}
-            <PanelButton icon={<Search size={17} />} label={t("sidePanel.search")} disabled />
+            <PanelButton
+                icon={<Search size={17} />}
+                label={t("sidePanel.search")}
+                onClick={() => openModal("search")}
+            />
 
             {/*
                 Grouping buttons

@@ -6,6 +6,7 @@ import quickCapture from "./quick-capture.json";
 import nodes from "./nodes.json";
 import categories from "./categories.json";
 import tools from "./tools.json";
+import search from "./search.json";
 
 export default {
     common,
@@ -16,4 +17,5 @@ export default {
     nodes,
     categories,
     tools,
+    search,
 } as const;

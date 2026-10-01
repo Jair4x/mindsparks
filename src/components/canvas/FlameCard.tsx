@@ -48,6 +48,7 @@ export function FlameCard({ data, selected }: NodeProps<FlameNode>) {
     
     return (
         <NodeCardShell
+            id={flame.id}
             borderColor={borderColor}
             boxShadow={boxShadow}
             relativePosition

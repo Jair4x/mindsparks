@@ -45,6 +45,7 @@ export function SparkCard({ data, selected }: NodeProps<SparkNode>) {
     
     return (
         <NodeCardShell
+            id={spark.id}
             borderColor={borderColor}
             boxShadow={boxShadow}
             category={category}

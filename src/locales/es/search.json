@@ -1,0 +1,7 @@
+{
+    "placeholder": "Buscar Sparks y Flames...",
+    "sameSpace": "En este Space",
+    "otherSpaces": "En otro Space",
+    "noDescription": "Sin descripción",
+    "noResults": "No se encontró nada para \"{{query}}\""
+}
