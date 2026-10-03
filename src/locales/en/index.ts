@@ -7,6 +7,7 @@ import nodes from "./nodes.json";
 import categories from "./categories.json";
 import tools from "./tools.json";
 import search from "./search.json";
+import archive from "./archive.json";
 
 export default {
     common,
@@ -18,4 +19,5 @@ export default {
     categories,
     tools,
     search,
+    archive,
 } as const;

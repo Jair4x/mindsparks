@@ -23,6 +23,7 @@ import { SpaceSelector } from "./SpaceSelector";
 import { SpaceModal } from "../ui/SpaceModal";
 
 import { SearchModal } from "../ui/SearchModal";
+import { ArchiveModal } from "../ui/ArchiveModal";
 
 // --------------------------
 // Components
@@ -81,6 +82,7 @@ export function AppLayout() {
                         <CategoryModal />
                         <SpaceModal />
                         <SearchModal onSelectResult={(id, spaceId) => canvasRef.current?.focusNode(id, spaceId)} />
+                        <ArchiveModal />
                     </>
             )}
         </div>

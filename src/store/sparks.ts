@@ -3,6 +3,8 @@ import { Spark, Position } from "../types";
 import { generateId, now } from "../lib/utils";
 import { dbSelect, dbExecute } from "../lib/db";
 import { queuePositionWrite } from "../lib/canvasPositionSync";
+import { useFlameStore } from "./flames";
+import { useConnectionStore } from "./connections";
 
 // --------------------------
 // DB stuff
@@ -101,6 +103,9 @@ interface SparkStore {
     // Archives a spark. It doesn't delet it, just hides it from the main canvas.
     // The spark keeps existing and can be seen from the menu.
     archiveSpark: (id: string) => void;
+
+    // Permanently deletes a spark. Orphans child/related nodes
+    deleteSpark: (id: string) => void;
 
     // Converts a spark into a flame
     convertSparkToFlame: (id: string) => void;
@@ -234,6 +239,25 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
             "UPDATE sparks SET is_archived = 1, updated_at = ?1 WHERE id = ?2",
             [updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Spark archiving: ", e));
+    },
+
+    deleteSpark: (id) => {
+        get().sparks
+            .filter((s) => s.parentId === id)
+            .forEach((s) => get().reassignParent(s.id, ""));
+
+        useFlameStore.getState().flames
+            .filter((f) => f.parentId === id)
+            .forEach((f) => useFlameStore.getState().reassignParent(f.id, ""));
+
+        useConnectionStore.getState().deleteConnectionsByNode(id);
+
+        set((state) => ({
+            sparks: state.sparks.filter((s) => s.id !== id)
+        }));
+
+        dbExecute("DELETE FROM sparks WHERE id = ?1", [id])
+            .catch((e) => console.error("Couldn't persist Spark deletion: ", e));
     },
 
     convertSparkToFlame: (id) => {

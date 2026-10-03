@@ -30,6 +30,7 @@ export type ModalType =
     | "assign-category"     // Assign or create a category
     | "manage-space"        // Create or edit a Space
     | "search"              // Node search
+    | "archive-list"        // Archived node list
     | null;                 // No modal open
 
 // Type of nodes that can be selected in the canvas

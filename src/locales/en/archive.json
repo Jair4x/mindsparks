@@ -1,0 +1,23 @@
+{
+    "title": "Archived",
+    "trigger": "Archived nodes",
+    "filters": {
+        "onlySparks": "Only Sparks",
+        "onlyFlames": "Only Flames",
+        "allSpaces": "All Spaces",
+        "searchPlaceholder": "Search archived...",
+        "reset": "Reset filters"
+    },
+    "empty": "No archived nodes match these filters",
+    "archivedWhen": "Archived {{when}}",
+    "actions": {
+        "restore": "Restore",
+        "delete": "Delete permanently",
+        "confirmQuestion": "Permanently delete this?",
+        "confirmYes": "Yes",
+        "cancel": "Cancel",
+        "filesQuestion": "What about its files?",
+        "filesKeep": "Keep them",
+        "filesDelete": "Delete them"
+    }
+}

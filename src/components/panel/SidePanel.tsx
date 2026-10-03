@@ -14,6 +14,7 @@ import {
     Filter,
     List,
     Settings,
+    Archive
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -92,6 +93,17 @@ export function SidePanel({ onCreateSpark }: { onCreateSpark: () => void }) {
                 isActive={groupMode === "hierarchy"}
                 onClick={() => setGroupMode("hierarchy")}
                 disabled
+            />
+
+            <PanelDivider />
+
+            {/*
+                Archived nodes list
+            */}
+            <PanelButton
+                icon={<Archive size={17} />}
+                label={t("sidePanel.archive")}
+                onClick={() => openModal("archive-list")}
             />
 
             <PanelDivider />

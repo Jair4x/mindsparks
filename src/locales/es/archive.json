@@ -1,0 +1,23 @@
+{
+    "title": "Archivados",
+    "trigger": "Nodos archivados",
+    "filters": {
+        "onlySparks": "Solo Sparks",
+        "onlyFlames": "Solo Flames",
+        "allSpaces": "Todos los Spaces",
+        "searchPlaceholder": "Buscar...",
+        "reset": "Reiniciar filtros"
+    },
+    "empty": "No hay nodos archivados que coincidan con estos filtros",
+    "archivedWhen": "Archivado {{when}}",
+    "actions": {
+        "restore": "Restaurar",
+        "delete": "Eliminar permanentemente",
+        "confirmQuestion": "¿Eliminarlo permanentemente?",
+        "confirmYes": "Sí",
+        "cancel": "Cancelar",
+        "filesQuestion": "¿Qué hay de sus archivos?",
+        "filesKeep": "Mantenlos",
+        "filesDelete": "Elimínalos"
+    }
+}

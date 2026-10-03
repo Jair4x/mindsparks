@@ -6,11 +6,16 @@
 // 
 
 
+import { invoke } from "@tauri-apps/api/core";
+import { remove } from "@tauri-apps/plugin-fs";
 import { create } from "zustand";
 import { Flame, Position, ToolInstance } from "../types";
 import { generateId, now } from "../lib/utils";
 import { dbSelect, dbExecute } from "../lib/db";
 import { queuePositionWrite } from "../lib/canvasPositionSync";
+import { useSpaceStore } from "./spaces";
+import { useSparkStore } from "./sparks";
+import { useConnectionStore } from "./connections";
 
 // --------------------------
 // DB stuff
@@ -126,6 +131,10 @@ interface FlameStore {
 
     // Archive a flame. Doesn't delete it.
     archiveFlame: (id: string) => void;
+
+    // Permanently delete a flame.
+    // User can choose to keep or delete files of the project if they wish to.
+    deleteFlame: (id: string, filesAction: "keep" | "delete") => Promise<void>;
 
     // Restores an archived flame.
     restoreFlame: (id: string) => void;
@@ -348,6 +357,45 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             "UPDATE flames SET is_archived = 1, updated_at = ?1 WHERE id = ?2",
             [updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame archiving: ", e));
+    },
+
+    deleteFlame: async (id, filesAction) => {
+        const flame = get().flames.find((f) => f.id === id);
+        if (!flame) return;
+
+        if (filesAction === "delete") {
+            try {
+                const space = useSpaceStore.getState().spaces.find((s) => s.id === flame.spaceId);
+
+                const flameFolder = await invoke<string>("resolve_flame_folder", {
+                    spaceId: flame.spaceId,
+                    spaceName: space?.name ?? "",
+                    flameId: flame.id,
+                    flameName: flame.name,
+                });
+
+                await remove(flameFolder, { recursive: true });
+            } catch (e) {
+                console.error("Couldn't delete Flame folder: ", e);
+            }
+        }
+
+        get().flames
+            .filter((f) => f.parentId === id)
+            .forEach((f) => get().reassignParent(f.id, ""));
+
+        useSparkStore.getState().sparks
+            .filter((s) => s.parentId === id)
+            .forEach((s) => useSparkStore.getState().reassignParent(s.id, ""));
+
+        useConnectionStore.getState().deleteConnectionsByNode(id);
+
+        set((state) => ({
+            flames: state.flames.filter((f) => f.id !== id)
+        }));
+
+        await dbExecute("DELETE FROM flames WHERE id = ?1", [id])
+            .catch((e) => console.error("Couldn't persist Flame deletion: ", e));
     },
 
     restoreFlame: (id) => {

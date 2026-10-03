@@ -46,7 +46,8 @@
         "groupByHierarchy": "Agrupar por Jerarquía",
         "filter": "Filtrar",
         "listView": "Vista de lista",
-        "config": "Configuración"
+        "config": "Configuración",
+        "archive": "Nodos archivados"
     },
     "flameView": {
         "previousFlame": "Flame anterior",
