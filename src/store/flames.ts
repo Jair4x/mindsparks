@@ -55,8 +55,6 @@ function rowToFlame(row: FlameRow): Flame {
 
 function insertFlameSql(flame: Flame) {
     return dbExecute(
-        `INSERT INTO flames (id, name, spark_id, position, space_id, category_id, parent_id, schema, tools, is_archived, is_completed, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)`,
         `INSERT INTO flames (id, name, description, spark_id, position, space_id, category_id, parent_id, schema, tools, is_archived, is_completed, created_at, updated_at)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)`,
         [
