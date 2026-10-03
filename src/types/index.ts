@@ -95,6 +95,7 @@ export interface Spark {
 export interface Flame {
     id:             string;
     name:           string;         // inherits the original spark's name, editable
+    description?:   string;         // short description of the project
     sparkId:        string;         // pointer to the spark it came from
     position:       Position;       // where is it in the canvas
     spaceId:        string;

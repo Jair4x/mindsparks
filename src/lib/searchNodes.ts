@@ -49,11 +49,7 @@ export function searchNodes(
 
     for (const node of candidates) {
         const nameIndex = node.name.toLowerCase().indexOf(trimmed);
-
-        // subject to change because I'll most probably add description for Flames later too
-        const descriptionMatches = "description" in node
-            ? (node.description ?? "").toLowerCase().includes(trimmed)
-            : false;
+        const descriptionMatches = (node.description ?? "").toLowerCase().includes(trimmed)
 
         if (nameIndex === -1 && !descriptionMatches) continue;
 

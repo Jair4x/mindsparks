@@ -212,7 +212,7 @@ function ResultRow({
                 className="line-clamp-1"
                 style={{ fontSize: 12, color: "var(--color-text-muted)", marginTop: 2 }}
             >
-                {"description" in node ? node.description : t("noDescription")}
+                {node.description && node.description.length > 0 ? node.description : t("noDescription")}
             </div>
 
             <div className="flex items-center gap-2" style={{ marginTop: 4, fontSize: 12, color: "var(--color-text-muted"}}>

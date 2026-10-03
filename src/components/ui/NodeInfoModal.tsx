@@ -66,13 +66,14 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const updateSparkDescription = useSparkStore((s) => s.updateSparkDescription);
     const restoreSpark           = useSparkStore((s) => s.restoreSpark);
     
-    const updateFlameName   = useFlameStore((s) => s.updateFlameName);
-    const completeFlame     = useFlameStore((s) => s.completeFlame);
-    const reopenFlame       = useFlameStore((s) => s.reopenFlame);
-    const restoreFlame      = useFlameStore((s) => s.restoreFlame);
+    const updateFlameName           = useFlameStore((s) => s.updateFlameName);
+    const updateFlameDescription    = useFlameStore((s) => s.updateFlameDescription);
+    const completeFlame             = useFlameStore((s) => s.completeFlame);
+    const reopenFlame               = useFlameStore((s) => s.reopenFlame);
+    const restoreFlame              = useFlameStore((s) => s.restoreFlame);
     
-    const openModal         = useUIStore((s) => s.openModal);
-    const openFlame         = useUIStore((s) => s.openFlame);
+    const openModal                 = useUIStore((s) => s.openModal);
+    const openFlame                 = useUIStore((s) => s.openFlame);
 
     const category = useCategoryStore((s) =>
         target.node.categoryId ? s.categories.find((c) => c.id === target.node.categoryId) : undefined
@@ -87,7 +88,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const initialName = target.node.name;
 
     const [name, setName]                                   = useState(initialName);
-    const [description, setDescription]                     = useState(!isFlame ? (target.node.description ?? "") : "");
+    const [description, setDescription]                     = useState(target.node.description ?? "");
     const [showFamily, setShowFamily]                       = useState(false);
     const [isCategoryBtnHovered, setIsCategoryBtnHovered]   = useState(false);
     const [pendingFlameNav, setPendingFlameNav]             = useState<Flame | null>(null);
@@ -114,11 +115,10 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
 
     // Save description when unfocused
     const handleDescriptionBlur = () => {
-        if (isFlame) return; // Nothing to save this into for a Flame
-        
-        if (description !== (target.node.description ?? "")) {
-            updateSparkDescription(target.node.id, description);
-        }
+        if (description === (target.node.description ?? "")) return;
+
+        if (isFlame) updateFlameDescription(target.node.id, description);
+        else updateSparkDescription(target.node.id, description);
     };
 
     const handleOverlayClick = (e: React.MouseEvent) => {
@@ -251,29 +251,27 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                     {/*
                         Description
                     */}
-                    {!isFlame && (
-                        <div className="flex items-center mt-1">
-                            <textarea
-                                rows={2}
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value.slice(0, DESC_MAX_LENGTH))}
-                                onBlur={handleDescriptionBlur}
-                                placeholder={t("nodes:info.descriptionPlaceholder")}
-                                className="w-full bg-transparent border-none outline-none mt-1"
-                                style={{
-                                    fontSize:   13,
-                                    color:      "var(--color-text-muted)",
-                                    fontFamily: "inherit",
-                                    resize:     "none",
-                                }}
-                            />
-                            {description.length > 0 && (
-                                <div style={{ fontSize: 10, color: "var(--color-text-muted)", flexShrink: 0, marginTop: 2 }}>
-                                    {description.length}/{DESC_MAX_LENGTH}
-                                </div>
-                            )}
-                        </div>
-                    )}
+                    <div className="flex items-center mt-1">
+                        <textarea
+                            rows={2}
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value.slice(0, DESC_MAX_LENGTH))}
+                            onBlur={handleDescriptionBlur}
+                            placeholder={t("nodes:info.descriptionPlaceholder")}
+                            className="w-full bg-transparent border-none outline-none mt-1"
+                            style={{
+                                fontSize:   13,
+                                color:      "var(--color-text-muted)",
+                                fontFamily: "inherit",
+                                resize:     "none",
+                            }}
+                        />
+                        {description.length > 0 && (
+                            <div style={{ fontSize: 10, color: "var(--color-text-muted)", flexShrink: 0, marginTop: 2 }}>
+                                {description.length}/{DESC_MAX_LENGTH}
+                            </div>
+                        )}
+                    </div>
 
                     {/*
                         Right column: Family + timestamp

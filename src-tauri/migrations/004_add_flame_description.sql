@@ -1,0 +1,1 @@
+ALTER TABLE flames ADD COLUMN description TEXT;

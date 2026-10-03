@@ -20,6 +20,7 @@ import { queuePositionWrite } from "../lib/canvasPositionSync";
 interface FlameRow {
     id:             string;
     name:           string;
+    description:    string | null;
     spark_id:       string;
     position:       string;
     space_id:       string;
@@ -37,6 +38,7 @@ function rowToFlame(row: FlameRow): Flame {
     return {
         id: row.id,
         name: row.name,
+        description: row.description ?? undefined,
         sparkId: row.spark_id,
         position: JSON.parse(row.position),
         spaceId: row.space_id,
@@ -55,9 +57,12 @@ function insertFlameSql(flame: Flame) {
     return dbExecute(
         `INSERT INTO flames (id, name, spark_id, position, space_id, category_id, parent_id, schema, tools, is_archived, is_completed, created_at, updated_at)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)`,
+        `INSERT INTO flames (id, name, description, spark_id, position, space_id, category_id, parent_id, schema, tools, is_archived, is_completed, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)`,
         [
             flame.id,
             flame.name,
+            flame.description ?? null,
             flame.sparkId,
             JSON.stringify(flame.position),
             flame.spaceId,
@@ -91,6 +96,7 @@ interface FlameStore {
     convertSparkToFlame: (params: {
         sparkId:        string;
         name:           string;
+        description?:   string;
         position:       Position;
         spaceId:        string;
         schema:         string;
@@ -102,6 +108,8 @@ interface FlameStore {
     loadFlames: () => Promise<void>;
 
     updateFlameName: (id: string, name: string) => void;
+
+    updateFlameDescription: (id: string, description: string) => void;
 
     moveFlameToPosition: (id: string, position: Position) => void;
 
@@ -149,6 +157,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
     convertSparkToFlame: ({
         sparkId,
         name,
+        description,
         position,
         spaceId,
         schema,
@@ -170,6 +179,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         const newFlame: Flame = {
             id: generateId(),
             name,
+            description,
             sparkId,
             position,
             spaceId,
@@ -209,6 +219,23 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             "UPDATE flames SET name = ?1, updated_at = ?2 WHERE id = ?3",
             [name, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame name: ", e));
+    },
+
+    updateFlameDescription: (id, description) => {
+        const updatedAt = now();
+
+        set((state) => ({
+            flames: state.flames.map((flame) =>
+                flame.id === id
+                    ? { ...flame, description, updatedAt }
+                    : flame
+            )
+        }));
+
+        dbExecute(
+            "UPDATE flames SET description = ?1, updated_at = ?2 WHERE id = ?3",
+            [description, updatedAt, id]
+        ).catch((e) => console.error("Couldn't persist Flame description: ", e));
     },
 
     moveFlameToPosition: (id, position) => {

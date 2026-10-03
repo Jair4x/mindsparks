@@ -55,6 +55,7 @@ export function SparkToFlameModal() {
                     const newFlame = convertSparkToFlame({
                         sparkId: spark.id,
                         name: spark.name,
+                        description: spark.description,
                         position: spark.position,
                         spaceId: spark.spaceId,
                         schema: schemaName,
