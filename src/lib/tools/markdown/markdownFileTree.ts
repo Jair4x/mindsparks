@@ -37,11 +37,11 @@ export async function buildFileTree(rootPath: string): Promise<MarkdownFileNode[
         })
     );
 
-    // folders first, files later, in alphabetical order
+    // folders first, files later, in natural order (so "File 2" sorts before "File 10")
     return nodes.sort((a, b) => {
         if (a.kind !== b.kind) return a.kind === "folder" ? -1 : 1;
 
-        return a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name, undefined, { numeric: true });
     });
 }
 
