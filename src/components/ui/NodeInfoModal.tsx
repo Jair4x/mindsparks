@@ -85,6 +85,8 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const nowMs         = useNow();
     const overlayRef    = useRef<HTMLDivElement>(null);
     
+    const mouseDownOnOverlay = useRef(false);
+    
     const initialName = target.node.name;
 
     const [name, setName]                                   = useState(initialName);
@@ -121,8 +123,12 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
         else updateSparkDescription(target.node.id, description);
     };
 
-    const handleOverlayClick = (e: React.MouseEvent) => {
-        if (e.target === overlayRef.current) onClose();
+    const handleOverlayMouseDown = (e: React.MouseEvent) => {
+        mouseDownOnOverlay.current = e.target === overlayRef.current;
+    };
+
+    const handleOverlayMouseUp = (e: React.MouseEvent) => {
+        if (mouseDownOnOverlay.current && e.target === overlayRef.current) onClose();
     };
 
     const handleFamilyClick = (node: Spark | Flame) => {
@@ -149,7 +155,8 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     return (
         <div
             ref={overlayRef}
-            onClick={handleOverlayClick}
+            onMouseUp={handleOverlayMouseUp}
+            onMouseDown={handleOverlayMouseDown}
             className="fixed inset-0 flex items-center justify-center z-50"
             style={{ background: "var(--color-overlay" }}
         >
