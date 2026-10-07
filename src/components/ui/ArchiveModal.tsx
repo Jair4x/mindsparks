@@ -233,12 +233,19 @@ function ArchivedRow({ node, space }: { node: ArchivedNode; space: Space | undef
     const deleteSpark = useSparkStore((s) => s.deleteSpark);
     const deleteFlame = useFlameStore((s) => s.deleteFlame);
 
+    const requestRepulsion = useUIStore((s) => s.requestRepulsion);
+
     const isFlame = node.kind === "flame";
     const SpaceIcon = space ? getSpaceIcon(space.icon) : null;
 
-    const handleRestore = () => {
-        if (isFlame) restoreFlame(node.id);
-        else restoreSpark(node.id);
+    const handleRestore = async () => {
+        if (isFlame) {
+            await restoreFlame(node.id);
+        } else {
+            await restoreSpark(node.id);
+        }
+
+        requestRepulsion([node.id]);
     };
 
     const handleDeleteConfirmed = async (filesAction?: "keep" | "delete") => {

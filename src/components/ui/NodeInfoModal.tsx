@@ -72,6 +72,8 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const reopenFlame               = useFlameStore((s) => s.reopenFlame);
     const restoreFlame              = useFlameStore((s) => s.restoreFlame);
     
+    const requestRepulsion          = useUIStore((s) => s.requestRepulsion);
+    
     const openModal                 = useUIStore((s) => s.openModal);
     const openFlame                 = useUIStore((s) => s.openFlame);
 
@@ -383,7 +385,11 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                                 <ActionButton
                                     icon={<ArchiveRestore size={13} />}
                                     label={t("info.actions.restore")}
-                                    onClick={() => { restoreFlame(target.node.id); onClose(); }}
+                                    onClick={() => { 
+                                        restoreFlame(target.node.id);
+                                        requestRepulsion([target.node.id]);
+                                        onClose();
+                                    }}
                                 />
                             ) : target.node.isCompleted ? (
                                     <ActionButton

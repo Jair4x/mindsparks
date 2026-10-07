@@ -359,6 +359,12 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     useEffect(() => {
         if (pendingRepulsion.length === 0) return;
 
+        const readyIds = pendingRepulsion.filter((id) =>
+            nodes.some((node) => node.id === id)
+        );
+
+        if (readyIds.length === 0) return;
+
         // Solution proposed by AI, I still don't get how can duplicated nodes be "one render behind", but eh, it works.
         // Replacing the big tangent added in "feat: add repulsion to duplication and child creation"
 
@@ -371,14 +377,15 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
             id: node.id,
             position: displayNodePositions.get(node.id) ?? node.position,
             size: getNodeSize(node.id),
+            type: node.type,
         }));
 
-        for (const id of pendingRepulsion) {
+        for (const id of readyIds) {
             resolveAndAnimateCollisions(id, allNodePositions);
         }
 
         clearPendingRepulsion();
-    }, [pendingRepulsion, displayNodes, resolveAndAnimateCollisions, clearPendingRepulsion, getNodeSize]);
+    }, [pendingRepulsion, nodes, displayNodes, resolveAndAnimateCollisions, clearPendingRepulsion, getNodeSize]);
 
     // --------------------------
     // createSparkAtCenter
