@@ -27,6 +27,7 @@ const MIGRATIONS: &[(i64, &str)] = &[
     (2, include_str!("../migrations/002_create_sparks_flames_&_categories.sql")),
     (3, include_str!("../migrations/003_create_connections.sql")),
     (4, include_str!("../migrations/004_add_flame_description.sql")),
+    (5, include_str!("../migrations/005_folder_names.sql")),
 ];
 
 fn run_migrations(conn: &mut Connection) -> Result<(), String> {

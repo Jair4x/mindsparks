@@ -19,6 +19,7 @@ import { Space, CanvasPos } from "../types";
 import { generateId, now } from "../lib/utils";
 import { deleteSpaceCascade } from "./cascade";
 import { dbSelect, dbExecute } from "../lib/db";
+import { invoke } from "@tauri-apps/api/core";
 import i18n from "i18next";
 
 // --------------------------
@@ -39,6 +40,7 @@ interface SpaceRow {
     color:              string | null;
     is_default:         number;
     canvas_viewport:    string;
+    folder_name:        string;
     created_at:         string;
     updated_at:         string;
 }
@@ -51,6 +53,7 @@ function rowToSpace(row: SpaceRow): Space {
         color: row.color ?? undefined,
         isDefault: row.is_default === 1,
         canvasViewport: JSON.parse(row.canvas_viewport),
+        folderName: row.folder_name,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
     };
@@ -58,8 +61,8 @@ function rowToSpace(row: SpaceRow): Space {
 
 function insertSpaceSql(space: Space) {
     return dbExecute(
-        `INSERT INTO spaces (id, name, icon, color, is_default, canvas_viewport, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)`,
+        `INSERT INTO spaces (id, name, icon, color, is_default, canvas_viewport, folder_name, created_at, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)`,
         [
             space.id,
             space.name,
@@ -67,6 +70,7 @@ function insertSpaceSql(space: Space) {
             space.color ?? null,
             space.isDefault ? 1 : 0,
             JSON.stringify(space.canvasViewport),
+            space.folderName,
             space.createdAt,
             space.updatedAt,
         ]
@@ -99,9 +103,9 @@ interface SpaceStore {
         name:   string;
         icon?:  string;
         color?: string;
-    }) => Space;
+    }) => Promise<Space>;
 
-    renameSpace: (id: string, name: string) => void;
+    renameSpace: (id: string, name: string) => Promise<void>;
 
     updateSpaceIcon: (id: string, icon: string) => void;
 
@@ -132,11 +136,14 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
             const rows = await dbSelect<SpaceRow>("SELECT * FROM spaces");
 
             if (rows.length === 0) {
+                const folderName = await invoke<string>("create_space_folder", { spaceName: "Personal" });
+
                 const defaultSpace: Space = {
                     id: generateId(),
                     name: i18n.t("spaces:defaultName"),
                     isDefault: true,
                     canvasViewport: DEFAULT_VIEWPORT,
+                    folderName,
                     createdAt: now(),
                     updatedAt: now(),
                 };
@@ -162,7 +169,9 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
         set({ activeSpaceId: id });
     },
 
-    createSpace: ({ name, icon, color }) => {
+    createSpace: async ({ name, icon, color }) => {
+        const folderName = await invoke<string>("create_space_folder", { spaceName: name });
+
         const newSpace: Space = {
             id: generateId(),
             name,
@@ -170,6 +179,7 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
             color,
             isDefault: false,
             canvasViewport: DEFAULT_VIEWPORT,
+            folderName,
             createdAt: now(),
             updatedAt: now(),
         };
@@ -180,20 +190,34 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
         return newSpace;
     },
 
-    renameSpace: (id, name) => {
+    renameSpace: async (id, name) => {
+        const space = get().spaces.find((s) => s.id === id);
+        if (!space) return;
+
+        let folderName = space.folderName;
+
+        try {
+            folderName = await invoke<string>("rename_space_folder", {
+                spaceFolderName: space.folderName,
+                newName: name,
+            });
+        } catch (e) {
+            console.error("Couldn't rename Space folder:", e);
+        }
+
         const updatedAt = now();
 
         set((state) => ({
-            spaces: state.spaces.map((space) =>
-                space.id === id
-                    ? { ...space, name, updatedAt }
-                    : space
+            spaces: state.spaces.map((s) =>
+                s.id === id
+                    ? { ...s, name, folderName, updatedAt }
+                    : s
             )
         }));
 
         dbExecute(
-            "UPDATE spaces SET name = ?1, updated_at = ?2 WHERE id = ?3",
-            [name, updatedAt, id]
+            "UPDATE spaces SET name = ?1, folder_name = ?2, updated_at = ?3 WHERE id = ?4",
+            [name, folderName, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Space rename: ", e));
     },
 
@@ -226,7 +250,7 @@ export const useSpaceStore = create<SpaceStore>((set, get) => ({
         }));
 
         dbExecute(
-            "UPDATE spaces SET color = ?1, update_at = ?2 WHERE id = ?3",
+            "UPDATE spaces SET color = ?1, updated_at = ?2 WHERE id = ?3",
             [color, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Space Color: ", e));
     },

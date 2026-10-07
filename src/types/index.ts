@@ -103,6 +103,7 @@ export interface Flame {
     parentId?:      string;
     schema:         string;         // name of the selected schema (predefined or custom), referencing Schema
     tools:          ToolInstance[]; // name of the active tools in this flame, referencing tools[]
+    folderName:     string;         // on-disk folder name under its Space's folder, set once at creation
     isArchived:     boolean;
     isCompleted:    boolean;        // if the user marked it as finished
     createdAt:      string;
@@ -151,6 +152,7 @@ export interface Space {
     color?:         string;     // identifier color, hex
     isDefault:      boolean;    // only true for the personal Space
     canvasViewport: CanvasPos;  // last pan/zoom position on this space's canvas
+    folderName:     string;     // on-disk folder name under [vault]/Spaces/, slug + disambiguator, set once at creation
     createdAt:      string;
     updatedAt:      string;
 }

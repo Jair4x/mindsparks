@@ -50,9 +50,9 @@ export function SparkToFlameModal() {
                 subtitle={spark.name}
                 initialTools={[]}
                 onClose={closeModal}
-                onConfirm={(schemaName, selectedTools) => {
+                onConfirm={async (schemaName, selectedTools) => {
                     convertSpark(spark.id);
-                    const newFlame = convertSparkToFlame({
+                    const newFlame = await convertSparkToFlame({
                         sparkId: spark.id,
                         name: spark.name,
                         description: spark.description,

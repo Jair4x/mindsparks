@@ -9,6 +9,7 @@ import { readTextFile, writeTextFile, exists, watch } from "@tauri-apps/plugin-f
 import { dirname, join } from "@tauri-apps/api/path";
 import { flattenFiles, type MarkdownFileNode } from "../../../lib/tools/markdown/markdownFileTree";
 import { toRelativePath } from "../../../lib/tools/markdown/relativePath";
+import { registerWatcher, unregisterWatcher } from "../../../lib/tools/watcherRegistry";
 
 import { ATOMIC_CODE_LANGUAGES } from "@atomic-editor/editor/code-languages";
 import { AtomicCodeMirrorEditor, wikiLinks } from "@atomic-editor/editor";
@@ -22,13 +23,14 @@ import { setupViewListener } from "../../../lib/tools/markdown/externalChangeExt
 
 interface MarkdownEditorProps {
     filePath:   string;
+    flameId:    string;
     fileTree:   MarkdownFileNode[];
     onOpenFile: (path: string) => void;
 }
 
 const SAVE_DEBOUNCE_MS = 500;
 
-export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEditorProps) {
+export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile }: MarkdownEditorProps) {
     const [initialContent, setInitialContent]   = useState<string | null>(null);
     const [externalContent, setExternalContent] = useState<string | null>(null);
     const [loadError, setLoadError]             = useState<string | null>(null);
@@ -86,13 +88,16 @@ export function MarkdownEditor({ filePath, fileTree, onOpenFile }: MarkdownEdito
             if (cancelled) {
                 fn();
             } else {
-                unwatch = fn;
+                unwatch = registerWatcher(flameId, fn);
             }
         });
 
         return () => {
             cancelled = true;
-            unwatch?.();
+            if (unwatch) {
+                unwatch();
+                unregisterWatcher(flameId, unwatch);
+            }
         };
     }, [filePath]);
 

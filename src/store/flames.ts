@@ -11,6 +11,8 @@ import { remove } from "@tauri-apps/plugin-fs";
 import { create } from "zustand";
 import { Flame, Position, ToolInstance } from "../types";
 import { generateId, now } from "../lib/utils";
+import { resolveFlameFolderPath } from "../lib/flamePaths";
+import { pauseWatchersForFlame } from "../lib/tools/watcherRegistry";
 import { dbSelect, dbExecute } from "../lib/db";
 import { queuePositionWrite } from "../lib/canvasPositionSync";
 import { useSpaceStore } from "./spaces";
@@ -33,6 +35,7 @@ interface FlameRow {
     parent_id:      string | null;
     schema:         string;
     tools:          string;
+    folder_name:    string;
     is_archived:    number;
     is_completed:   number;
     created_at:     string;
@@ -51,6 +54,7 @@ function rowToFlame(row: FlameRow): Flame {
         parentId: row.parent_id ?? undefined,
         schema: row.schema,
         tools: JSON.parse(row.tools),
+        folderName: row.folder_name,
         isArchived: row.is_archived === 1,
         isCompleted: row.is_completed === 1,
         createdAt: row.created_at,
@@ -60,8 +64,8 @@ function rowToFlame(row: FlameRow): Flame {
 
 function insertFlameSql(flame: Flame) {
     return dbExecute(
-        `INSERT INTO flames (id, name, description, spark_id, position, space_id, category_id, parent_id, schema, tools, is_archived, is_completed, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)`,
+        `INSERT INTO flames (id, name, description, spark_id, position, space_id, category_id, parent_id, schema, tools, folder_name, is_archived, is_completed, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)`,
         [
             flame.id,
             flame.name,
@@ -73,6 +77,7 @@ function insertFlameSql(flame: Flame) {
             flame.parentId ?? null,
             flame.schema,
             JSON.stringify(flame.tools),
+            flame.folderName,
             flame.isArchived ? 1 : 0,
             flame.isCompleted ? 1 : 0,
             flame.createdAt,
@@ -106,11 +111,11 @@ interface FlameStore {
         tools:          Array<string | { type: string; label?: string }>;
         categoryId?:    string;
         parentId?:      string;
-    }) => Flame;
+    }) => Promise<Flame>;
 
     loadFlames: () => Promise<void>;
 
-    updateFlameName: (id: string, name: string) => void;
+    updateFlameName: (id: string, name: string) => Promise<void>;
 
     updateFlameDescription: (id: string, description: string) => void;
 
@@ -130,14 +135,14 @@ interface FlameStore {
     reopenFlame: (id: string) => void;
 
     // Archive a flame. Doesn't delete it.
-    archiveFlame: (id: string) => void;
+    archiveFlame: (id: string) => Promise<void>;
 
     // Permanently delete a flame.
     // User can choose to keep or delete files of the project if they wish to.
     deleteFlame: (id: string, filesAction: "keep" | "delete") => Promise<void>;
 
     // Restores an archived flame.
-    restoreFlame: (id: string) => void;
+    restoreFlame: (id: string) => Promise<void>;
 
     // Main selector the canvas uses to know what to show.
     getActiveFlamesBySpace: (spaceId: string) => Flame[];
@@ -161,7 +166,7 @@ interface FlameStore {
 export const useFlameStore = create<FlameStore>((set, get) => ({
     flames: [],
 
-    convertSparkToFlame: ({
+    convertSparkToFlame: async ({
         sparkId,
         name,
         description,
@@ -172,6 +177,13 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         categoryId,
         parentId,
     }) => {
+        const space = useSpaceStore.getState().spaces.find((s) => s.id === spaceId);
+
+        const folderName = await invoke<string>("create_flame_folder", {
+            spaceFolderName: space?.folderName ?? "",
+            flameName: name,
+        });
+
         const toolInstances: ToolInstance[] = tools.map((entry) => {
             const isPlainType = typeof entry === "string";
 
@@ -194,6 +206,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             tools: toolInstances,
             categoryId,
             parentId,
+            folderName,
             isArchived: false,
             isCompleted: false,
             createdAt: now(),
@@ -211,20 +224,39 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         set({ flames: rows.map(rowToFlame) });
     },
 
-    updateFlameName: (id, name) => {
+    updateFlameName: async (id, name) => {
+        const flame = get().flames.find((f) => f.id === id);
+        if (!flame) return;
+
+        const space = useSpaceStore.getState().spaces.find((s) => s.id === flame.spaceId);
+
+        pauseWatchersForFlame(id); // try to stop active file watchers on that flame to edit stuff
+
+        let folderName = flame.folderName;
+        try {
+            folderName = await invoke<string>("rename_flame_folder", {
+                spaceFolderName: space?.folderName ?? "",
+                flameFolderName: flame.folderName,
+                newName: name,
+                isArchived: flame.isArchived,
+            });
+        } catch (e) {
+            console.error("Couldn't rename Flame folder: ", e);
+        }
+
         const updatedAt = now();
-        
+
         set((state) => ({
             flames: state.flames.map((flame) => 
                 flame.id === id 
-                    ? { ...flame, name, updatedAt }
+                    ? { ...flame, name, folderName, updatedAt }
                     : flame
             ),
         }));
 
         dbExecute(
-            "UPDATE flames SET name = ?1, updated_at = ?2 WHERE id = ?3",
-            [name, updatedAt, id]
+            "UPDATE flames SET name = ?1, folder_name = ?2, updated_at = ?3 WHERE id = ?4",
+            [name, folderName, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame name: ", e));
     },
 
@@ -342,7 +374,11 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         ).catch((e) => console.error("Couldn't persist Flame reopening: ", e));
     },
 
-    archiveFlame: (id) => {
+    archiveFlame: async (id) => {
+        const flame = get().flames.find((f) => f.id === id);
+        if (!flame) return;
+
+        const space = useSpaceStore.getState().spaces.find((s) => s.id === flame.spaceId);
         const updatedAt = now();
 
         set((state) => ({
@@ -352,11 +388,23 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
                     : flame
             ),
         }));
+        
+        try {
+            const folderName = await invoke("set_flame_archived_folder", {
+                spaceFolderName: space?.folderName ?? "",
+                flameFolderName: flame.folderName,
+                flameName: flame.name,
+                archived: true,
+            });
+        } catch (e) {
+            console.error("Couldn't move Flame folder to archived: ", e);
+        }
 
         dbExecute(
-            "UPDATE flames SET is_archived = 1, updated_at = ?1 WHERE id = ?2",
-            [updatedAt, id]
+            "UPDATE flames SET is_archived = 1, folder_name = ?1, updated_at = ?2 WHERE id = ?3",
+            [folderName, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame archiving: ", e));
+
     },
 
     deleteFlame: async (id, filesAction) => {
@@ -367,12 +415,11 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             try {
                 const space = useSpaceStore.getState().spaces.find((s) => s.id === flame.spaceId);
 
-                const flameFolder = await invoke<string>("resolve_flame_folder", {
-                    spaceId: flame.spaceId,
-                    spaceName: space?.name ?? "",
-                    flameId: flame.id,
-                    flameName: flame.name,
-                });
+                const flameFolder = await resolveFlameFolderPath(
+                    space?.folderName ?? "",
+                    flame.folderName,
+                    flame.isArchived
+                );
 
                 await remove(flameFolder, { recursive: true });
             } catch (e) {
@@ -398,20 +445,31 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             .catch((e) => console.error("Couldn't persist Flame deletion: ", e));
     },
 
-    restoreFlame: (id) => {
+    restoreFlame: async (id) => {
+        const flame = get().flames.find((f) => f.id === id);
+        if (!flame) return;
+
+        const space = useSpaceStore.getState().spaces.find((s) => s.id === flame.spaceId);
         const updatedAt = now();
+
+        const folderName = await invoke<string>("set_flame_archived_folder", {
+            spaceFolderName: space?.folderName ?? "",
+            flameFolderName: flame.folderName,
+            flameName: flame.name,
+            archived: false,
+        });
 
         set((state) => ({
             flames: state.flames.map((flame) =>
                 flame.id === id 
-                    ? { ...flame, isArchived: false, updatedAt }
+                    ? { ...flame, folderName, isArchived: false, updatedAt }
                     : flame
             ),
         }));
 
         dbExecute(
-            "UPDATE flames SET is_archived = 0, updated_at = ?1 WHERE id = ?2",
-            [updatedAt, id]
+            "UPDATE flames SET is_archived = 0, folder_name = ?1, updated_at = ?2 WHERE id = ?3",
+            [folderName, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame restoring: ", e));
     },
 

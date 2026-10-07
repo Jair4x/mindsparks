@@ -150,12 +150,12 @@ function ContextMenuContent({
     // Handlers: single/multi node actions
     // --------------------------
 
-    const handleDuplicate = () => {
+    const handleDuplicate = async () => {
         const newIds: string[] = [];
-        targetNodes.forEach((node) => {
+        for (const node of targetNodes) {
             if (node.type === "spark") {
                 const spark = sparks.find((s) => s.id === node.id);
-                if (!spark) return;
+                if (!spark) continue;
 
                 const newSpark = createSpark({
                     name: spark.name,
@@ -169,7 +169,7 @@ function ContextMenuContent({
             }
             if (node.type === "flame") {
                 const flame = flames.find((f) => f.id === node.id);
-                if (!flame) return;
+                if (!flame) continue;
 
                 const tempSpark = createSpark({
                     name: flame.name,
@@ -181,7 +181,7 @@ function ContextMenuContent({
 
                 convertSpark(tempSpark.id);
 
-                const newFlame = createFlame({
+                const newFlame = await createFlame({
                     sparkId: tempSpark.id,
                     name: tempSpark.name,
                     position: tempSpark.position,
@@ -194,7 +194,7 @@ function ContextMenuContent({
 
                 newIds.push(newFlame.id);
             }
-        });
+        };
 
         requestRepulsion(newIds);
         onClose();

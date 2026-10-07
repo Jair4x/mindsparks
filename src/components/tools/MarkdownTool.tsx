@@ -24,6 +24,7 @@ import {
 import { FileTreeToolbar } from "./markdown/fileTreeToolbar";
 import { FileTree } from "./markdown/FileTree";
 import { watchFileTree } from "../../lib/tools/markdown/fileTreeWatcher";
+import { registerWatcher, unregisterWatcher } from "../../lib/tools/watcherRegistry";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import type { ToolInstance } from "../../types";
 
@@ -68,14 +69,17 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                 instanceId: instance.id,
                 flameId: flame.id,
                 flameName: flame.name,
+                flameFolderName: flame.folderName,
+                flameIsArchived: flame.isArchived,
                 spaceId: space.id,
                 spaceName: space.name,
+                spaceFolderName: space.folderName,
             })
             .then(async (root) => {
                 setRootPath(root);
                 setNodes(await buildFileTree(root));
             });
-    }, [flame?.id, space?.id, instance.id]);
+    }, [flame?.id, flame?.folderName, space?.id, instance.id]);
 
     // Watcher to file tree
     useEffect(() => {
@@ -84,13 +88,16 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         let unwatch: (() => void) | undefined;
 
         watchFileTree(rootPath, () => refreshTree(rootPath)).then((fn) => {
-            unwatch = fn;
+            unwatch = registerWatcher(flame?.id, fn);
         });
 
         return () => {
-            unwatch?.();
+            if (unwatch) {
+                unwatch();
+                unregisterWatcher(flame?.id, unwatch);
+            }
         };
-    }, [rootPath]);
+    }, [rootPath, flame?.id]);
 
     async function refreshTree(root: string) {
         setNodes(await buildFileTree(root));
@@ -254,6 +261,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                     <div className="flex-1 overflow-hidden py-1.5">
                         <MarkdownEditor
                             key={`${session.openFilePath}-${reloadNonce}`}
+                            flameId={flame?.id ?? ""}
                             filePath={session.openFilePath}
                             fileTree={nodes}
                             onOpenFile={async (path) => {
