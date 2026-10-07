@@ -388,9 +388,11 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
                     : flame
             ),
         }));
-        
+
+        let folderName = flame.folderName;
+
         try {
-            const folderName = await invoke("set_flame_archived_folder", {
+            folderName = await invoke("set_flame_archived_folder", {
                 spaceFolderName: space?.folderName ?? "",
                 flameFolderName: flame.folderName,
                 flameName: flame.name,

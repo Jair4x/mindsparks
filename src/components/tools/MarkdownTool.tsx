@@ -88,16 +88,16 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         let unwatch: (() => void) | undefined;
 
         watchFileTree(rootPath, () => refreshTree(rootPath)).then((fn) => {
-            unwatch = registerWatcher(flame?.id, fn);
+            unwatch = registerWatcher(flameId, fn);
         });
 
         return () => {
             if (unwatch) {
                 unwatch();
-                unregisterWatcher(flame?.id, unwatch);
+                unregisterWatcher(flameId, unwatch);
             }
         };
-    }, [rootPath, flame?.id]);
+    }, [rootPath, flameId]);
 
     async function refreshTree(root: string) {
         setNodes(await buildFileTree(root));
