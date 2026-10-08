@@ -133,6 +133,7 @@ function ModalContent({
     const [selectedTools, setSelectedTools]     = useState<string[]>(defaultTools);
     const selectedSchema                        = useMemo(() => deriveSchemaFromTools(selectedTools, tools, schemas), [selectedTools, tools, schemas]);
     const overlayRef                            = useRef<HTMLDivElement>(null);
+    const mouseDownOnOverlay                    = useRef(false);
     const { t }                                 = useTranslation(["nodes", "common"]);
 
     const handleSchemaChange = (schemaName: string) => {
@@ -163,8 +164,13 @@ function ModalContent({
         return () => window.removeEventListener("keydown", handleKey);
     }, [onClose]);
 
-    const handleOverlayClick = (e: React.MouseEvent) => {
-        if (e.target === overlayRef.current) onClose();
+
+    const handleOverlayMouseDown = (e: React.MouseEvent) => {
+        mouseDownOnOverlay.current = e.target === overlayRef.current;
+    };
+
+    const handleOverlayMouseUp = (e: React.MouseEvent) => {
+        if (mouseDownOnOverlay.current && e.target === overlayRef.current) onClose();
     };
 
     const canConfirm = selectedTools.length > 0;
@@ -172,7 +178,8 @@ function ModalContent({
     return (
         <div
             ref={overlayRef}
-            onClick={handleOverlayClick}
+            onMouseDown={handleOverlayMouseDown}
+            onMouseUp={handleOverlayMouseUp}
             className="fixed inset-0 flex items-center justify-center z-50"
             style={{ background: "var(--color-overlay)" }}
         >
