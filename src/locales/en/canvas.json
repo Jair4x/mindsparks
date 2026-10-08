@@ -7,7 +7,7 @@
         "createSpace": "Create a New Space",
         "duplicate": "Duplicate",
         "convertToFlame": "Convert into a Flame",
-        "convertToSpark": "Convert back to Spark (NOT IMPLEMENTED YET)",
+        "convertToSpark": "Convert back to Spark",
         "assignCategory": "Assign a category",
         "archive": "Archive",
         "createChild": "Create a Child Spark",

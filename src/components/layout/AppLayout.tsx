@@ -15,6 +15,7 @@ import { FlameView } from "../flame/FlameView";
 
 import { NodeInfoModal } from "../ui/NodeInfoModal";
 import { SparkToFlameModal } from "../ui/SparkToFlameModal";
+import { FlameToSparkModal } from "../ui/FlameToSparkModal";
 import { CategoryModal } from "../ui/CategoryModal";
 
 import { HEADER_HEIGHT } from "../../lib/constants";
@@ -46,6 +47,7 @@ export function AppLayout() {
                     <FlameView />
                     <NodeInfoModal />
                     <SparkToFlameModal />
+                    <FlameToSparkModal />
                     <CategoryModal />
                 </>
             ) : (
@@ -79,6 +81,7 @@ export function AppLayout() {
                         
                         <NodeInfoModal />
                         <SparkToFlameModal />
+                        <FlameToSparkModal />
                         <CategoryModal />
                         <SpaceModal />
                         <SearchModal onSelectResult={(id, spaceId) => canvasRef.current?.focusNode(id, spaceId)} />

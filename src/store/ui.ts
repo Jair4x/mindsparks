@@ -25,6 +25,7 @@ import {
 export type ModalType =
     | "node-detail"         // Details of a node (spark/flame)
     | "spark-to-flame"      // Spark to flame conversion
+    | "flame-to-spark"      // Reverse the above conversion
     | "manage-tools"        // spark-to-flame, but inside a Flame to manage tools
     | "manage-category"     // Create or edit a category
     | "assign-category"     // Assign or create a category

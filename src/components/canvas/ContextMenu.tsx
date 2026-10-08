@@ -220,9 +220,12 @@ function ContextMenuContent({
     };
 
     const handleConvert = () => {
-        if (contextMenu.nodeType !== "spark") return; // Flame -> Spark isn't implemented yet.
+        if (contextMenu.nodeType === "spark") {
+            openModal("spark-to-flame", contextMenu.nodeId);
+        } else {
+            openModal("flame-to-spark", contextMenu.nodeId);
+        }
 
-        openModal("spark-to-flame", contextMenu.nodeId);
         onClose();
     };
 
@@ -422,7 +425,6 @@ function ContextMenuContent({
                                 label={contextMenu.nodeType === "spark" ? t("contextMenu.convertToFlame") : t("contextMenu.convertToSpark")}
                                 onClick={handleConvert}
                                 onMouseEnter={() => setOpenSubmenu(null)}
-                                disabled={contextMenu.nodeType === "flame"}
                             />
                             
                             <SubmenuItem

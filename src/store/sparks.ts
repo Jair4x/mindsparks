@@ -113,6 +113,9 @@ interface SparkStore {
     // Restores an archived spark to the canvas.
     restoreSpark: (id: string) => void;
 
+    // Bring the original archived Spark back as if it had never been converted in the first place
+    revertSparkFromFlame: (id: string, position: Position, parentId: string | undefined) => void;
+
     // Main selector the canvas uses to know what to show.
     getActiveSparksBySpace: (spaceId: string) => Spark[];
 
@@ -298,6 +301,23 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
             "UPDATE sparks SET is_archived = 0, updated_at = ?1 WHERE id = ?2",
             [updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Spark restore: ", e));
+    },
+
+    revertSparkFromFlame: (id, position, parentId) => {
+        const updatedAt = now();
+
+        set((state) => ({
+            sparks: state.sparks.map((spark) =>
+                spark.id === id
+                    ? { ...spark, isArchived: false, isConvertedToFlame: false, position, parentId, updatedAt }
+                    : spark
+            )
+        }));
+
+        dbExecute(
+            "UPDATE sparks SET is_archived = 0, is_converted_to_flame = 0, position = ?1, parent_id = ?2, updated_at = ?3 WHERE id = ?4",
+            [JSON.stringify(position), parentId ?? null, updatedAt, id]
+        ).catch((e) => console.error("Couldn't persist Spark revert: ", e));
     },
 
     getActiveSparksBySpace: (spaceId) => {

@@ -56,3 +56,16 @@ export function reparentNode(oldId: string, newId: string): void {
         .filter((s) => s.parentId === oldId)
         .forEach((s) => useFlameStore.getState().reassignParent(s.id, newId));
 }
+
+// Flame → Spark, inverse of convertSparkToFlame + reparentNode
+export async function convertFlameToSpark(flameId: string): Promise<void> {
+    const flame = useFlameStore.getState().flames.find((f) => f.id === flameId);
+    if (!flame) return;
+
+    const spark = useSparkStore.getState().sparks.find((s) => s.id === flame.sparkId);
+    if (!spark) return; // the original Spark should always exist, but let's not crash if it somehow doesn't
+
+    useSparkStore.getState().revertSparkFromFlame(spark.id, flame.position, flame.parentId);
+    reparentNode(flame.id, spark.id);
+    await useFlameStore.getState().deleteFlame(flame.id, "delete");
+}

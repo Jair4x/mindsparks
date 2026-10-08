@@ -6,8 +6,8 @@
 //
 //
 
-import { useState, useCallback, useEffect } from "react";
-import { ArrowLeft, Info, Settings, MoreHorizontal, LayoutGrid } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { ArrowLeft, Info, Settings, MoreHorizontal, LayoutGrid, ArrowLeftRight } from "lucide-react";
 import { useUIStore, useFlameStore, useSparkStore } from "../../store";
 import { useTranslation } from "react-i18next";
 
@@ -226,11 +226,7 @@ function FlameViewContent({
                         label={t("flameView.appSettings")}
                         onClick={() => {}} // TODO: Implement this
                     />
-                    <HeaderButton
-                        icon={<MoreHorizontal size={14} />}
-                        label={t("flameView.moreOptions")}
-                        onClick={() => {}} // TODO: Implement this
-                    />
+                    <FlameMoreOptions flame={flame} />
                 </div>
             </header>
 
@@ -297,5 +293,95 @@ function Separator() {
                 flexShrink: 0,
             }}
         />
+    );
+}
+
+function FlameMoreOptions({ flame }: { flame: Flame }) {
+    const { t }                 = useTranslation(["nodes", "common"]);
+    const [isOpen, setIsOpen]   = useState(false);
+    const anchorRef             = useRef<HTMLDivElement>(null);
+    const openModal             = useUIStore((s) => s.openModal);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleMouseDown = (e: MouseEvent) => {
+            if (anchorRef.current?.contains(e.target as Node)) return;
+            setIsOpen(false);
+        };
+
+        document.addEventListener("mousedown", handleMouseDown, true);
+        return () => document.removeEventListener("mousedown", handleMouseDown, true);
+    }, [isOpen]);
+
+    return (
+        <div ref={anchorRef} className="relative">
+            <HeaderButton
+                icon={<MoreHorizontal size={14} />}
+                label={t("flameView.moreOptions")}
+                onClick={() => setIsOpen((v) => !v)}
+            />
+
+            {isOpen && (
+                <div
+                    style={{
+                        position: "absolute",
+                        top: "calc(100% + 6px)",
+                        right: 0,
+                        width: 240,
+                        background: "var(--color-surface)",
+                        border: "0.5px solid var(--color-border)",
+                        borderRadius: 10,
+                        padding: "4px 0",
+                        zIndex: 100,
+                        boxShadow: "0 8px 24px var(--color-shadow)",
+                    }}
+                >
+                    <FlameMenuItem
+                        icon={<ArrowLeftRight size={14} />}
+                        label={t("flameView.convertToSpark")}
+                        onClick={() => {
+                            setIsOpen(false);
+                            openModal("flame-to-spark", flame.id);
+                        }}
+                    />
+                </div>
+            )}
+        </div>
+    );
+}
+
+function FlameMenuItem({
+    icon,
+    label,
+    onClick,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    onClick: () => void;
+}) {
+    const [isHovered, setIsHovered] = useState(false);
+
+    return (
+        <button
+            onClick={onClick}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className="flex items-center gap-2 w-full cursor-pointer border-none text-left"
+            style={{
+                padding: "7px 12px",
+                fontSize: 13,
+                borderRadius: 6,
+                color: "var(--color-text)",
+                background: isHovered
+                    ? "var(--color-surface-raised)"
+                    : "transparent",
+                fontFamily: "inherit",
+                transition: "background 0.15s",
+            }}
+        >
+            {icon}
+            {label}
+        </button>
     );
 }
