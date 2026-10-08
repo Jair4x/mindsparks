@@ -229,38 +229,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
 
     return (
         <div className="h-full flex flex-col">
-            {externalContent !== null && (
-                <div className="flex items-center justify-between px-4 py-2" style={{ background: "var(--color-warning)", color: "var(--color-warning-contrast)" }}>
-                    <span style={{ fontSize: 13 }}>{t("editor.changedContentExternal")}</span>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleKeepCurrent}
-                            className="cursor-pointer border-none"
-                            style={{
-                                padding: "4px 10px",
-                                borderRadius: 4,
-                                fontSize: 12,
-                                background: "var(--color-warning-dark)",
-                            }}
-                        >
-                            {t("editor.keepOpened")}
-                        </button>
-
-                        <button
-                            onClick={handleLoadNew}
-                            className="cursor-pointer border-none"
-                            style={{
-                                padding: "4px 10px",
-                                borderRadius: 4,
-                                fontSize: 12,
-                                background: "var(--color-warning-dark)",
-                            }}
-                        >
-                            {t("editor.loadUpdated")}
-                        </button>
-                    </div>
-                </div>
-            )}
+            {externalContent !== null && <ExternalContentBanner handleKeepCurrent={handleKeepCurrent} handleLoadNew={handleLoadNew} />}
 
             <div className="flex-1 overflow-hidden">
                 <AtomicCodeMirrorEditor
@@ -270,6 +239,51 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
                     extensions={extensions}
                     codeLanguages={ATOMIC_CODE_LANGUAGES}
                 />
+            </div>
+        </div>
+    );
+}
+
+function ExternalContentBanner({ handleKeepCurrent, handleLoadNew }: { handleKeepCurrent: () => void; handleLoadNew: () => void }) {
+    const [isKeepHovered, setIsKeepHovered] = useState(false);
+    const [isUpdateHovered, setIsUpdateHovered] = useState(false);
+    const { t } = useTranslation("markdown");
+
+    return (
+        <div className="flex items-center justify-between px-4 py-2" style={{ background: "var(--color-warning)", color: "var(--color-warning-contrast)" }}>
+            <span style={{ fontSize: 13 }}>{t("editor.changedContentExternal")}</span>
+            <div className="flex gap-2">
+                <button
+                    onClick={handleKeepCurrent}
+                    onMouseEnter={() => setIsKeepHovered(true)}
+                    onMouseLeave={() => setIsKeepHovered(false)}
+                    className="cursor-pointer border-none"
+                    style={{
+                        padding: "4px 10px",
+                        borderRadius: 4,
+                        fontSize: 12,
+                        color: "var(--color-warning-light)",
+                        background: isKeepHovered ? "var(--color-warning-surface)" : "var(--color-warning-dark)",
+                    }}
+                >
+                    {t("editor.keepOpened")}
+                </button>
+
+                <button
+                    onClick={handleLoadNew}
+                    onMouseEnter={() => setIsUpdateHovered(true)}
+                    onMouseLeave={() => setIsUpdateHovered(false)}
+                    className="cursor-pointer border-none"
+                    style={{
+                        padding: "4px 10px",
+                        borderRadius: 4,
+                        fontSize: 12,
+                        color: "var(--color-warning-light)",
+                        background: isUpdateHovered ? "var(--color-warning-surface)" : "var(--color-warning-dark)",
+                    }}
+                >
+                    {t("editor.loadUpdated")}
+                </button>
             </div>
         </div>
     );
