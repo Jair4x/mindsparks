@@ -1,0 +1,32 @@
+{
+    "loading": "Cargando...",
+    "delete": {
+        "title": "Eliminar",
+        "folderLabel": "esta carpeta (y todo lo que hay dentro)",
+        "fileLabel": "este archivo",
+        "warning": "¿Eliminar {{label}}? Esto no puede deshacerse."
+    },
+    "fileTree": {
+        "showTree": "Mostrar árbol de archivos",
+        "collapseTree": "Colapsar/esconder árbol de archivos",
+        "rename": "Renombrar",
+        "newFile": "Crear nuevo archivo",
+        "newFolder": "Crear nueva carpeta"
+    },
+    "modifiedAt": "Última modificación",
+    "editor": {
+        "errorOpeningFile": "No se pudo abrir el archivo:",
+        "changedContentExternal": "Este archivo cambió su contenido por fuera del editor.",
+        "keepOpened": "Mantener la versión abierta",
+        "loadUpdated": "Cargar la nueva versión",
+        "newFileName": "Sin título",
+        "newFolderName": "Nueva Carpeta"
+    },
+    "WikiLinks": {
+        "update": "¿Actualizar {{referenceCount}} WikiLink(s) en {{fileCount}} archivo(s) para que coincida con el renombre?",
+        "warning": "Puedes perder tu historial de ediciones si el archivo abierto en el editor lo está referenciando.",
+        "rememberChoice": "Recordar mi decisión en esta sesión",
+        "skipBtn": "Saltar",
+        "updateBtn": "Actualizar"
+    }
+}

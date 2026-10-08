@@ -6,6 +6,7 @@
 //
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface WikiLinkRenameConfirmProps {
     referenceCount: number;
@@ -16,6 +17,7 @@ interface WikiLinkRenameConfirmProps {
 
 export function WikiLinkRenameConfirm({ referenceCount, fileCount, onConfirm, onCancel }: WikiLinkRenameConfirmProps) {
     const [rememberChoice, setRememberChoice] = useState(false);
+    const { t }                               = useTranslation("markdown");
 
     return (
         <div
@@ -35,25 +37,24 @@ export function WikiLinkRenameConfirm({ referenceCount, fileCount, onConfirm, on
                 }}
             >
                 <div style={{ fontSize: 13, color: "var(--color-text)" }}>
-                    Update {referenceCount} WikiLink{referenceCount === 1 ? "" : "s"} in {fileCount}{" "}
-                    file{fileCount === 1 ? "" : "s"} to match the rename?
+                    {t("fileTree.updateWikiLinks", { referenceCount, fileCount })}
                 </div>
 
                 <div style={{ fontSize: 10, color: "var(--color-text-muted)" }}>
-                    You might lose your edit history if the currently opened file is referencing it.
+                    {t("WikiLinks.warning")}
                 </div>
 
                 <label className="flex items-center gap-2 cursor-pointer" style={{ fontSize: 12, color: "var(--color-text-muted)" }}>
                     <input type="checkbox" checked={rememberChoice} onChange={(e) => setRememberChoice(e.target.checked)}/>
-                    Remember my choice for this session
+                    {t("WikiLinks.rememberChoice")}
                 </label>
 
                 <div className="flex justify-end gap-2">
                     <ConfirmButton onClick={() => onCancel(rememberChoice)} variant="neutral">
-                        Skip
+                        {t("WikiLinks.skipBtn")}
                     </ConfirmButton>
                     <ConfirmButton onClick={() => onConfirm(rememberChoice)} variant="accent">
-                        Update
+                        {t("WikiLinks.updateBtn")}
                     </ConfirmButton>
                 </div>
             </div>

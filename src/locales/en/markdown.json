@@ -1,0 +1,32 @@
+{
+    "loading": "Loading...",
+    "delete": {
+        "title": "Delete",
+        "folderLabel": "this folder (and everything inside)",
+        "fileLabel": "this file",
+        "warning": "Delete {{label}}? This can't be undone."
+    },
+    "fileTree": {
+        "showTree": "Show file tree",
+        "collapseTree": "Collapse/hide file tree",
+        "rename": "Rename",
+        "newFile": "Create new file",
+        "newFolder": "Create new folder"
+    },
+    "modifiedAt": "Last modified",
+    "editor": {
+        "errorOpeningFile": "Could not open this file:",
+        "changedContentExternal": "This file changed its contents outside of the editor.",
+        "keepOpened": "Keep the current version",
+        "loadUpdated": "Load the new version",
+        "newFileName": "Untitled",
+        "newFolderName": "New Folder"
+    },
+    "WikiLinks": {
+        "update": "Update {{referenceCount}} WikiLink(s) in {{fileCount}} file(s) to match the rename?",
+        "warning": "You might lose your edit history if the currently opened file is referencing it.",
+        "rememberChoice": "Remember my choice for this session",
+        "skipBtn": "Skip",
+        "updateBtn": "Update"
+    }
+}

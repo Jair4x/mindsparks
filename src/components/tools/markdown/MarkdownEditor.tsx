@@ -10,6 +10,7 @@ import { dirname, join } from "@tauri-apps/api/path";
 import { flattenFiles, type MarkdownFileNode } from "../../../lib/tools/markdown/markdownFileTree";
 import { toRelativePath } from "../../../lib/tools/markdown/relativePath";
 import { registerWatcher, unregisterWatcher } from "../../../lib/tools/watcherRegistry";
+import { useTranslation } from "react-i18next";
 
 import { ATOMIC_CODE_LANGUAGES } from "@atomic-editor/editor/code-languages";
 import { AtomicCodeMirrorEditor, wikiLinks } from "@atomic-editor/editor";
@@ -40,6 +41,8 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
     const currentContent                        = useRef(""); // what's on the editor right now
     const lastPersistedContent                  = useRef(""); // the last we KNOW it's saved on disk
     const saveTimeout                           = useRef<ReturnType<typeof setTimeout> | null>(null);
+    
+    const { t }                                 = useTranslation("markdown");
     
     useEffect(() => {
         let cancelled = false;
@@ -209,7 +212,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
     if (loadError) {
         return (
             <div className="h-full flex items-center justify-center py-2" style={{ color: "var(--color-danger)" }}>
-                Could not open this file:
+                {t("editor.errorOpeningFile")}
                 <br />
                 {loadError}
             </div>
@@ -219,7 +222,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
     if (initialContent === null) {
         return (
             <div className="h-full flex items-center justify-center py-2" style={{ color: "var(--color-text-muted)" }}>
-                Loading...
+                {t("loading")}
             </div>
         );
     }
@@ -228,7 +231,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
         <div className="h-full flex flex-col">
             {externalContent !== null && (
                 <div className="flex items-center justify-between px-4 py-2" style={{ background: "var(--color-warning)", color: "var(--color-warning-contrast)" }}>
-                    <span style={{ fontSize: 13 }}>This file changed its contents outside of the editor.</span>
+                    <span style={{ fontSize: 13 }}>{t("editor.changedContentExternal")}</span>
                     <div className="flex gap-2">
                         <button
                             onClick={handleKeepCurrent}
@@ -240,7 +243,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
                                 background: "var(--color-warning-dark)",
                             }}
                         >
-                            Keep this version
+                            {t("editor.keepOpened")}
                         </button>
 
                         <button
@@ -253,7 +256,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
                                 background: "var(--color-warning-dark)",
                             }}
                         >
-                            Load the new version
+                            {t("editor.loadUpdated")}
                         </button>
                     </div>
                 </div>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface FileTreeContextMenuProps {
     x:          number;
@@ -9,7 +10,8 @@ interface FileTreeContextMenuProps {
 }
 
 export function FileTreeContextMenu({ x, y, onRename, onDelete, onClose }: FileTreeContextMenuProps) {
-    const ref = useRef<HTMLDivElement>(null);
+    const ref   = useRef<HTMLDivElement>(null);
+    const { t } = useTranslation(["markdown", "common"])
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -44,8 +46,8 @@ export function FileTreeContextMenu({ x, y, onRename, onDelete, onClose }: FileT
                 boxShadow: "0 4px 16px var(--color-shadow)",
             }}
         >
-            <MenuItem label="Rename" onClick={onRename} />
-            <MenuItem label="Delete" onClick={onDelete} danger />
+            <MenuItem label={t("markdown:fileTree.rename")} onClick={onRename} />
+            <MenuItem label={t("common:delete")} onClick={onDelete} danger />
         </div>
     );
 }

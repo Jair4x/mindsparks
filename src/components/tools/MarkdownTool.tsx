@@ -26,6 +26,7 @@ import { FileTree } from "./markdown/FileTree";
 import { watchFileTree } from "../../lib/tools/markdown/fileTreeWatcher";
 import { registerWatcher, unregisterWatcher } from "../../lib/tools/watcherRegistry";
 import { Group, Panel, Separator } from "react-resizable-panels";
+import { useTranslation } from "react-i18next";
 import type { ToolInstance } from "../../types";
 
 import { computeWikiLinkRename, applyWikiLinkRenameChanges, type WikiLinkRenameChange } from "../../lib/tools/markdown/wikiLinkRename";
@@ -52,6 +53,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     const [session, setSession]                         = useToolSession<MarkdownSession>(instance.id, { openFilePath: null });
     const [renamingPath, setRenamingPath]               = useState<string | null>(null);
     const [contextMenu, setContextMenu]                 = useState<{ node: MarkdownFileNode; x: number; y: number } | null>(null);
+    const { t }                                         = useTranslation("markdown");
     
     // editor reloading
     const [reloadNonce, setReloadNonce]                 = useState(0);
@@ -109,7 +111,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         const targetDir     = selectedFolderPath ?? rootPath;
         const siblings      = getChildrenAt(nodes, targetDir, rootPath);
         const existingNames = new Set(siblings.filter((n) => n.kind === "file").map((n) => n.name));
-        const name          = generateUniqueName("Untitled", ".md", existingNames);
+        const name          = generateUniqueName(t("editor.newFileName"), ".md", existingNames);
         const path          = await join(targetDir, name);
 
         await writeTextFile(path, "");
@@ -127,7 +129,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
         const targetDir     = selectedFolderPath ?? rootPath;
         const siblings      = getChildrenAt(nodes, targetDir, rootPath);
         const existingNames = new Set(siblings.filter((n) => n.kind === "folder").map((n) => n.name));
-        const name          = generateUniqueName("New Folder", "", existingNames);
+        const name          = generateUniqueName(t("editor.newFolderName"), "", existingNames);
         const path          = await join(targetDir, name);
 
         await mkdir(path);
@@ -218,9 +220,9 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     async function handleDelete(node: MarkdownFileNode) {
         if (!rootPath) return;
 
-        const label = node.kind === "folder" ? "this folder (and everything inside)" : "this file";
-        const confirmed = await confirm(`Delete ${label}? This can't be undone.`, {
-            title: "Delete",
+        const label = node.kind === "folder" ? t("delete.folderLabel") : t("delete.fileLabel");
+        const confirmed = await confirm(t("delete.warning", { label }), {
+            title: t("delete.title"),
             kind: "warning",
         });
         if (!confirmed) return;
@@ -242,7 +244,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     if (!rootPath) {
         return (
             <div className="flex items-center justify-center h-full" style={{ color: "var(--color-text-muted)" }}>
-                Loading...
+                {t("loading")}
             </div>
         );
     }
@@ -296,7 +298,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                     >
                         <button
                             onClick={() => setIsSidebarCollapsed(false)}
-                            title="Show file tree"
+                            title={t("fileTree.showTree")}
                             className="flex items-center justify-center cursor-pointer bg-transparent border-none"
                             style={{ width: 22, height: 22, borderRadius: 4, color: "var(--color-text-muted)" }}
                         >
@@ -432,6 +434,8 @@ function EditorHeader({
     const fileName = displayName(filePath.split(/[\\/]/).pop() ?? filePath);
     const [draftName, setDraftName] = useState(fileName);
 
+    const { t } = useTranslation("markdown");
+
     useEffect(() => {
         let cancelled = false;
         let unwatch: (() => void) | null = null;
@@ -520,7 +524,7 @@ function EditorHeader({
                         color: "var(--color-text-muted)",
                     }}
                 >
-                    Last modified: {modifiedAt.toLocaleDateString()} {modifiedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    {t("modifiedAt")}: {modifiedAt.toLocaleDateString()} {modifiedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
             )}
         </div>

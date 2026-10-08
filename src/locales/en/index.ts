@@ -8,6 +8,7 @@ import categories from "./categories.json";
 import tools from "./tools.json";
 import search from "./search.json";
 import archive from "./archive.json";
+import markdown from "./markdown.json";
 
 export default {
     common,
@@ -20,4 +21,5 @@ export default {
     tools,
     search,
     archive,
+    markdown,
 } as const;
