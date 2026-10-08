@@ -158,3 +158,34 @@ export interface Space {
     createdAt:      string;
     updatedAt:      string;
 }
+
+// --------------------------
+// KanbanColumn
+//  One of the columns of a Flame's Kanban board. 
+// 
+//  ? Default columns have a translation key
+// --------------------------
+export type KanbanColumnKey = "todo" | "in_progress" | "done";
+
+export interface KanbanColumn {
+    id:         string;
+    flameId:    string;
+    key?:       KanbanColumnKey;
+    position:   number;         // float, midpoint insertion (see decisions)
+    createdAt:  string;
+}
+
+// --------------------------
+// KanbanCard
+//  A card inside a column of the Kanban board.
+// --------------------------
+export interface KanbanCard {
+    id:             string;
+    columnId:       string;
+    title:          string;
+    description?:   string;
+    dueDate?:       string;     // calendar date "YYYY-MM-DD"
+    position:       number;     // float, midpoint insertion
+    createdAt:      string;
+    updatedAt:      string;
+}
