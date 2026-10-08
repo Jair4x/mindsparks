@@ -273,6 +273,10 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
                                     setExpandedPaths((prev) => new Set([...prev, ...ancestors]));
                                 }
                             }}
+                            onFileDeleted={() => {
+                                setSession({ openFilePath: null });
+                                setLastClickedPath(null);
+                            }}
                         />
                     </div>
                 </>

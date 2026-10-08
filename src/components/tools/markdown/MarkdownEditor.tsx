@@ -22,15 +22,16 @@ import { EditorView, placeholder } from "@codemirror/view";
 import { setupViewListener } from "../../../lib/tools/markdown/externalChangeExt";
 
 interface MarkdownEditorProps {
-    filePath:   string;
-    flameId:    string;
-    fileTree:   MarkdownFileNode[];
-    onOpenFile: (path: string) => void;
+    filePath:       string;
+    flameId:        string;
+    fileTree:       MarkdownFileNode[];
+    onOpenFile:     (path: string) => void;
+    onFileDeleted:  () => void;
 }
 
 const SAVE_DEBOUNCE_MS = 500;
 
-export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile }: MarkdownEditorProps) {
+export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFileDeleted }: MarkdownEditorProps) {
     const [initialContent, setInitialContent]   = useState<string | null>(null);
     const [externalContent, setExternalContent] = useState<string | null>(null);
     const [loadError, setLoadError]             = useState<string | null>(null);
@@ -78,7 +79,14 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile }: Mark
                 if (!affectsThisFile) return;
 
                 const diskContent = await readTextFile(filePath).catch(() => null);
-                if (diskContent === null) return; // file could've been deleted
+                if (diskContent === null) {
+                    if (!(await exists(filePath).catch(() => false))) {
+                        onFileDeleted();
+                    }
+
+                    return;
+                }
+
                 if (diskContent === lastPersistedContent.current) return; // echo from saving the file
 
                 setExternalContent(diskContent);
@@ -99,7 +107,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile }: Mark
                 unregisterWatcher(flameId, unwatch);
             }
         };
-    }, [filePath]);
+    }, [filePath, onFileDeleted]);
 
     function persistNow(content: string) {
         lastPersistedContent.current = content;
