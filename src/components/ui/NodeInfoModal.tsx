@@ -64,10 +64,12 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
 
     const updateSparkName        = useSparkStore((s) => s.updateSparkName);
     const updateSparkDescription = useSparkStore((s) => s.updateSparkDescription);
+    const updateSparkNotes       = useSparkStore((s) => s.updateSparkNotes);
     const restoreSpark           = useSparkStore((s) => s.restoreSpark);
     
     const updateFlameName           = useFlameStore((s) => s.updateFlameName);
     const updateFlameDescription    = useFlameStore((s) => s.updateFlameDescription);
+    const updateFlameNotes          = useFlameStore((s) => s.updateFlameNotes);
     const completeFlame             = useFlameStore((s) => s.completeFlame);
     const reopenFlame               = useFlameStore((s) => s.reopenFlame);
     const restoreFlame              = useFlameStore((s) => s.restoreFlame);
@@ -93,6 +95,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
 
     const [name, setName]                                   = useState(initialName);
     const [description, setDescription]                     = useState(target.node.description ?? "");
+    const [notes, setNotes]                                 = useState<string[]>([...target.node.notes, ""]);
     const [showFamily, setShowFamily]                       = useState(false);
     const [isCategoryBtnHovered, setIsCategoryBtnHovered]   = useState(false);
     const [isCloseHovered, setIsCloseHovered]               = useState(false);
@@ -133,7 +136,68 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
         }  else {
             updateSparkDescription(target.node.id, trimmed);
         }
+    };
 
+    // Store-like actions for notes, but they're here since it's where they live
+    const persistNotes = (draft: string[]) => {
+        const savedNotes = draft
+            .map((note) => note.trim())
+            .filter(Boolean);
+
+        if (isFlame) {
+            updateFlameNotes(target.node.id, savedNotes);
+            updateSparkNotes(target.node.sparkId, savedNotes);
+        } else {
+            updateSparkNotes(target.node.id, savedNotes);
+        }
+    };
+
+    const updateNote = (index: number, value: string) => {
+        const nextNotes = [...notes];
+        nextNotes[index] = value;
+
+        // Once the trailing input has content, create another one.
+        if (index === nextNotes.length - 1 && value.trim()) {
+            nextNotes.push("");
+        }
+
+        setNotes(nextNotes);
+    };
+
+    const removeNote = (index: number) => {
+        const nextNotes = notes.filter((_, noteIndex) => noteIndex !== index);
+
+        if (nextNotes.length === 0 || nextNotes.at(-1)?.trim()) {
+            nextNotes.push("");
+        }
+
+        setNotes(nextNotes);
+        persistNotes(nextNotes);
+    };
+
+    const addNote = () => {
+        persistNotes([...notes, ""]);
+    };
+
+    const resizeNote = (textarea: HTMLTextAreaElement) => {
+        textarea.style.height = "auto";
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    };
+
+    const handleNoteBlur = (index: number) => {
+        let nextNotes = notes[index].trim()
+            ? notes
+            : notes.filter((_, noteIndex) => noteIndex !== index);
+
+        if (
+            nextNotes.length === 0 ||
+            nextNotes.at(-1)?.trim()
+        ) {
+            nextNotes = [...nextNotes, ""];
+        }
+
+        setNotes(nextNotes);
+        persistNotes(nextNotes);
     };
 
     const handleOverlayMouseDown = (e: React.MouseEvent) => {
@@ -446,22 +510,50 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                     <div className="text-xs mb-2" style={{ color: "var(--color-text-muted)" }}>
                         {t("info.notes")}
                     </div>
-                    {/* Disabled this since it's not implemented yet. */}
-                    <textarea
-                        placeholder={t("common:comingSoon")}
-                        disabled
-                        className="w-full min-h-30 max-h-60 leading-5 outline-none resize-none overflow-y-auto"
-                        style={{
-                            background:     "var(--color-surface-raised)",
-                            border:         "0.5px solid var(--color-border)",
-                            borderRadius:   8,
-                            padding:        "10px 12px",
-                            fontSize:       13,
-                            fontFamily:     "inherit",
-                            color:          "var(--color-text)",
-                            cursor:         "not-allowed",
-                        }}
-                    />
+                    <div
+                        className="flex flex-col gap-2 overflow-y-auto"
+                        style={{ maxHeight: 270 }}
+                    >
+                        {notes.map((note, index) => (
+                            <div key={index} className="flex items-start gap-2">
+                                <Circle size={8} color="var(--color-accent)" fill="var(--color-accent)" style={{ flexShrink: 0, marginTop: 12 }} />
+
+                                <textarea
+                                    rows={1}
+                                    value={note}
+                                    onChange={(e) => updateNote(index, e.target.value)}
+                                    onBlur={() => handleNoteBlur(index)}
+                                    ref={(txtarea) => {
+                                        if (txtarea) resizeNote(txtarea);
+                                    }}
+                                    placeholder={t("nodes:notes.placeholder")}
+                                    className="flex-1 outline-none overflow-hidden"
+                                    style={{
+                                        height: 32,
+                                        resize: "none",
+                                        boxSizing: "border-box",
+                                        background: "transparent",
+                                        border: "none",
+                                        borderBottom: "0.5px solid var(--color-border)",
+                                        padding: "5px 7px",
+                                        color: "var(--color-text)",
+                                        fontFamily: "inherit",
+                                        fontSize: 13,
+                                        lineHeight: 1.4,
+                                    }}
+                                />
+
+                                {note.trim() && (
+                                    <NoteIconButton
+                                        label={t("nodes:notes.remove")}
+                                        onClick={() => removeNote(index)}
+                                    >
+                                        <X size={12} />
+                                    </NoteIconButton>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/*------------------------------------------
@@ -617,6 +709,49 @@ function FamilyEntry({ node, onClick }: { node: Spark | Flame; onClick: () => vo
                 ? <FlameIcon size={10} fill="var(--color-flame)" color="var(--color-flame)" />
                 : <Circle size={6} fill="var(--color-text-muted)" color="var(--color-text-muted)" />
             }
+        </button>
+    );
+}
+
+// --------------------------
+// NoteIconButton
+//  Only used for the remove note button, literally nothing else
+// --------------------------
+
+function NoteIconButton({
+    label,
+    onClick,
+    children,
+}: {
+    label: string;
+    onClick: () => void;
+    children: React.ReactNode;
+}) {
+    const [hovered, setHovered] = useState(false);
+
+    return (
+        <button
+            aria-label={label}
+            title={label}
+            onClick={onClick}
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            className="flex items-center justify-center cursor-pointer border-none"
+            style={{
+                width: 26,
+                height: 26,
+                borderRadius: 6,
+                marginTop: 3,
+                background: hovered
+                    ? "var(--color-danger-surface)"
+                    : "transparent",
+                color: hovered
+                    ? "var(--color-danger)"
+                    : "var(--color-text-muted)",
+                transition: "background 0.15s, color 0.15s",
+            }}
+        >
+            {children}
         </button>
     );
 }

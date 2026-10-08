@@ -67,5 +67,9 @@
         "title": "Converting into a Spark",
         "confirm": "Are you sure you want to convert back this Flame into a Spark?",
         "confirmB": "This will delete all the flame data saved."
+    },
+    "notes": {
+        "placeholder": "Write a note...",
+        "remove": "Remove note"
     }
 }

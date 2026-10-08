@@ -28,6 +28,7 @@ interface FlameRow {
     id:             string;
     name:           string;
     description:    string | null;
+    notes:          string;
     spark_id:       string;
     position:       string;
     space_id:       string;
@@ -47,6 +48,7 @@ function rowToFlame(row: FlameRow): Flame {
         id: row.id,
         name: row.name,
         description: row.description ?? undefined,
+        notes: JSON.parse(row.notes ?? "[]"),
         sparkId: row.spark_id,
         position: JSON.parse(row.position),
         spaceId: row.space_id,
@@ -64,12 +66,13 @@ function rowToFlame(row: FlameRow): Flame {
 
 function insertFlameSql(flame: Flame) {
     return dbExecute(
-        `INSERT INTO flames (id, name, description, spark_id, position, space_id, category_id, parent_id, schema, tools, folder_name, is_archived, is_completed, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)`,
+        `INSERT INTO flames (id, name, description, notes, spark_id, position, space_id, category_id, parent_id, schema, tools, folder_name, is_archived, is_completed, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)`,
         [
             flame.id,
             flame.name,
             flame.description ?? null,
+            JSON.stringify(flame.notes),
             flame.sparkId,
             JSON.stringify(flame.position),
             flame.spaceId,
@@ -105,6 +108,7 @@ interface FlameStore {
         sparkId:        string;
         name:           string;
         description?:   string;
+        notes:          string[];
         position:       Position;
         spaceId:        string;
         schema:         string;
@@ -125,6 +129,8 @@ interface FlameStore {
     updateFlameTools: (id: string, tools: ToolInstance[]) => void;
 
     updateFlameSchema: (id: string, schema: string) => void;
+
+    updateFlameNotes: (id: string, notes: string[]) => void;
 
     assignCategory: (id: string, categoryId: string | undefined) => void;
 
@@ -170,6 +176,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
         sparkId,
         name,
         description,
+        notes,
         position,
         spaceId,
         schema,
@@ -199,6 +206,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             id: generateId(),
             name,
             description,
+            notes,
             sparkId,
             position,
             spaceId,
@@ -321,6 +329,23 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             "UPDATE flames SET schema = ?1, updated_at = ?2 WHERE id = ?3",
             [schema, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame schema: ", e));
+    },
+
+    updateFlameNotes: (id, notes) => {
+        const updatedAt = now();
+
+        set((state) => ({
+            flames: state.flames.map((flame) =>
+                flame.id === id
+                    ? { ...flame, notes, updatedAt }
+                    : flame
+            )
+        }));
+
+        dbExecute(
+            "UPDATE flames SET notes = ?1, updated_at = ?2 WHERE id = ?3",
+            [JSON.stringify(notes), updatedAt, id]
+        ).catch((e) => console.error("Couldn't persist Flame notes: ", e));
     },
 
     assignCategory: (id, categoryId) => {

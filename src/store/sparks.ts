@@ -15,6 +15,7 @@ interface SparkRow {
     id:                     string;
     name:                   string;
     description:            string | null;
+    notes:                  string;
     position:               string;
     space_id:               string;
     category_id:            string | null;
@@ -30,6 +31,7 @@ function rowToSpark(row: SparkRow): Spark {
         id: row.id,
         name: row.name,
         description: row.description ?? undefined,
+        notes: JSON.parse(row.notes ?? "[]"),
         position: JSON.parse(row.position),
         spaceId: row.space_id,
         categoryId: row.category_id ?? undefined,
@@ -43,12 +45,13 @@ function rowToSpark(row: SparkRow): Spark {
 
 function insertSparkSql(spark: Spark) {
     return dbExecute(
-        `INSERT INTO sparks (id, name, description, position, space_id, category_id, parent_id, is_archived, is_converted_to_flame, created_at, updated_at)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`,
+        `INSERT INTO sparks (id, name, description, notes, position, space_id, category_id, parent_id, is_archived, is_converted_to_flame, created_at, updated_at)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)`,
         [
             spark.id,
             spark.name,
             spark.description ?? null,
+            JSON.stringify(spark.notes),
             JSON.stringify(spark.position),
             spark.spaceId,
             spark.categoryId ?? null,
@@ -92,6 +95,8 @@ interface SparkStore {
     updateSparkName: (id: string, name: string) => void;
 
     updateSparkDescription: (id: string, description: string) => void;
+
+    updateSparkNotes: (id: string, notes: string[]) => void;
 
     // Called each time the user stops dragging a card.
     moveSparkToPosition: (id: string, position: Position) => void;
@@ -196,6 +201,23 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
             "UPDATE sparks SET description = ?1, updated_at = ?2 WHERE id = ?3",
             [description, updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Spark description: ", e));
+    },
+
+    updateSparkNotes: (id, notes) => {
+        const updatedAt = now();
+
+        set((state) => ({
+            sparks: state.sparks.map((spark) =>
+                spark.id === id
+                    ? { ...spark, notes, updatedAt }
+                    : spark
+            ),
+        }));
+
+        dbExecute(
+            "UPDATE sparks SET notes = ?1, updated_at = ?2 WHERE id = ?3",
+            [JSON.stringify(notes), updatedAt, id]
+        ).catch((e) => console.error("Couldn't persist Spark notes: ", e));
     },
 
     moveSparkToPosition: (id, position) => {

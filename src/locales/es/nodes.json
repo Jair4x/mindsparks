@@ -67,5 +67,9 @@
         "title": "Convirtiendo en Spark",
         "confirm": "¿Estás seguro/a de que quieres convertir este Flame a Spark de nuevo?",
         "confirmB": "Esto eliminará todos los datos guardados del Flame."
+    },
+    "notes": {
+        "placeholder": "Escribe una nota...",
+        "remove": "Eliminar nota"
     }
 }

@@ -76,6 +76,7 @@ export interface Spark {
     id:                 string;
     name:               string;     // title of the idea
     description?:       string;     // short description of the idea (100 chars max, optional)
+    notes:              string[];   // bullet point list with more details
     position:           Position;   // where is it in the canvas
     spaceId:            string;     // to which Space it belongs
     categoryId?:        string;     // optional: it might not have a category
@@ -96,6 +97,7 @@ export interface Flame {
     id:             string;
     name:           string;         // inherits the original spark's name, editable
     description?:   string;         // short description of the project
+    notes:          string[];       // bullet point list with more details
     sparkId:        string;         // pointer to the spark it came from
     position:       Position;       // where is it in the canvas
     spaceId:        string;
