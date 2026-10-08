@@ -138,6 +138,58 @@ export const Canvas = forwardRef<CanvasHandle>(function Canvas(_props, ref) {
     const [displayNodes, setDisplayNodes] = useState(nodes);
 
     // --------------------------
+    // Viewport handling
+    //
+    // useEffect below sets viewport center to (0, 0),
+    //  if we don't, the viewport will have the (0, 0) coords
+    //  at the top-left of the screen, and that isn't good.
+    //
+    // The useEffect below this one is to handle resizing the window.
+    //  It SHOULD work, but knowing how badly I'm handling repulsion,
+    //  this might not work as well
+    // --------------------------
+    useEffect(() => {
+        const space = useSpaceStore.getState().spaces.find((s) => s.id === activeSpaceId);
+        if (!space) return;
+
+        requestAnimationFrame(() => {
+            if (
+                space.canvasViewport.x === 0 &&
+                space.canvasViewport.y === 0 &&
+                space.canvasViewport.zoom === 1
+            ) {
+                setCenter(0, 0, { zoom: 1 });
+            } else {
+                setViewport(space.canvasViewport);
+            }
+        });
+    }, [activeSpaceId, setCenter, setViewport]);
+
+    useEffect(() => {
+        let previousWidth = window.innerWidth;
+        let previousHeight = window.innerHeight;
+
+        const handleResize = () => {
+            const deltaX = (window.innerWidth - previousWidth) / 2;
+            const deltaY = (window.innerHeight - previousHeight) / 2;
+
+            const viewport = useSpaceStore.getState().getActiveSpace().canvasViewport;
+
+            setViewport({
+                ...viewport,
+                x: viewport.x + deltaX,
+                y: viewport.y + deltaY,
+            });
+
+            previousWidth = window.innerWidth;
+            previousHeight = window.innerHeight;
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, [setViewport]);
+
+    // --------------------------
     // resolveAndAnimateCollisions
     //
     // Used by onNodeDragStop:

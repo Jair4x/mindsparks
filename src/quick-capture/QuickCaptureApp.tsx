@@ -65,7 +65,7 @@ export function QuickCaptureApp() {
             } = event.payload;
 
             setMode(newMode);
-            setSparkPosition(newPosition ?? { x: 200, y: 200 });
+            setSparkPosition(newPosition ?? { x: 0, y: 0 });
             setParentId(newParentId);
 
             if (newMode === "inline" && fixedSpaceId) {
