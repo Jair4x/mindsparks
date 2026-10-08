@@ -14,9 +14,10 @@
       {
         "label": "main",
         "title": "Mindsparks",
-        "width": 800,
-        "height": 600,
-        "dragDropEnabled": false
+        "width": 1600,
+        "height": 900,
+        "dragDropEnabled": false,
+        "center": true
       },
       {
         "label": "quick-capture",
