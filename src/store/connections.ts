@@ -79,7 +79,7 @@ interface ConnectionStore {
         sourceId:   string;
         targetId:   string;
         spaceId:    string;
-    }) => Connection;
+    }) => Connection | undefined;
 
     loadConnections: () => Promise<void>;
 
@@ -143,6 +143,18 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
     },
 
     createRelatedConnection: ({ sourceId, targetId, spaceId }) => {
+        const alreadyExists = get().connections.some(
+            (connection) =>
+                connection.type === "related" &&
+                connection.spaceId === spaceId &&
+                (
+                    (connection.sourceId === sourceId && connection.targetId === targetId) ||
+                    (connection.sourceId === targetId && connection.targetId === sourceId)
+                )
+        );
+
+        if (alreadyExists) return; // limit related connection between nodes to only one for obvious reasons.
+
         const connection = buildConnection(sourceId, targetId, "related", spaceId);
         set((state) => ({ connections: [...state.connections, connection] }));
 
