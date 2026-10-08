@@ -95,6 +95,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const [description, setDescription]                     = useState(target.node.description ?? "");
     const [showFamily, setShowFamily]                       = useState(false);
     const [isCategoryBtnHovered, setIsCategoryBtnHovered]   = useState(false);
+    const [isCloseHovered, setIsCloseHovered]               = useState(false);
     const [pendingFlameNav, setPendingFlameNav]             = useState<Flame | null>(null);
 
     const hasFamily = !!parent || children.length > 0 || related.length > 0;
@@ -113,16 +114,26 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
         const trimmed = name.trim();
         if (!trimmed || trimmed === initialName) return;
 
-        if (isFlame) updateFlameName(target.node.id, trimmed);
-        else updateSparkName(target.node.id, trimmed);
+        if (isFlame) {
+            updateFlameName(target.node.id, trimmed);
+            updateSparkName(target.node.sparkId, trimmed);
+        }  else {
+            updateSparkName(target.node.id, trimmed);
+        }
     };
 
     // Save description when unfocused
     const handleDescriptionBlur = () => {
-        if (description === (target.node.description ?? "")) return;
+        const trimmed = description.trim();
+        if (!trimmed || trimmed === (target.node.description ?? "")) return;
 
-        if (isFlame) updateFlameDescription(target.node.id, description);
-        else updateSparkDescription(target.node.id, description);
+        if (isFlame) {
+            updateFlameDescription(target.node.id, trimmed);
+            updateSparkDescription(target.node.sparkId, trimmed);
+        }  else {
+            updateSparkDescription(target.node.id, trimmed);
+        }
+
     };
 
     const handleOverlayMouseDown = (e: React.MouseEvent) => {
@@ -229,9 +240,11 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
                         <button
                             onClick={onClose}
                             aria-label={t("common:closeModal")}
+                            onMouseEnter={() => setIsCloseHovered(true)}
+                            onMouseLeave={() => setIsCloseHovered(false)}
                             className="bg-transparent border-none cursor-pointer flex items-center p-0.5 shrink-0"
                             style={{
-                                color: "var(--color-text-muted)",
+                                color: isCloseHovered ? "var(--color-text)" :  "var(--color-text-muted)",
                             }}
                         >
                             <X size={16} />
