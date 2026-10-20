@@ -7,3 +7,5 @@ export * from "./spaces";
 export * from "./connections";
 export * from "./ui";
 export * from "./toolSession";
+
+export * from "./tools/kanban";

@@ -17,6 +17,7 @@ import { useSparkStore } from "./sparks";
 import { useFlameStore } from "./flames";
 import { useCategoryStore } from "./categories";
 import { useConnectionStore } from "./connections";
+import { useKanbanStore } from "./tools/kanban";
 
 // --------------------------
 // deleteSpaceCascade
@@ -26,6 +27,10 @@ import { useConnectionStore } from "./connections";
 // since it also owns the isDefault guard and "reassign active space" logic.
 // --------------------------
 export function deleteSpaceCascade(spaceId: string): void {
+    useFlameStore.getState().flames
+        .filter((f) => f.spaceId === spaceId)
+        .forEach((f) => useKanbanStore.getState().clearBoard(f.id));
+
     useConnectionStore.getState().deleteConnectionsBySpace(spaceId);
     useFlameStore.getState().deleteFlamesBySpace(spaceId);
     useSparkStore.getState().deleteSparksBySpace(spaceId);

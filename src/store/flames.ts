@@ -18,6 +18,7 @@ import { queuePositionWrite } from "../lib/canvasPositionSync";
 import { useSpaceStore } from "./spaces";
 import { useSparkStore } from "./sparks";
 import { useConnectionStore } from "./connections";
+import { useKanbanStore } from "./tools/kanban";
 
 // --------------------------
 // DB stuff
@@ -463,6 +464,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             .forEach((s) => useSparkStore.getState().reassignParent(s.id, ""));
 
         useConnectionStore.getState().deleteConnectionsByNode(id);
+        useKanbanStore.getState().clearBoard(id);
 
         set((state) => ({
             flames: state.flames.filter((f) => f.id !== id)

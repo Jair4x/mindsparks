@@ -5,6 +5,8 @@
 // or that's possible to change in the future goes here.
 //
 
+import { KanbanColumnKey } from "../types";
+
 // --------------------------
 //            Canvas
 // --------------------------
@@ -141,3 +143,10 @@ export const schemaDefinitions: SchemaDefinition[] = [
         tools:          [],
     }
 ];
+
+// --------------------------
+//           Kanban
+// --------------------------
+
+export const KANBAN_DEFAULT_COLUMNS: KanbanColumnKey[]  = ["todo", "in_progress", "done"];
+export const KANBAN_POSITION_STEP                       = 1;                                // gap between seeded positions, also the step when appending a card at the end
