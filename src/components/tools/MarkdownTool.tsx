@@ -244,7 +244,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     if (!rootPath) {
         return (
             <div className="flex items-center justify-center h-full" style={{ color: "var(--color-text-muted)" }}>
-                {t("loading")}
+                {t("common:loading")}
             </div>
         );
     }
