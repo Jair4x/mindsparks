@@ -53,7 +53,7 @@ export function MarkdownTool({ flameId, instance }: { flameId: string; instance:
     const [session, setSession]                         = useToolSession<MarkdownSession>(instance.id, { openFilePath: null });
     const [renamingPath, setRenamingPath]               = useState<string | null>(null);
     const [contextMenu, setContextMenu]                 = useState<{ node: MarkdownFileNode; x: number; y: number } | null>(null);
-    const { t }                                         = useTranslation("markdown");
+    const { t }                                         = useTranslation(["markdown", "common"]);
     
     // editor reloading
     const [reloadNonce, setReloadNonce]                 = useState(0);
