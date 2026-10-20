@@ -207,7 +207,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
             id: generateId(),
             name,
             description,
-            notes,
+            notes: notes ?? [],
             sparkId,
             position,
             spaceId,
@@ -311,7 +311,7 @@ export const useFlameStore = create<FlameStore>((set, get) => ({
 
         dbExecute(
             "UPDATE flames SET tools = ?1, updated_at = ?2 WHERE id = ?3",
-            [tools, updatedAt, id]
+            [JSON.stringify(tools), updatedAt, id]
         ).catch((e) => console.error("Couldn't persist Flame tools: ", e));
     },
 
