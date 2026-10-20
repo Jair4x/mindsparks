@@ -51,7 +51,7 @@ function insertSparkSql(spark: Spark) {
             spark.id,
             spark.name,
             spark.description ?? null,
-            JSON.stringify(spark.notes),
+            JSON.stringify(spark.notes) ?? "[]",
             JSON.stringify(spark.position),
             spark.spaceId,
             spark.categoryId ?? null,
@@ -147,6 +147,7 @@ export const useSparkStore = create<SparkStore>((set, get) => ({
         const newSpark: Spark = {
             id: generateId(),
             name,
+            notes: [],
             position,
             spaceId,
             categoryId,

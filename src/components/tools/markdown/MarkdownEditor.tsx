@@ -42,7 +42,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
     const lastPersistedContent                  = useRef(""); // the last we KNOW it's saved on disk
     const saveTimeout                           = useRef<ReturnType<typeof setTimeout> | null>(null);
     
-    const { t }                                 = useTranslation("markdown");
+    const { t }                                 = useTranslation(["markdown", "common"]);
     
     useEffect(() => {
         let cancelled = false;
@@ -222,7 +222,7 @@ export function MarkdownEditor({ filePath, flameId, fileTree, onOpenFile, onFile
     if (initialContent === null) {
         return (
             <div className="h-full flex items-center justify-center py-2" style={{ color: "var(--color-text-muted)" }}>
-                {t("loading")}
+                {t("common:loading")}
             </div>
         );
     }

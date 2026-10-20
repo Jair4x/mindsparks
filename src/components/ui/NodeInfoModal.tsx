@@ -167,16 +167,12 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
     const removeNote = (index: number) => {
         const nextNotes = notes.filter((_, noteIndex) => noteIndex !== index);
 
-        if (nextNotes.length === 0 || nextNotes.at(-1)?.trim()) {
+        if (nextNotes.length === 0 || nextNotes[nextNotes.length - 1]?.trim()) {
             nextNotes.push("");
         }
 
         setNotes(nextNotes);
         persistNotes(nextNotes);
-    };
-
-    const addNote = () => {
-        persistNotes([...notes, ""]);
     };
 
     const resizeNote = (textarea: HTMLTextAreaElement) => {
@@ -191,7 +187,7 @@ function NodeInfoModalContent({ target, onClose }: { target: NodeTarget; onClose
 
         if (
             nextNotes.length === 0 ||
-            nextNotes.at(-1)?.trim()
+            nextNotes[nextNotes.length - 1]?.trim()
         ) {
             nextNotes = [...nextNotes, ""];
         }

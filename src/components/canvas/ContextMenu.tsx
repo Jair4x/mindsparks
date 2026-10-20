@@ -184,6 +184,7 @@ function ContextMenuContent({
                 const newFlame = await createFlame({
                     sparkId: tempSpark.id,
                     name: tempSpark.name,
+                    notes: [],
                     position: tempSpark.position,
                     spaceId: tempSpark.spaceId,
                     schema: flame.schema,

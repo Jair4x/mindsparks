@@ -107,7 +107,7 @@ export const useKanbanStore = create<KanbanStore>((set) => ({
             if (columnRows.length === 0) {
                 for (const [idx, key] of KANBAN_DEFAULT_COLUMNS.entries()) {
                     await dbExecute(
-                        "INSERT OR IGNORE INTO kanban_columns (id, flame_id, key, position, created_at VALUES (?1, ?2, ?3, ?4, ?5)",
+                        "INSERT OR IGNORE INTO kanban_columns (id, flame_id, key, position, created_at) VALUES (?1, ?2, ?3, ?4, ?5)",
                         [generateId(), flameId, key, (idx + 1) * KANBAN_POSITION_STEP, now()]
                     );
                 }

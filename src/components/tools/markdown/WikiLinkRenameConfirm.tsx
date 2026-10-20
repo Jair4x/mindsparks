@@ -37,7 +37,7 @@ export function WikiLinkRenameConfirm({ referenceCount, fileCount, onConfirm, on
                 }}
             >
                 <div style={{ fontSize: 13, color: "var(--color-text)" }}>
-                    {t("fileTree.updateWikiLinks", { referenceCount, fileCount })}
+                    {t("WikiLinks.update", { referenceCount, fileCount })}
                 </div>
 
                 <div style={{ fontSize: 10, color: "var(--color-text-muted)" }}>

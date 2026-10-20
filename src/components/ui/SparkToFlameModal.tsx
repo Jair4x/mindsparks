@@ -56,6 +56,7 @@ export function SparkToFlameModal() {
                         sparkId: spark.id,
                         name: spark.name,
                         description: spark.description,
+                        notes: spark.notes,
                         position: spark.position,
                         spaceId: spark.spaceId,
                         schema: schemaName,
