@@ -9,6 +9,7 @@ import tools from "./tools.json";
 import search from "./search.json";
 import archive from "./archive.json";
 import markdown from "./markdown.json";
+import kanban from "./kanban.json";
 
 export default {
     common,
@@ -22,4 +23,5 @@ export default {
     search,
     archive,
     markdown,
+    kanban,
 } as const;

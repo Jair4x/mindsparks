@@ -9,6 +9,7 @@ import type { ToolInstance } from "../../types";
 import { useTranslation } from "react-i18next";
 
 import { MarkdownTool } from "../tools/MarkdownTool";
+import { KanbanTool } from "../tools/KanbanTool";
 
 // --------------------------
 // Props
@@ -102,15 +103,7 @@ function ToolContent({ flameId, instance }: { flameId: string; instance: ToolIns
             return <MarkdownTool flameId={flameId} instance={instance} />;
         
         case "kanban":
-            // TODO: Replace with <KanbanTool flameId={flameId} instance={instance} /> when done
-            return (
-                <div
-                    className="flex items-center justify-center h-full text-white"
-                    style={{ color: "var(--color-border)", fontSize: 13 }}
-                >
-                    -----------
-                </div>
-            );
+            return <KanbanTool flameId={flameId} instance={instance} />
         
         default:
             return null;

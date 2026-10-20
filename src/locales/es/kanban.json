@@ -1,0 +1,7 @@
+{
+    "columns": {
+        "todo": "Pendiente",
+        "in_progress": "En progreso",
+        "done": "Hecho"
+    }
+}

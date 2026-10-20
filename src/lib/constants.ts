@@ -150,3 +150,5 @@ export const schemaDefinitions: SchemaDefinition[] = [
 
 export const KANBAN_DEFAULT_COLUMNS: KanbanColumnKey[]  = ["todo", "in_progress", "done"];
 export const KANBAN_POSITION_STEP                       = 1;                                // gap between seeded positions, also the step when appending a card at the end
+export const KANBAN_COLUMN_WIDTH                        = 280;                              // px
+export const KANBAN_COLUMN_MIN_HEIGHT                   = 120;                              // px (to keep the empty columns easy to drop onto)
